@@ -1,0 +1,45 @@
+#flow-design-panel {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  .flow-design-panel-left{
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    height: 100%;
+    flex: 0 0 120px;
+    padding: 10px;
+    button {
+      margin-bottom: 10px;
+    }
+  }
+  .flow-design-panel-graph {
+    width: calc(100% - 120px);
+    height: 100%;
+    padding-left: 10px;
+    .flow-design-panel-toolbar {
+      display: flex;
+      justify-content: space-between;
+      border: 1px solid red;
+      height: 40px;
+      padding: 5px;
+    }
+    #graph {
+      // height: 100vh;
+      height: 100%;
+      .minimapContainer {
+        padding: 15px;
+        z-index: 100;
+        position: absolute !important;
+        .x6-widget-minimap {
+          background: none;
+          border: 1px solid;
+        }
+      }
+      #container {
+        height: 100%;
+        width: 100%;
+      }
+    }
+  }
+}
