@@ -47,13 +47,13 @@ const DbconnectionOperation = (props: IProp) => {
     const onOk = () => {
         let param = formData.getFieldsValue();
         console.log(param)
-        _dbconnectionservice.create(param).then(x => {
-            if (x.success && props.Config.onClose) {
-                message.success(x.message, 3)
-                props.Config.onClose();
-                formData.resetFields()
-            }
-        })
+        // _dbconnectionservice.create(param).then(x => {
+        //     if (x.success && props.Config.onClose) {
+        //         message.success(x.message, 3)
+        //         props.Config.onClose();
+        //         formData.resetFields()
+        //     }
+        // })
     }
     return (
         <div>

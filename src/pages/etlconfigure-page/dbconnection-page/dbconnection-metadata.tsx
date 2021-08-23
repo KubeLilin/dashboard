@@ -39,7 +39,7 @@ const DBconnectionMetadata = (props: IProp) => {
         const input = new MetaDataImportInputDto();
         input.id = props.connId;
         input.metaDatas = treeSelected;
-        _dbconnectionservice.importmetadata(input)
+        // _dbconnectionservice.importmetadata(input)
 
     }
     return (

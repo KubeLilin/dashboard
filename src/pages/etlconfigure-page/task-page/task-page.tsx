@@ -17,7 +17,7 @@ const TaskPage = () => {
      * 父组件获取子组件所有内容
      */
     const taskOperationRef = useRef<any>();
-    const [loading, setloading] = useState<boolean>(true);
+    const [loading, setloading] = useState<boolean>(false);
     const _scheduletasktaskervice: IScheduleTaskService = useHookProvider(IocTypes.ScheduleTaskService);
     const _dbconnectionservice: IDbConnectionService = useHookProvider(IocTypes.DbConnectionService);
     const [pagination, setPagination] = useState<PaginationProps>(
@@ -26,7 +26,7 @@ const TaskPage = () => {
     const [cascader, setCascader] = useState({ visible: false });
     const [cascadervalue, setCascaderValue] = useState([]);
     useEffect(() => {
-        getTable();
+        // getTable();
     }, [pagination]);
     /**
     * Table 列名

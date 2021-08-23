@@ -17,7 +17,7 @@ const Dbconnectionpage = () => {
   const _dbconnectionservice: IDbConnectionService = useHookProvider(
     IocTypes.DbConnectionService
   );
-  const [loading, setloading] = useState<boolean>(true);
+  const [loading, setloading] = useState<boolean>(false);
   const [OperationState, setOperationState] = useState<IOperationConfig>({
     itemId: Guid.EMPTY,
     title: "",
@@ -129,7 +129,7 @@ const Dbconnectionpage = () => {
    * 页面初始化事件
    */
   useEffect(() => {
-    getTable();
+    // getTable();
   }, [pagination]);
   /**
    * 页面初始化获取数据
