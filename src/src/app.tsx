@@ -55,6 +55,15 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     waterMarkProps: {
       content: initialState?.currentUser?.name,
     },
+    menu: {
+      params: {
+          userId: initialState?.currentUser?.userid,
+      },
+      request: async (params, defaultMenuData) => {
+        console.log(defaultMenuData)
+        return defaultMenuData
+      }
+    },
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
