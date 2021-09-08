@@ -85,14 +85,14 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
           userId: initialState?.currentUser?.userid,
       },
       request: async (params, defaultMenuData) => {
-        console.log(params)
-        console.log(defaultMenuData)
+        //console.log(params)
+        //console.log(defaultMenuData)
         const userId = params?.userId
         if (userId == undefined || userId == "") {
           return defaultMenuData
         } else {
           let menuResponse = await menuListByUserId({ params:{ id: userId } })
-          console.log(menuResponse.data)
+          //console.log(menuResponse.data)
           let menuListJson : string = menuResponse.data
           let menuList: MenuDataItem[] = JSON.parse(menuListJson);
           return menuList
