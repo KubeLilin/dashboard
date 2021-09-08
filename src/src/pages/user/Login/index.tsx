@@ -37,8 +37,8 @@ const Login: React.FC = () => {
 
   const intl = useIntl();
 
-  const fetchUserInfo = async () => {
-    const userInfo = await initialState?.fetchUserInfo?.();
+  const fetchUserInfo = async (userId?: number) => {
+    const userInfo = await initialState?.fetchUserInfo?.(userId);
     if (userInfo) {
       await setInitialState((s) => ({
         ...s,
@@ -51,14 +51,18 @@ const Login: React.FC = () => {
     setSubmitting(true);
     try {
       // 登录
-      const msg = await login({ ...values, type });
-      if (msg.status === 'ok') {
+      const loginResult = await login({ ...values, type });
+      console.log(loginResult)
+      if (loginResult.status === 'ok') {
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
         });
+
+        await initialState?.setUserId?.(loginResult.userId);
+
         message.success(defaultLoginSuccessMessage);
-        await fetchUserInfo();
+        await fetchUserInfo(loginResult.userId);
         /** 此方法会跳转到 redirect 参数所在的位置 */
         if (!history) return;
         const { query } = history.location;
@@ -67,7 +71,7 @@ const Login: React.FC = () => {
         return;
       }
       // 如果失败去设置用户错误信息
-      setUserLoginState(msg);
+      setUserLoginState(loginResult);
     } catch (error) {
       const defaultLoginFailureMessage = intl.formatMessage({
         id: 'pages.login.failure',
@@ -120,6 +124,7 @@ const Login: React.FC = () => {
               },
             }}
             onFinish={async (values) => {
+              console.log(values)
               await handleSubmit(values as API.LoginParams);
             }}
           >

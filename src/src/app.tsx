@@ -1,6 +1,6 @@
 import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 import { PageLoading } from '@ant-design/pro-layout';
-import type { RunTimeLayoutConfig } from 'umi';
+import type { RunTimeLayoutConfig , RequestConfig } from 'umi';
 import { history, Link } from 'umi';
 import RightContent from '@/components/RightContent';
 import Footer from '@/components/Footer';
@@ -9,7 +9,7 @@ import { BookOutlined, LinkOutlined } from '@ant-design/icons';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
-
+let initUserId:any = 0
 /** 获取用户信息比较慢的时候会展示一个 loading */
 export const initialStateConfig = {
   loading: <PageLoading />,
@@ -21,11 +21,17 @@ export const initialStateConfig = {
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
   currentUser?: API.CurrentUser;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  setUserId?:(userId?: number) => void;
+  fetchUserInfo?: (userId?:number) => Promise<API.CurrentUser | undefined>;
 }> {
-  const fetchUserInfo = async () => {
+
+  const setUserId = async (userId?:number) => {
+    initUserId = userId
+  }
+
+  const fetchUserInfo = async (userId?:number) => {
     try {
-      const msg = await queryCurrentUser();
+      const msg = await queryCurrentUser({ params:{ id: userId }});
       return msg.data;
     } catch (error) {
       history.push(loginPath);
@@ -34,16 +40,18 @@ export async function getInitialState(): Promise<{
   };
   // 如果是登录页面，不执行
   if (history.location.pathname !== loginPath) {
-    const currentUser = await fetchUserInfo();
+    const currentUser = await fetchUserInfo(initUserId);
     return {
       fetchUserInfo,
       currentUser,
       settings: {},
+      setUserId
     };
   }
   return {
     fetchUserInfo,
     settings: {},
+    setUserId
   };
 }
 
@@ -89,4 +97,14 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     // unAccessible: <div>unAccessible</div>,
     ...initialState?.settings,
   };
+};
+
+
+export const request: RequestConfig = {
+  //prefix:'http://localhost:8080/',
+  credentials:'include',
+  errorHandler: (error) => {
+    // 集中处理错误
+    console.log(error);
+  }
 };

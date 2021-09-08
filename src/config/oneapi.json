@@ -6,10 +6,10 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8000/"
+      "url": "http://localhost1:8000/"
     },
     {
-      "url": "https://localhost:8000/"
+      "url": "https://localhost1:8000/"
     }
   ],
   "paths": {
