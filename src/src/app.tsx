@@ -4,12 +4,29 @@ import type { RunTimeLayoutConfig , RequestConfig } from 'umi';
 import { history, Link } from 'umi';
 import RightContent from '@/components/RightContent';
 import Footer from '@/components/Footer';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
+import { currentUser as queryCurrentUser , menuListByUserId } from './services/ant-design-pro/api';
 import { BookOutlined, LinkOutlined } from '@ant-design/icons';
+import * as allIcons from '@ant-design/icons';
+import type { MenuDataItem } from '@umijs/route-utils';
+import React from 'react';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 let initUserId:any = 0
+
+const fixMenuItemIcon = (menus: MenuDataItem[], iconType = 'Outlined'): MenuDataItem[] => {
+  menus.forEach((item) => {
+    const { icon, children } = item;
+    if (typeof icon === 'string') {
+      let fixIconName = icon.slice(0, 1).toLocaleUpperCase() + icon.slice(1) + iconType;
+      item.icon = React.createElement(allIcons[fixIconName] || allIcons[icon]);
+    }
+    children && children.length > 0 ? (item.children = fixMenuItemIcon(children)) : null;
+  });
+  return menus;
+};
+
+
 /** 获取用户信息比较慢的时候会展示一个 loading */
 export const initialStateConfig = {
   loading: <PageLoading  />,
@@ -68,9 +85,23 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
           userId: initialState?.currentUser?.userid,
       },
       request: async (params, defaultMenuData) => {
+        console.log(params)
         console.log(defaultMenuData)
+        const userId = params?.userId
+        if (userId == undefined || userId == "") {
+          return defaultMenuData
+        } else {
+          let menuResponse = await menuListByUserId({ params:{ id: userId } })
+          console.log(menuResponse.data)
+          let menuListJson : string = menuResponse.data
+          let menuList: MenuDataItem[] = JSON.parse(menuListJson);
+          return menuList
+        }
         return defaultMenuData
       }
+    },  
+    menuDataRender: (menuData) => {
+        return fixMenuItemIcon(menuData)
     },
     footerRender: () => <Footer />,
     onPageChange: () => {

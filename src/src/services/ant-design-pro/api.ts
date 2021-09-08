@@ -2,6 +2,14 @@
 /* eslint-disable */
 import { request } from 'umi';
 
+export async function menuListByUserId(options?: { [key: string]: any }) {
+  return request<API.Response<any>>('/v1/sysmenu/querylist', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+
 /** 获取当前的用户 GET /api/currentUser */
 export async function currentUser(options?: { [key: string]: any }) {
   return request<{
