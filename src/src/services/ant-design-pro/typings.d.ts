@@ -2,6 +2,14 @@
 /* eslint-disable */
 
 declare namespace API {
+
+  type Response<T> = {
+    success?: boolean;
+    message?: string;
+    data: T;
+  };
+
+
   type CurrentUser = {
     name?: string;
     avatar?: string;

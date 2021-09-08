@@ -53,16 +53,16 @@ const Login: React.FC = () => {
       // 登录
       const loginResult = await login({ ...values, type });
       console.log(loginResult)
-      if (loginResult.status === 'ok') {
+      if (loginResult?.data.status === 'ok') {
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
         });
 
-        await initialState?.setUserId?.(loginResult.userId);
+        await initialState?.setUserId?.(loginResult?.data.userId);
 
         message.success(defaultLoginSuccessMessage);
-        await fetchUserInfo(loginResult.userId);
+        await fetchUserInfo(loginResult?.data.userId);
         /** 此方法会跳转到 redirect 参数所在的位置 */
         if (!history) return;
         const { query } = history.location;
@@ -71,7 +71,10 @@ const Login: React.FC = () => {
         return;
       }
       // 如果失败去设置用户错误信息
-      setUserLoginState(loginResult);
+      if (loginResult != undefined) {
+        setUserLoginState(loginResult?.data);
+      }
+
     } catch (error) {
       const defaultLoginFailureMessage = intl.formatMessage({
         id: 'pages.login.failure',

@@ -24,7 +24,7 @@ export async function outLogin(options?: { [key: string]: any }) {
 export async function login(body: API.LoginParams, options?: { [key: string]: any }) {
   // test /api/login/account
   // prod /v1/user/login
-  return request<API.LoginResult>('/v1/user/login', {
+  return request<API.Response<API.LoginResult>>('/v1/user/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
