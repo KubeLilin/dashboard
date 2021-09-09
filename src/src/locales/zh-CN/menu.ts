@@ -49,4 +49,8 @@ export default {
   'menu.editor.flow': '流程编辑器',
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
+  'menu.user': '用户',
+  'menu.user.login': '登录',
+  'menu.user.register-result': '注册结果',
+  'menu.user.register': '注册',
 };

@@ -12,6 +12,8 @@ import React from 'react';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
+const registerPath = '/user/register';
+
 let initUserId:any = 0
 
 const fixMenuItemIcon = (menus: MenuDataItem[], iconType = 'Outlined'): MenuDataItem[] => {
@@ -51,7 +53,7 @@ export async function getInitialState(): Promise<{
       const msg = await queryCurrentUser({ params:{ id: userId }});
       return msg.data;
     } catch (error) {
-      history.push(loginPath);
+      //history.push(loginPath);
     }
     return undefined;
   };
@@ -107,6 +109,10 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     onPageChange: () => {
       const { location } = history;
       // 如果没有登录，重定向到 login
+      if (location.pathname == registerPath) {
+        history.push(registerPath);
+        return 
+      }
       if (!initialState?.currentUser && location.pathname !== loginPath) {
         history.push(loginPath);
       }
