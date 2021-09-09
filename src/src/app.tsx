@@ -18,12 +18,12 @@ let initUserId:any = 0
 
 const fixMenuItemIcon = (menus: MenuDataItem[], iconType = 'Outlined'): MenuDataItem[] => {
   menus.forEach((item) => {
-    const { icon, children } = item;
+    const { icon } = item;  //{ icon,children} in item
     if (typeof icon === 'string') {
       let fixIconName = icon.slice(0, 1).toLocaleUpperCase() + icon.slice(1) + iconType;
       item.icon = React.createElement(allIcons[fixIconName] || allIcons[icon]);
     }
-    children && children.length > 0 ? (item.children = fixMenuItemIcon(children)) : null;
+    //children && children.length > 0 ? (item.children = fixMenuItemIcon(children)) : null;
   });
   return menus;
 };

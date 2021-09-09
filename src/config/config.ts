@@ -271,6 +271,11 @@ export default defineConfig({
           component: './account/center',
         },
         {
+          "component": "./account/manage",
+          "name": "manage",
+          "path": "/account/manage"
+        },
+        {
           name: 'settings',
           icon: 'smile',
           path: '/account/settings',
