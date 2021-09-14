@@ -9,8 +9,45 @@ import type { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
 import ProDescriptions from '@ant-design/pro-descriptions';
 import type { FormValueType } from './components/UpdateForm';
 import UpdateForm from './components/UpdateForm';
-import { rule, addRule, updateRule, removeRule } from './service';
+import { query, addRule, updateRule, removeRule } from './service';
 import type { TableListItem, TableListPagination } from './data';
+import { useModel } from 'umi';
+
+var tenantId:number = 0;
+
+const queryUsers = async (
+  params: {
+    tenantId?: number;
+    pageIndex?: number;
+    current?: number;
+    pageSize?: number;
+  },
+  options?: { [key: string]: any },) => {
+  
+  params.tenantId = tenantId
+  params.pageIndex = params.current
+  params.current = undefined
+
+
+  var requestData = await query(params,options)
+  
+  let retData :{
+    data:  TableListItem[];
+    /** 列表的内容总数 */
+    total?: number;
+    success?: boolean;
+  } = { 
+    data: requestData.data.data,
+    success : requestData.success,
+    total : requestData.data.total
+  }
+
+  //return query(params,options)
+  return new Promise<any>(resolve => {
+    resolve(retData)
+  })
+}
+
 /**
  * 添加节点
  *
@@ -66,7 +103,7 @@ const handleRemove = async (selectedRows: TableListItem[]) => {
 
   try {
     await removeRule({
-      key: selectedRows.map((row) => row.key),
+      key: selectedRows.map((row) => row.id),
     });
     hide();
     message.success('删除成功，即将刷新');
@@ -79,6 +116,9 @@ const handleRemove = async (selectedRows: TableListItem[]) => {
 };
 
 const Manage: React.FC = () => {
+  const { initialState } = useModel('@@initialState');
+  tenantId = Number(initialState?.currentUser?.group)
+
   /** 新建窗口的弹窗 */
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);
   /** 分布更新窗口的弹窗 */
@@ -92,9 +132,14 @@ const Manage: React.FC = () => {
 
   const columns: ProColumns<TableListItem>[] = [
     {
-      title: '规则名称',
-      dataIndex: 'name',
-      tip: '规则名称是唯一的 key',
+      title: 'ID',
+      dataIndex:'id',
+      hideInForm: true,
+      hideInSearch:true,
+    },
+    {
+      title: '用户名',
+      dataIndex: 'userName',
       render: (dom, entity) => {
         return (
           <a
@@ -109,58 +154,35 @@ const Manage: React.FC = () => {
       },
     },
     {
-      title: '描述',
-      dataIndex: 'desc',
+      title: '手机号',
+      dataIndex: 'mobile',
       valueType: 'textarea',
     },
     {
-      title: '服务调用次数',
-      dataIndex: 'callNo',
+      title: '邮箱',
+      dataIndex: 'email',
       sorter: true,
-      hideInForm: true,
-      renderText: (val: string) => `${val}万`,
     },
     {
       title: '状态',
       dataIndex: 'status',
-      hideInForm: true,
       valueEnum: {
         0: {
-          text: '关闭',
+          text: '失效',
           status: 'Default',
         },
         1: {
-          text: '运行中',
-          status: 'Processing',
-        },
-        2: {
-          text: '已上线',
+          text: '生效',
           status: 'Success',
-        },
-        3: {
-          text: '异常',
-          status: 'Error',
         },
       },
     },
     {
-      title: '上次调度时间',
+      title: '更新时间',
       sorter: true,
-      dataIndex: 'updatedAt',
+      dataIndex: 'updateTime',
       valueType: 'dateTime',
-      renderFormItem: (item, { defaultRender, ...rest }, form) => {
-        const status = form.getFieldValue('status');
-
-        if (`${status}` === '0') {
-          return false;
-        }
-
-        if (`${status}` === '3') {
-          return <Input {...rest} placeholder="请输入异常原因！" />;
-        }
-
-        return defaultRender(item);
-      },
+      hideInSearch:true,
     },
     {
       title: '操作',
@@ -188,7 +210,7 @@ const Manage: React.FC = () => {
       <ProTable<TableListItem, TableListPagination>
         headerTitle="查询表格"
         actionRef={actionRef}
-        rowKey="key"
+        rowKey="id"
         search={{
           labelWidth: 120,
         }}
@@ -203,7 +225,7 @@ const Manage: React.FC = () => {
             <PlusOutlined /> 新建
           </Button>,
         ]}
-        request={rule}
+        request={queryUsers}
         columns={columns}
         rowSelection={{
           onChange: (_, selectedRows) => {

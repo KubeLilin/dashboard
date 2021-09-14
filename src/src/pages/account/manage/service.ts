@@ -4,22 +4,29 @@ import { request } from 'umi';
 import { TableListItem } from './data';
 
 /** 获取规则列表 GET /api/rule */
-export async function rule(
+export async function query(
   params: {
     // query
     /** 当前的页码 */
+    tenantId?: number;
+    pageIndex?: number;
     current?: number;
     /** 页面的容量 */
     pageSize?: number;
   },
   options?: { [key: string]: any },
 ) {
+  params.pageIndex = params.current
+  params.current = undefined
   return request<{
-    data: TableListItem[];
+    data: {
+      data: TableListItem[];
+      total?: number;
+    }; 
     /** 列表的内容总数 */
-    total?: number;
+    message?: string;
     success?: boolean;
-  }>('/api/rule', {
+  }>('/v1/user/list', {
     method: 'GET',
     params: {
       ...params,
