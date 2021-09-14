@@ -192,14 +192,18 @@ const Manage: React.FC = () => {
         <a
           key="config"
           onClick={() => {
-            handleUpdateModalVisible(true);
-            setCurrentRow(record);
+            var ok = confirm("确定要禁用用户吗?")
+            if (ok) {
+              handleUpdateModalVisible(true);
+              setCurrentRow(record);
+              
+            }
           }}
         >
-          配置
+          { record.status == "1"? "禁用":"启用" }
         </a>,
         <a key="subscribeAlert" href="https://procomponents.ant.design/">
-          订阅警报
+          更新
         </a>,
       ],
     },
@@ -208,7 +212,7 @@ const Manage: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<TableListItem, TableListPagination>
-        headerTitle="查询表格"
+        headerTitle="用户查询"
         actionRef={actionRef}
         rowKey="id"
         search={{
