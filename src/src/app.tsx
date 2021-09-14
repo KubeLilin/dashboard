@@ -46,6 +46,7 @@ export async function getInitialState(): Promise<{
 
   const setUserId = async (userId?:number) => {
     initUserId = userId
+    sessionStorage.setItem("userId",initUserId)
   }
 
   const fetchUserInfo = async (userId?:number) => {
@@ -59,6 +60,15 @@ export async function getInitialState(): Promise<{
   };
   // 如果是登录页面，不执行
   if (history.location.pathname !== loginPath) {
+    if (initUserId == 0) {
+      var id = sessionStorage.getItem("userId")
+      if (id != null) {
+        initUserId = Number(id)
+      } else {
+        history.push(loginPath)
+      }
+    }
+
     const currentUser = await fetchUserInfo(initUserId);
     return {
       fetchUserInfo,
