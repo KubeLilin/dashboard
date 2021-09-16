@@ -210,9 +210,15 @@ const Manage: React.FC = () => {
         >
           { record.status == "1"? "禁用":"启用" }
         </a>,
-        <a key="subscribeAlert" href="https://procomponents.ant.design/">
-          更新
-        </a>,
+        <a key="updateUser" 
+          onClick={ async() => {
+            setCurrentRow(record)
+            handleUpdateModalVisible(true)
+
+
+          }}
+        >更新</a>
+      
       ],
     },
   ];
@@ -310,6 +316,7 @@ const Manage: React.FC = () => {
 
       <UpdateForm
         onSubmit={async (value) => {
+          console.log(value)
           const success = await handleUpdate(value, currentRow);
 
           if (success) {
