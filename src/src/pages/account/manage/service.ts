@@ -44,10 +44,27 @@ export async function updateRule(data: { [key: string]: any }, options?: { [key:
   });
 }
 
-/** 新建规则 POST /api/rule */
-export async function addRule(data: { [key: string]: any }, options?: { [key: string]: any }) {
-  return request<TableListItem>('/api/rule', {
+export async function setUserStatus(options?: { [key: string]: any }) {
+  return request<{
+    success? :boolean
+    message? :string
+  }>('/v1/user/status', {
+    method: 'PUT',
+    ...(options || {}),
+  });
+}
+
+
+/** 新建用户 POST /v1/user/register */
+export async function addUser(data: TableListItem, options?: { [key: string]: any }) {
+  return request<{
+    success? :boolean
+    message? :string
+  }>('/v1/user/register', {
     data,
+    headers: {
+      'Content-Type': 'application/json',
+    },
     method: 'POST',
     ...(options || {}),
   });

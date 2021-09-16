@@ -4,12 +4,12 @@ import React, { useState, useRef } from 'react';
 import { PageContainer, FooterToolbar } from '@ant-design/pro-layout';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
+import ProForm, { ModalForm, ProFormText } from '@ant-design/pro-form';
 import type { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
 import ProDescriptions from '@ant-design/pro-descriptions';
 import type { FormValueType } from './components/UpdateForm';
 import UpdateForm from './components/UpdateForm';
-import { query, addRule, updateRule, removeRule } from './service';
+import { query, addUser, setUserStatus, updateRule, removeRule } from './service';
 import type { TableListItem, TableListPagination } from './data';
 import { useModel } from 'umi';
 
@@ -22,11 +22,12 @@ const queryUsers = async (
     current?: number;
     pageSize?: number;
   },
+  sort: Record<string, any>,
   options?: { [key: string]: any },) => {
-  
+  console.log(sort)
   params.tenantId = tenantId
   params.pageIndex = params.current
-  params.current = undefined
+  //params.current = undefined
 
 
   var requestData = await query(params,options)
@@ -56,17 +57,16 @@ const queryUsers = async (
 
 const handleAdd = async (fields: TableListItem) => {
   const hide = message.loading('正在添加');
-
-  try {
-    await addRule({ ...fields });
+    var resMsg = await addUser(fields );
+    if (resMsg.success) {
+      message.success(resMsg.message);
+      return true;
+    } else {
+      message.error('添加失败请重试！');
+    }
     hide();
-    message.success('添加成功');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('添加失败请重试！');
+    
     return false;
-  }
 };
 /**
  * 更新节点
@@ -191,12 +191,20 @@ const Manage: React.FC = () => {
       render: (_, record) => [
         <a
           key="config"
-          onClick={() => {
+          onClick={ async () => {
             var ok = confirm("确定要禁用用户吗?")
             if (ok) {
-              handleUpdateModalVisible(true);
               setCurrentRow(record);
+              var status = '1' 
+              if(record.status == '1') {
+                status = '0'
+              } 
+              let res = await setUserStatus({ params:{ id: record.id , status: status  } })
               
+              if (res.success && actionRef.current) {
+                message.success("操作成功")
+                actionRef.current.reload();
+              }
             }
           }}
         >
@@ -256,24 +264,24 @@ const Manage: React.FC = () => {
             </div>
           }
         >
-          <Button
+          <Button type="primary"
             onClick={async () => {
-              await handleRemove(selectedRowsState);
+              //await handleRemove(selectedRowsState);
               setSelectedRows([]);
               actionRef.current?.reloadAndRest?.();
             }}
           >
             批量删除
           </Button>
-          <Button type="primary">批量审批</Button>
         </FooterToolbar>
       )}
-      <ModalForm
-        title="新建规则"
-        width="400px"
+      <ModalForm<TableListItem>
+        title="新建用户"
+        width={450}
         visible={createModalVisible}
         onVisibleChange={handleModalVisible}
         onFinish={async (value) => {
+          value.tenantId = tenantId
           const success = await handleAdd(value as TableListItem);
           if (success) {
             handleModalVisible(false);
@@ -283,18 +291,23 @@ const Manage: React.FC = () => {
           }
         }}
       >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: '规则名称为必填项',
-            },
-          ]}
-          width="md"
-          name="name"
-        />
-        <ProFormTextArea width="md" name="desc" />
+     
+          <ProFormText  width="md" name="userName" label="用户名" tooltip="英文名" placeholder="请输入名称" 
+              rules={[ {  required: true, message: '用户名为必填项',  }, { max:10 , message:'超过最大输入长度 > 10'}  ]}  />
+
+          <ProFormText.Password  width="md" name="password" label="密码" tooltip="密码" placeholder="请输入密码" 
+              rules={[ {  required: true, message: '密码为必填项',  },{ max:13 , message:'超过最大输入长度 > 10'}  ]}  />
+
+          <ProFormText width="md" name="account" label="姓名" placeholder="请输入姓名" 
+              rules={[  { required: true, message: '姓名为必填项'}, { max:10 , message:'超过最大输入长度 > 10'}  ]}  />
+
+          <ProFormText width="md" name="mobile" label="手机号" placeholder="请输入手机号"  
+              rules={[ { required: true, message: '手机号为必填项', }, { pattern: /^1\d{10}$/, message: '不合法的手机号格式!',  }, ]} />
+
+          <ProFormText width="md" name="email" label="邮箱" placeholder="请输入邮箱地址"  
+              rules={[ { required: true, message: '邮箱地址为必填项', }, { max:20 , message:'超过最大输入长度 > 20'}  ]} />
       </ModalForm>
+
       <UpdateForm
         onSubmit={async (value) => {
           const success = await handleUpdate(value, currentRow);
