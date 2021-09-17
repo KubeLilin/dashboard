@@ -9,12 +9,15 @@ import type { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
 import ProDescriptions from '@ant-design/pro-descriptions';
 import type { FormValueType } from './components/UpdateForm';
 import UpdateForm from './components/UpdateForm';
-import { query, addUser, setUserStatus, updateRule, removeRule } from './service';
+import { query, addUser, setUserStatus, updateUser } from './service';
 import type { TableListItem, TableListPagination } from './data';
 import { useModel } from 'umi';
 
 var tenantId:number = 0;
 
+/**
+ *  查询用户信息(分页)
+*/
 const queryUsers = async (
   params: {
     tenantId?: number;
@@ -24,11 +27,10 @@ const queryUsers = async (
   },
   sort: Record<string, any>,
   options?: { [key: string]: any },) => {
-  console.log(sort)
+  //console.log(sort)
   params.tenantId = tenantId
   params.pageIndex = params.current
   //params.current = undefined
-
 
   var requestData = await query(params,options)
   
@@ -69,51 +71,27 @@ const handleAdd = async (fields: TableListItem) => {
     return false;
 };
 /**
- * 更新节点
+ * 更新用户信息
  *
  * @param fields
  */
-
-const handleUpdate = async (fields: FormValueType, currentRow?: TableListItem) => {
-  const hide = message.loading('正在配置');
-
+const handleUpdate = async ( item?: TableListItem) => {
+  const hide = message.loading('正在更新');
+  if (item != null) {
+    item.tenantId = tenantId
+  }
   try {
-    await updateRule({
-      ...currentRow,
-      ...fields,
-    });
+    await updateUser(item);
     hide();
-    message.success('配置成功');
+    message.success('更新成功');
     return true;
   } catch (error) {
     hide();
-    message.error('配置失败请重试！');
+    message.error('更新失败请重试！');
     return false;
   }
 };
-/**
- * 删除节点
- *
- * @param selectedRows
- */
 
-const handleRemove = async (selectedRows: TableListItem[]) => {
-  const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-
-  try {
-    await removeRule({
-      key: selectedRows.map((row) => row.id),
-    });
-    hide();
-    message.success('删除成功，即将刷新');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('删除失败，请重试');
-    return false;
-  }
-};
 
 const Manage: React.FC = () => {
   const { initialState } = useModel('@@initialState');
@@ -214,8 +192,6 @@ const Manage: React.FC = () => {
           onClick={ async() => {
             setCurrentRow(record)
             handleUpdateModalVisible(true)
-
-
           }}
         >更新</a>
       
@@ -317,7 +293,7 @@ const Manage: React.FC = () => {
       <UpdateForm
         onSubmit={async (value) => {
           console.log(value)
-          const success = await handleUpdate(value, currentRow);
+          const success = await handleUpdate(value);
 
           if (success) {
             handleUpdateModalVisible(false);

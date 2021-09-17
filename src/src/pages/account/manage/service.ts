@@ -36,10 +36,13 @@ export async function query(
 }
 
 /** 新建规则 PUT /api/rule */
-export async function updateRule(data: { [key: string]: any }, options?: { [key: string]: any }) {
-  return request<TableListItem>('/api/rule', {
+export async function updateUser(data?: TableListItem, options?: { [key: string]: any }) {
+  return request<TableListItem>('/v1/user/update', {
     data,
-    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
     ...(options || {}),
   });
 }

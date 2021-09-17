@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal,Form } from 'antd';
+import { Modal,Form , Select } from 'antd';
 import ProForm, {
   ProFormSelect,
   ProFormText,
@@ -23,26 +23,31 @@ export type UpdateFormProps = {
 };
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
+  const [form] = Form.useForm();
+
   return (
         <Modal
-            width={640}
-            bodyStyle={{
-              padding: '32px 40px 48px',
-            }}
             destroyOnClose
             title="用户信息编辑"
             visible={props.updateModalVisible}
             onOk={()=>{
-              props.onSubmit(props.values)
+              form.submit()
+
+              //
             }}
             onCancel={() => {
               props.onCancel();
             }} >
-              <Form initialValues={props.values} layout="vertical" >
+              <Form form={form} initialValues={props.values} layout="vertical" 
+              
+                onFinish={ (value:TableListItem) => {
+                  props.onSubmit(value)
+                }} 
+              >
 
                   <ProFormText  width="md" name="id" label="ID"  readonly={true} hidden={true} />
 
-                  <ProFormText  width="md" name="userName" label="用户名" tooltip="英文名" placeholder="请输入名称" 
+                  <ProFormText  width="md" name="userName" label="用户名" tooltip="英文名" placeholder="请输入名称"  disabled
                       rules={[ {  required: true, message: '用户名为必填项',  }, { max:10 , message:'超过最大输入长度 > 10'}  ]}  />
 
                   <ProFormText.Password  width="md" name="password" label="密码" tooltip="密码" placeholder="请输入密码" 
@@ -57,12 +62,12 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
                   <ProFormText width="md" name="email" label="邮箱" placeholder="请输入邮箱地址"  
                       rules={[ { required: true, message: '邮箱地址为必填项', }, { max:20 , message:'超过最大输入长度 > 20'}  ]} />
 
-                  <ProFormSelect name="status" width="md" label="状态"
-                            valueEnum={{
-                              '0': '禁用',
-                              '1': '启用',
-                            }}
-                          />
+                  <ProFormSelect name="status" width="md" label="状态" 
+                    options={[
+                      {label:'禁用',value: 0 },
+                      {label:'启用',value: 1 }
+                    ]}
+                  />
               </Form>
 
         </Modal>
