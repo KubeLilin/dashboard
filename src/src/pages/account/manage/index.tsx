@@ -94,8 +94,12 @@ const handleUpdate = async ( item?: TableListItem) => {
 
 
 const Manage: React.FC = () => {
+  console.log("------------------------------------------------------------------------------------------------------------------")
+  
   const { initialState } = useModel('@@initialState');
   tenantId = Number(initialState?.currentUser?.group)
+  const token = initialState?.getUserToken?.()
+  console.log(token)
 
   /** 新建窗口的弹窗 */
   const [createModalVisible, handleModalVisible] = useState<boolean>(false);

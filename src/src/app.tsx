@@ -9,6 +9,8 @@ import { BookOutlined, LinkOutlined } from '@ant-design/icons';
 import * as allIcons from '@ant-design/icons';
 import type { MenuDataItem } from '@umijs/route-utils';
 import React from 'react';
+import { ResponseError } from 'umi-request';
+import { notification } from 'antd';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -41,6 +43,7 @@ export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
   currentUser?: API.CurrentUser;
   setUserId?:(userId?: number) => void;
+  getUserToken?:() => string;
   fetchUserInfo?: (userId?:number) => Promise<API.CurrentUser | undefined>;
 }> {
 
@@ -49,12 +52,22 @@ export async function getInitialState(): Promise<{
     sessionStorage.setItem("userId",initUserId)
   }
 
+  const getUserToken = () => {
+     var token = sessionStorage.getItem("loginStatus")
+     if (token != null ) {
+       return token
+     } else {
+       return ""
+     }
+  }
+  
   const fetchUserInfo = async (userId?:number) => {
     try {
+      console.log("get user info")
       const msg = await queryCurrentUser({ params:{ id: userId }});
       return msg.data;
     } catch (error) {
-      //history.push(loginPath);
+      history.push(loginPath);
     }
     return undefined;
   };
@@ -74,13 +87,15 @@ export async function getInitialState(): Promise<{
       fetchUserInfo,
       currentUser,
       settings: {},
-      setUserId
+      setUserId,
+      getUserToken
     };
   }
   return {
     fetchUserInfo,
     settings: {},
-    setUserId
+    setUserId,
+    getUserToken
   };
 }
 
@@ -147,11 +162,53 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
 };
 
 
+const headerInterceptor = (url: string, options: RequestInit) => {
+  if ( sessionStorage.getItem("loginStatus")) {
+    const token = sessionStorage.getItem("loginStatus")
+    options.headers = {
+      ...options.headers,
+      "Authorization" : 'Bearer ' + token
+    }
+  }
+  return {url,options}
+}
+
+const errorHandler = (error:ResponseError) => {
+  const { response } = error;
+  if (response && response.status) {
+
+    if (response.status == 401) {
+      notification.error({
+        message: '未授权的请求，请重新登录' , 
+        description: '访问被拒绝'
+      })
+      sessionStorage.clear()
+      history.push(loginPath)
+    } else {
+        const errorText = response.statusText
+        const {status ,url} = response
+
+        notification.error({
+          message: `请求错误 ${status} : ${url}` , 
+          description: errorText
+        })
+    }
+  }
+
+  if (!response) {
+      notification.error({
+        message: '您的网络发生异常，无法连接服务器！' , 
+        description: '网络异常'
+      })
+  }
+
+}
+
+
+
 export const request: RequestConfig = {
   //prefix:'http://localhost:8080/',
   credentials:'include',
-  errorHandler: (error) => {
-    // 集中处理错误
-    console.log(error);
-  }
+  requestInterceptors: [ headerInterceptor ],
+  errorHandler: errorHandler
 };
