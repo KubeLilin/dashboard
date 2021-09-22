@@ -264,6 +264,11 @@ export default defineConfig({
           "component": "./account/manage",
           "name": "manage",
           "path": "/account/manage"
+        },
+        {
+          "component": "./account/role",
+          "name": "role",
+          "path": "/account/role"
         }
       ],
     },
@@ -336,7 +341,7 @@ export default defineConfig({
   nodeModulesTransform: {
     type: 'none',
   },
-  mfsu: {},
+  // mfsu: {},
   webpack5: {},
   exportStatic: {},
 });

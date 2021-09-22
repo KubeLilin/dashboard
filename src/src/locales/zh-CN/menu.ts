@@ -54,4 +54,6 @@ export default {
   'menu.user.register-result': '注册结果',
   'menu.user.register': '注册',
   'menu.account.manage': '用户管理',
+  'menu.account.role': '角色管理',
+  
 };
