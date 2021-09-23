@@ -7,11 +7,13 @@ export type TableListItem = {
   };
   
 export type MenuListItem = {
-    id: number;
+    id?: number;
     menuCode?: string;
     menuName?: string;
-    tenantId: number;
-    status: number;
+    tenantID?: number;
+    status?: number;
+    sort?: number
+    childrenMenu?: MenuListItem[]
   };
 
 export type TableListPagination = {
