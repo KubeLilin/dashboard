@@ -6,11 +6,14 @@ import { message, Button,Table } from 'antd';
 import ProTable from '@ant-design/pro-table';
 import ProCard from '@ant-design/pro-card';
 import type { TableListItem,MenuListItem, TableListPagination } from './data';
-import { roleQuery,queryMenuList } from './service';
+import { roleQuery,queryMenuList, getMenuListByRoleId } from './service';
 
 
 const Role: React.FC = () => {
     const actionRef = useRef<ActionType>();
+    const [ selectedMenuIds,setSelectedMenuIds ] = useState<number[]>([])
+    const [ currentRole , setCurrentRole ] = useState<TableListItem>()
+
 
     const roleColumns: ProColumns<TableListItem>[] = [
         {
@@ -59,22 +62,7 @@ const Role: React.FC = () => {
         },
         {
             title: '菜单名称',
-            dataIndex: 'menuName',
-        },
-        {
-            title: '状态',
-            width: 120,
-            dataIndex: 'status',
-            valueEnum: {
-                0: {
-                  text: '失效',
-                  status: 'Default',
-                },
-                1: {
-                  text: '生效',
-                  status: 'Success',
-                },
-            },
+            dataIndex: 'name',
         },
     ]
 
@@ -87,9 +75,18 @@ const Role: React.FC = () => {
                     rowSelection={{
                         type: "radio",
                         selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT],
-                        onChange: (_,selectedRows) => {
-                            message.success(selectedRows.length)
-                            console.log(selectedRows.length)
+                        onChange: async (_,selectedRows) => {
+                            setSelectedMenuIds([])
+                            if (selectedRows.length > 0) {
+                                console.log(selectedRows.length)
+                                const rsData =  await getMenuListByRoleId(selectedRows[0].id)
+                                if(rsData.success && rsData.data != null){
+                                    setSelectedMenuIds(rsData.data)
+                                }
+                            } else {
+                                setSelectedMenuIds([])
+                            }
+
                         }
                     }}
                     bordered={true}
@@ -115,14 +112,15 @@ const Role: React.FC = () => {
                     headerTitle="菜单-角色权限分配"
                     rowSelection={{
                         selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT],
-                        checkStrictly: false
+                        checkStrictly: false,
+                        selectedRowKeys: selectedMenuIds
                     }}
                     bordered={true}
                     indentSize={10}
                     defaultExpandAllRows={true}
                     search={false}
                     rowKey="id"
-                    childrenColumnName="childrenMenu"
+                    childrenColumnName="routes"
                     columns={menusColumns}
                     request={queryMenuList}
                     toolBarRender={() => [

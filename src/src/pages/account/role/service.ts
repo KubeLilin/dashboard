@@ -62,3 +62,10 @@ export const queryMenuList = async (
 
 
 
+export const getMenuListByRoleId = async (roleId:number) => {
+
+    return request<ApiResponse<number[]>>('/v1/sysmenu/rolemenulist',{
+        params:{ roleId: roleId } , method:'GET' ,
+    })
+
+}
