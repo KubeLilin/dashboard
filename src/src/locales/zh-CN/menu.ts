@@ -55,5 +55,6 @@ export default {
   'menu.user.register': '注册',
   'menu.account.manage': '用户管理',
   'menu.account.role': '角色管理',
+  'menu.account.tenant': '租户管理',
   
 };

@@ -3,7 +3,8 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
 import React, { useState, useRef } from 'react';
 import { TenantTableListItem ,TenantTableListPagination} from './tenant_data';
-const queryUsers = async (
+import { queryTenant } from './teanant_service';
+const queryTenantList = async (
     params: {
         pageIdnex?: number;
         pageSize?: number;
@@ -13,6 +14,20 @@ const queryUsers = async (
     options?: { [key: string]: any }) => {
     params.pageIdnex = params.current
 
+    let reqData=await queryTenant(params,options)
+
+    let resData:{
+       data: TenantTableListItem[];
+       total?:number;
+       success?:boolean;
+    }={
+        data:reqData.data.data,
+        success : reqData.success,
+        total : reqData.data.total
+    }
+    return new Promise<any>(resolve => {
+        resolve(resData)
+      })
 }
 
 
@@ -61,7 +76,9 @@ const Tenant: React.FC = () => {
         <PageContainer>
             <ProTable<TenantTableListItem,TenantTableListPagination>
                 columns={columns}
+                request={queryTenantList}
                 />
         </PageContainer>
     )
-}
+};
+export default Tenant;
