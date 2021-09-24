@@ -1,10 +1,11 @@
 import { request } from 'umi';
-import { TableListItem,MenuListItem } from './data';
+import { TableListItem,MenuListItem, CreateOrUpdateRoleMenuRequest } from './data';
 import { ApiResponse } from '../../../services/public/service'
 
 export async function roleQuery(
     params: {
       /** 当前的页码 */
+      tenantId?:number;
       pageIndex?: number;
       current?: number;
       /** 页面的容量 */
@@ -68,4 +69,15 @@ export const getMenuListByRoleId = async (roleId:number) => {
         params:{ roleId: roleId } , method:'GET' ,
     })
 
+}
+
+
+export const postRoleMenuMap = async (requestData:CreateOrUpdateRoleMenuRequest) => {
+    return request<ApiResponse<any>>('/v1/RoleMenu/RoleMenuMap',{
+        data: requestData,
+        method:'POST' ,   
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
 }

@@ -21,3 +21,12 @@ export type TableListPagination = {
   pageSize: number;
   pageIndex: number;
 };
+
+export type CreateOrUpdateRoleMenuRequest = {
+  roleMenuList?:roleMenuItem[];
+}
+
+export type roleMenuItem = {
+  roleId:number;
+  menuId:number;
+}
