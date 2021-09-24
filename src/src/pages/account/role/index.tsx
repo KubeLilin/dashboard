@@ -115,7 +115,7 @@ const Role: React.FC = () => {
                     }}
                     bordered={true}
                     request={(params)=> {  
-                        params.tenantId = currentUser?.group
+                        params.tenantId = Number(currentUser?.group)
                         return roleQuery(params) 
                     }}
                     actionRef={actionRef}

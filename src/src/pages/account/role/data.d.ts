@@ -17,6 +17,7 @@ export type MenuListItem = {
   };
 
 export type TableListPagination = {
+  tenantId: number;
   total: number;
   pageSize: number;
   pageIndex: number;
