@@ -2,14 +2,13 @@ import React, { useState, useRef } from 'react';
 import { PageContainer, } from '@ant-design/pro-layout';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PlusOutlined } from '@ant-design/icons';
-import { message, Button,Table , Form } from 'antd';
+import { message, Button,Table , Form ,notification } from 'antd';
 import { ModalForm, ProFormText } from '@ant-design/pro-form';
 import ProTable from '@ant-design/pro-table';
 import ProCard from '@ant-design/pro-card';
 import type { TableListItem,MenuListItem, TableListPagination, CreateOrUpdateRoleMenuRequest } from './data';
-import { roleQuery,queryMenuList, getMenuListByRoleId ,postRoleMenuMap } from './service';
+import { roleQuery,queryMenuList, getMenuListByRoleId ,postRoleMenuMap ,deleteRole, createRole, updateRole } from './service';
 import { useModel } from 'umi';
-
 
 const Role: React.FC = () => {
     const actionRef = useRef<ActionType>();
@@ -33,8 +32,8 @@ const Role: React.FC = () => {
             dataIndex: 'roleName',
         },
         {
-            title: '角色描述',
-            dataIndex: 'roleDesc',
+            title: '角色Code',
+            dataIndex: 'roleCode',
             hideInForm: true,
             hideInSearch:true,
         },
@@ -74,7 +73,19 @@ const Role: React.FC = () => {
                     setRoleModalTitle("更新")
                     handleModalVisible(true)
                 }}>编辑</a> , 
-                <a key="link" color="red" >删除</a>
+                <a key="link" color="red" onClick={ async ()=>{
+                    var ok = confirm("确定删除角色吗?")
+                    if (ok && entity) {
+                        var res = await deleteRole(entity.id)
+                        if (res && res.success){
+                            notification.success({
+                                message: res.message , 
+                                description: '请求成功'
+                              })
+                            actionRef.current?.reload()
+                        }
+                    }
+                }} >删除</a>
             ],
         }
     ]
@@ -205,16 +216,26 @@ const Role: React.FC = () => {
             visible={createModalVisible}
             onVisibleChange={handleModalVisible}
             onFinish={async (value) => {
-                console.log(value)
+                if (roleModalTitle === '新建') {
+                    value.tenantId = Number(currentUser?.group)
+                    var res = await createRole(value)
+                    if (res && res.success){
+                        notification.success({
+                            message: res.message , 
+                            description: '请求成功'
+                        })
+                    }
+                } else {
+                    var res = await updateRole(value)
+                    if (res && res.success){
+                        notification.success({
+                            message: res.message , 
+                            description: '请求成功'
+                        })
+                    }
+                }
                 handleModalVisible(false);
-                //actionRef.current?.reload();
-            //const success = await handleAdd(value as TableListItem);
-                // if (success) {
-                //     
-                //     if (actionRef.current) {
-                //     actionRef.current.reload();
-                //     }
-                // }
+                actionRef.current?.reload();
             }}
        >
           <ProFormText   width="md" name="id" label="ID"  readonly={true} hidden={true} />

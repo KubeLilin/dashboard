@@ -2,8 +2,8 @@ export type TableListItem = {
     id: number;
     roleCode?: string;
     roleName?: string;
-    tenantId: number;
-    status: number;
+    tenantId?: number;
+    status?: number;
   };
   
 export type MenuListItem = {
