@@ -13,7 +13,7 @@ export type MenuListItem = {
     tenantID?: number;
     status?: number;
     sort?: number
-    childrenMenu?: MenuListItem[]
+    routes?: MenuListItem[]
   };
 
 export type TableListPagination = {

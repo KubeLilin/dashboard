@@ -99,6 +99,14 @@ export async function getInitialState(): Promise<{
   };
 }
 
+const defaultMenu = [
+    {
+            path: '/user/login',
+            layout: false,
+            name: 'login',
+            component: './user/Login',
+    },]
+
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
@@ -116,7 +124,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
         //console.log(defaultMenuData)
         const userId = params?.userId
         if (userId == undefined || userId == "") {
-          return defaultMenuData
+          return []
         } else {
           let menuResponse = await menuListByUserId({ params:{ id: userId } })
           //console.log(menuResponse.data)
@@ -124,7 +132,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
           let menuList: MenuDataItem[] = JSON.parse(menuListJson);
           return menuList
         }
-        return defaultMenuData
+        return []
       }
     },  
     menuDataRender: (menuData) => {
