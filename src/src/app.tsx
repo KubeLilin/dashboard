@@ -81,8 +81,10 @@ export async function getInitialState(): Promise<{
         history.push(loginPath)
       }
     }
-
-    const currentUser = await fetchUserInfo(initUserId);
+    var currentUser 
+    if(initUserId > 0) {
+      currentUser = await fetchUserInfo(initUserId);
+    }
     return {
       fetchUserInfo,
       currentUser,
