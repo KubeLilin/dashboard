@@ -13,7 +13,7 @@ export default defineConfig({
   },
   layout: {
     // https://umijs.org/zh-CN/plugins/plugin-layout
-    locale: true,
+    locale: false,
     siderWidth: 208,
     ...defaultSettings,
   },
@@ -23,7 +23,7 @@ export default defineConfig({
     default: 'zh-CN',
     antd: true,
     // default true, when it is true, will use `navigator.language` overwrite default
-    baseNavigator: true,
+    baseNavigator: false,
   },
   dynamicImport: {
     loading: '@ant-design/pro-layout/es/PageLoading',
@@ -106,6 +106,11 @@ export default defineConfig({
           "path": "/account/manage"
         },
         {
+          "component": "./account/route",
+          "name": "route",
+          "path": "/account/route"
+        },
+        {
           "component": "./account/role",
           "name": "role",
           "path": "/account/role"
@@ -157,7 +162,7 @@ export default defineConfig({
   nodeModulesTransform: {
     type: 'none',
   },
-  // mfsu: {},
+  mfsu: {},
   webpack5: {},
   exportStatic: {},
 });
