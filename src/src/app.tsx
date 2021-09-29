@@ -116,14 +116,13 @@ const defaultMenu = [
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
-    openKeys: false,
     rightContentRender: () => <RightContent />,
     disableContentMargin: false,
     waterMarkProps: {
       content: initialState?.currentUser?.name,
     },
     menu: {
-      inlineSize: 25,
+      inlineSize: 120,
       locale:false,
       defaultOpenAll: true,
       params: {
