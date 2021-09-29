@@ -27,3 +27,22 @@ import { ApiResponse } from '../../../services/public/service'
         total: 0
     }
 }
+
+
+export const postCreateOrUpdateMenu = ( data:MenuListItem) => {
+    return request<ApiResponse<boolean>>('/v1/sysmenu/CreateOrUpdateMenu', { 
+        method: 'POST',
+        data,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+    });
+}
+
+
+export const deleteMenu = ( id: number ) => {
+    return request<ApiResponse<boolean>>('/v1/sysmenu/menu',{
+        method:'DELETE',
+        params:{ id: id },
+    })
+}

@@ -34,6 +34,10 @@ export default defineConfig({
   // umi routes: https://umijs.org/docs/routing
   routes: [
     {
+      path: '/test',
+      layout: false,
+    },
+    {
       path: '/dashboard',
       icon: 'dashboard',
       routes: [
@@ -42,6 +46,11 @@ export default defineConfig({
           icon: 'smile',
           path: '/dashboard/analysis',
           component: './dashboard/analysis',
+        },
+        {
+          name: 'monitor',
+          path: '/dashboard/monitor',
+          component: './dashboard/monitor',
         }
       ]
     },

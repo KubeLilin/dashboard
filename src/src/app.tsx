@@ -22,10 +22,14 @@ const fixMenuItemIcon = (menus: MenuDataItem[], iconType = 'Outlined'): MenuData
   menus.forEach((item) => {
     const { icon } = item;  //{ icon,children} in item
     if (typeof icon === 'string') {
-      let fixIconName = icon.slice(0, 1).toLocaleUpperCase() + icon.slice(1) + iconType;
-      item.icon = React.createElement(allIcons[fixIconName] || allIcons[icon]);
+      if(icon != '') {
+        let fixIconName = icon.slice(0, 1).toLocaleUpperCase() + icon.slice(1) + iconType;
+        item.icon = React.createElement(allIcons[fixIconName] || allIcons[icon]);
+      }
     }
-    //children && children.length > 0 ? (item.children = fixMenuItemIcon(children)) : null;
+    if (item.children && item.children.length > 0 ){
+      item.children = fixMenuItemIcon(item.children)
+    }
   });
   return menus;
 };
@@ -112,12 +116,16 @@ const defaultMenu = [
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
+    openKeys: false,
     rightContentRender: () => <RightContent />,
     disableContentMargin: false,
     waterMarkProps: {
       content: initialState?.currentUser?.name,
     },
     menu: {
+      inlineSize: 25,
+      locale:false,
+      defaultOpenAll: true,
       params: {
           userId: initialState?.currentUser?.userid,
       },
@@ -131,7 +139,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
           let menuResponse = await menuListByUserId({ params:{ id: userId } })
           //console.log(menuResponse.data)
           let menuListJson : string = menuResponse.data
-          let menuList: MenuDataItem[] = JSON.parse(menuListJson);
+          let menuList = JSON.parse(menuListJson);
+          console.log(menuList)
           return menuList
         }
         return []

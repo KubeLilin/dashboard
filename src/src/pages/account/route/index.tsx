@@ -4,10 +4,10 @@ import ProTable from '@ant-design/pro-table';
 import React, { useState, useRef } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 import { message, Button, Form ,notification ,Drawer ,InputNumber } from 'antd';
-import { ModalForm, ProFormText , proform } from '@ant-design/pro-form';
+import { ModalForm, ProFormText  } from '@ant-design/pro-form';
 import ReactJson from 'react-json-view'
 
-import { queryMenuList } from './service'
+import { queryMenuList , postCreateOrUpdateMenu , deleteMenu } from './service'
 import { MenuListItem, TableListPagination } from './data'
 
 const Route: React.FC = () => {
@@ -43,10 +43,15 @@ const Route: React.FC = () => {
             hideInSearch:true
         },
         {
+            hideInTable:true,
+            dataIndex: 'parentId',
+        },
+        {
             width: 35,
             title: 'ID',
             dataIndex: 'id',
         },
+
         {
             width: 220,
             title: '名称',
@@ -76,9 +81,8 @@ const Route: React.FC = () => {
                 <a key="link" onClick={()=>{
                     const from:MenuListItem = {
                         id:undefined,
-                        menuName:'',
+                        name:'',
                         path: entity.path,
-                        parentText: entity.path,
                         icon:'',
                         sort: 0, 
                         isRoot: 0,
@@ -89,13 +93,20 @@ const Route: React.FC = () => {
 
                 }}>新建子菜单</a> , 
                 <a key="link" onClick={()=>{
-
+                    console.log(entity)
+                    //entity.parentText=  entity.path,
+                    routeModalForm.setFieldsValue(entity)
+                    handleModalVisible(true)
                 }}>编辑</a> , 
 
                 <a key="link" color="red" onClick={ async ()=>{
                     var ok = confirm("确定删除菜单吗?")
                     if (ok && entity) {
-                        var res = { success: true , message:''}
+                        var id = -1
+                        if (entity.id){ 
+                            id = entity.id
+                        }
+                        var res = await deleteMenu(id)
                         if (res && res.success){
                             notification.success({
                                 message: res.message , 
@@ -146,13 +157,12 @@ const Route: React.FC = () => {
                             setRouteModalTitle("新建")
                             const from:MenuListItem = {
                                 id:undefined,
-                                menuName:'',
+                                name:'',
                                 path:'',
                                 icon:'',
                                 sort: 0, 
                                 isRoot: 1,
                                 parentId: 0,
-                                parentText: '',
                             }
                             routeModalForm.setFieldsValue(from)
                             handleModalVisible(true)
@@ -169,7 +179,7 @@ const Route: React.FC = () => {
                 />
                 <Drawer title="导出路由JSON" placement="right" width="800" destroyOnClose
                         onClose={ ()=> setExportMenuJsonVisible(false) } visible={exportMenuJsonVisible}>
-                    <ReactJson src={exportMenuJsonObj} />
+                    <ReactJson src={exportMenuJsonObj} displayDataTypes={false} theme="google" />
                 </Drawer>
 
                 <ModalForm<MenuListItem>
@@ -180,32 +190,29 @@ const Route: React.FC = () => {
                     visible={createModalVisible}
                     onVisibleChange={handleModalVisible}
                     onFinish={ async (fromData) =>{
+                        fromData.sort = Number(fromData.sort) 
                         console.log(fromData)
-                    }}
-                    onValuesChange={(changedValues, allValues)=>{
-                        if(changedValues.menuCode) {
-                            var pPath =""
-                            if(allValues.parentId && allValues.parentId > 0){
-                                pPath = allValues.parentText?allValues.parentText:''
-                            }
-                            allValues.path = pPath + '/' + changedValues.menuCode
-                            routeModalForm.setFieldsValue(allValues)
+                        var response =  postCreateOrUpdateMenu(fromData)
+                        response.catch((e)=>{
+                            message.error("操作失败")
+                        })
+                        const res = await response
+                        if (res.success) {
+                            message.success("操作成功")
+                        } else {
+                            message.error("操作失败")   
                         }
-                        
-                    }}
-                    >
+                        handleModalVisible(false)
+                        actionRef.current?.reload()
+                    }}>
                     <ProFormText width="md" name="id" label="ID"  readonly={true} hidden={true} />
                     <ProFormText width="md" name="isRoot"         readonly={true} hidden={true} />
                     <ProFormText width="md" name="parentId"       readonly={true} hidden={true} />
-                    <ProFormText width="md" name="parentText"     readonly={true} hidden={true} />
 
-                    <ProFormText width="md" name="menuName" label="路由名称" tooltip="英文名" placeholder="请输入路由名称" 
+                    <ProFormText width="md" name="name" label="路由名称" tooltip="英文名" placeholder="请输入路由名称" 
                                 rules={[ {  required: true, message: '路由名称为必填项',  }, { max:20 , message:'超过最大输入长度 > 10'}  ]}  />
 
-                    <ProFormText  width="md" name="menuCode" label="路由Code" tooltip="英文名" placeholder="请输入路由名称" 
-                              rules={[ {  required: true, message: '路由Code为必填项',  }, { max:20 , message:'超过最大输入长度 > 10'}  ]}  />
-
-                    <ProFormText  width="md" name="path" label="路径" tooltip="英文名" placeholder="请输入路径" 
+                    <ProFormText  width="md" name="path" label="路径" tooltip="英文名" placeholder="请输入路径"  
                                 rules={[ {  required: true, message: '路由路径为必填项',  }, { max:20 , message:'超过最大输入长度 > 10'}  ]}  />
 
 

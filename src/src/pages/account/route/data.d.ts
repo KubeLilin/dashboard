@@ -2,18 +2,13 @@
 
 export type MenuListItem = {
     id?: number;
-    menuCode?: string;
-    menuName?: string;
-    tenantID?: number;
+    name?:string;
     path?:string;
     icon?:string;
     parentId?: number;
     isRoot?:number;
     status?: number;
     sort?: number
-
-    parentText?:string;
-
     routes?: MenuListItem[]
 };
 
