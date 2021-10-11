@@ -2,8 +2,10 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
 import React, { useState, useRef } from 'react';
-import { TenantTableListItem ,TenantTableListPagination} from './tenant_data';
+import { TenantTableListItem, TenantTableListPagination } from './tenant_data';
 import { queryTenant } from './teanant_service';
+import { Button } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 const queryTenantList = async (
     params: {
         pageIdnex?: number;
@@ -14,20 +16,20 @@ const queryTenantList = async (
     options?: { [key: string]: any }) => {
     params.pageIdnex = params.current
 
-    let reqData=await queryTenant(params,options)
+    let reqData = await queryTenant(params, options)
 
-    let resData:{
-       data: TenantTableListItem[];
-       total?:number;
-       success?:boolean;
-    }={
-        data:reqData.data.data,
-        success : reqData.success,
-        total : reqData.data.total
+    let resData: {
+        data: TenantTableListItem[];
+        total?: number;
+        success?: boolean;
+    } = {
+        data: reqData.data.data,
+        success: reqData.success,
+        total: reqData.data.total
     }
     return new Promise<any>(resolve => {
         resolve(resData)
-      })
+    })
 }
 
 
@@ -43,6 +45,7 @@ const Tenant: React.FC = () => {
         {
             title: '租户名称',
             dataIndex: 'tName',
+            search: false
 
         },
         {
@@ -65,7 +68,7 @@ const Tenant: React.FC = () => {
             title: '操作',
             dataIndex: 'option',
             valueType: 'option',
-            render:(_,record)=>[
+            render: (_, record) => [
                 <a>选择</a>
             ]
 
@@ -74,10 +77,22 @@ const Tenant: React.FC = () => {
 
     return (
         <PageContainer>
-            <ProTable<TenantTableListItem,TenantTableListPagination>
+            <ProTable<TenantTableListItem, TenantTableListPagination>
                 columns={columns}
                 request={queryTenantList}
-                />
+                headerTitle="租户查询"
+                rowKey="id"
+                toolBarRender={() => [
+                    <Button
+                        type="primary"
+                    >
+
+                        <PlusOutlined /> 新增租户
+                    </Button>
+                ]
+                }
+
+            />
         </PageContainer>
     )
 };

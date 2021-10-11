@@ -1,3 +1,4 @@
+import { ApiResponse } from '@/services/public/service';
 import { request } from 'umi';
 import { TenantTableListItem } from './tenant_data';
 
@@ -30,4 +31,11 @@ export async function queryTenant(
         ...(options || {}),
     }
     )
+}
+
+export async function addTenant(params:TenantTableListItem) {
+    return request<ApiResponse<TenantTableListItem>>("/vq/tenant/create",{
+        method:'POST',
+        data:params
+    })
 }
