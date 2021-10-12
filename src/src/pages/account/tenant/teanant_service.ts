@@ -28,14 +28,19 @@ export async function queryTenant(
         params: {
             ...params
         },
-        ...(options || {}),
+        ...(options || {}), 
     }
     )
 }
 
 export async function addTenant(params:TenantTableListItem) {
-    return request<ApiResponse<TenantTableListItem>>("/vq/tenant/create",{
+   let res=   await request<ApiResponse<TenantTableListItem>>("/v1/tenant/create",{
         method:'POST',
-        data:params
+        data:params,
+        headers:{
+            'Content-Type': 'application/json',
+          },
     })
+    console.log(res)
+    return res.success
 }
