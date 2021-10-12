@@ -33,14 +33,12 @@ export async function queryTenant(
     )
 }
 
-export async function addTenant(params:TenantTableListItem) {
-   let res=   await request<ApiResponse<TenantTableListItem>>("/v1/tenant/create",{
+export function addTenant(params:TenantTableListItem) {
+   return request<ApiResponse<boolean>>("/v1/tenant/create",{
         method:'POST',
         data:params,
         headers:{
             'Content-Type': 'application/json',
           },
     })
-    console.log(res)
-    return res.success
 }

@@ -1,15 +1,12 @@
 
 import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ProColumns } from '@ant-design/pro-table';
+import ProTable, { ProColumns , ActionType } from '@ant-design/pro-table';
 import React, { useState, useRef } from 'react';
 import { TenantTableListItem, TenantTableListPagination } from './tenant_data';
 import { queryTenant,addTenant } from './teanant_service';
-import { Button, message } from 'antd';
+import { Button, message ,Form } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
-import { Select } from 'antd';
-import { await } from '@umijs/deps/compiled/signale';
-import { add } from '@umijs/deps/compiled/lodash';
 
 
 
@@ -43,6 +40,9 @@ const queryTenantList = async (
 const Tenant: React.FC = () => {
 
     const [createModalVisible, handleModalVisible] = useState<boolean>(false);
+    const actionRef = useRef<ActionType>();
+
+    const [ createModalForm ] = Form.useForm();
 
     const columns: ProColumns<TenantTableListItem>[] = [
         {
@@ -78,7 +78,7 @@ const Tenant: React.FC = () => {
             dataIndex: 'option',
             valueType: 'option',
             render: (_, record) => [
-                <a>{record.status==0?"启用":"停用"}</a>
+                <a key="id">{record.status==0?"启用":"停用"}</a>
             ]
 
         }
@@ -93,11 +93,16 @@ const Tenant: React.FC = () => {
                 request={queryTenantList}
                 headerTitle="租户查询"
                 rowKey="id"
-                
+                actionRef={actionRef}
                 toolBarRender={() => [
                     <Button
                         type="primary"
                         onClick={() => {
+                            createModalForm.setFieldsValue({
+                                tName:"",
+                                tCode:"",
+                                status:1
+                            })
                             handleModalVisible(true)
                         }}
                     >
@@ -110,12 +115,19 @@ const Tenant: React.FC = () => {
             <ModalForm<TenantTableListItem>
                 title="新建租户"
                 width={450}
+                form={createModalForm}
                 visible={createModalVisible}
                 onVisibleChange={handleModalVisible}
                 onFinish={async (value)=> {
                    let res= await addTenant(value)
-                   message.info(res.message)
-                   return res.success
+                    if(res?.success) {
+                        message.success("添加成功")
+                    } else {
+                        message.error("添加失败")
+                    }
+                   handleModalVisible(false)
+                   actionRef.current?.reload()
+                   return  res.success
                 }}
             >
                 <ProFormText width="md" name="tName" label="租户名称" placeholder="请输入租户名称" rules={[{ required: true, message: "租户名称不可为空" }]} />
@@ -131,6 +143,7 @@ const Tenant: React.FC = () => {
                             label: "启用",
                         }
                     ]}
+                    
                     name="status"
                     width="md"
                     label="状态"

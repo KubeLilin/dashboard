@@ -213,13 +213,6 @@ const errorHandler = (error:ResponseError) => {
     }
   }
 
-  if (!response) {
-      notification.error({
-        message: '您的网络发生异常，无法连接服务器！' , 
-        description: '网络异常'
-      })
-  }
-
 }
 
 
