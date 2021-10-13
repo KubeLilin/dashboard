@@ -1,7 +1,7 @@
 import type { Settings as LayoutSettings } from '@ant-design/pro-layout';
 import { PageLoading } from '@ant-design/pro-layout';
 import type { RunTimeLayoutConfig , RequestConfig } from 'umi';
-import { history, Link } from 'umi';
+import { history, Link , getIntl } from 'umi';
 import RightContent from '@/components/RightContent';
 import Footer from '@/components/Footer';
 import { currentUser as queryCurrentUser , menuListByUserId } from './services/ant-design-pro/api';
@@ -211,6 +211,14 @@ const errorHandler = (error:ResponseError) => {
           description: errorText
         })
     }
+  } else {
+    const intl = getIntl()
+    const message = intl.formatMessage({id:error.data.message})
+    notification.error({
+      description:'请求错误',
+      message: message
+    })
+    //console.log(error)
   }
 
 }
@@ -221,5 +229,14 @@ export const request: RequestConfig = {
   //prefix:'http://localhost:8080/',
   credentials:'include',
   requestInterceptors: [ headerInterceptor ],
-  errorHandler: errorHandler
+  errorHandler: errorHandler,
+  // errorConfig:{
+  //   adaptor:(resData) => {
+  //     return {
+  //       ...resData,
+  //       success: true,
+  //       errorMessage: resData.message
+  //     }
+  //   }
+  // }
 };
