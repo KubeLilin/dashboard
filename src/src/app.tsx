@@ -212,10 +212,16 @@ const errorHandler = (error:ResponseError) => {
         })
     }
   } else {
-    const intl = getIntl()
-    const message = intl.formatMessage({id:error.data.message})
+    var message = ""
+    if(error.data.message != ""){
+      const intl = getIntl()
+      message = intl.formatMessage({id:error.data.message})
+     
+    } else {
+      message = "请求失败"
+    }
     notification.error({
-      description:'请求错误',
+      description:'错误',
       message: message
     })
     //console.log(error)
