@@ -3,8 +3,8 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns , ActionType } from '@ant-design/pro-table';
 import React, { useState, useRef } from 'react';
 import { TenantTableListItem, TenantTableListPagination } from './tenant_data';
-import { queryTenant,addTenant } from './teanant_service';
-import { Button, message ,Form } from 'antd';
+import { queryTenant,addTenant,changeTenantStatus } from './teanant_service';
+import { Button, message ,Form,Alert } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { ModalForm, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 
@@ -78,7 +78,16 @@ const Tenant: React.FC = () => {
             dataIndex: 'option',
             valueType: 'option',
             render: (_, record) => [
-                <a key="id">{record.status==0?"启用":"停用"}</a>
+                <a key="id" onClick={async ()=>{
+                    let res=await changeTenantStatus(record);
+                    console.log(res);
+                    if ( res?.success){
+                        actionRef.current?.reload();
+                        <Alert message={res.message}></Alert>
+                    }else{
+                        <Alert message="修改状态失败"></Alert>
+                    }
+                }}>{record.status==0?"启用":"停用"}</a>
             ]
 
         }
@@ -107,7 +116,7 @@ const Tenant: React.FC = () => {
                         }}
                     >
                         <PlusOutlined /> 新增租户
-                    </Button>
+                    </Button> 
                 ]
                 }
 

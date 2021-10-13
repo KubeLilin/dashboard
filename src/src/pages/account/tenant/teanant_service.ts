@@ -2,6 +2,8 @@ import { ApiResponse } from '@/services/public/service';
 import { request } from 'umi';
 import { TenantTableListItem } from './tenant_data';
 
+
+
 export async function queryTenant(
     params: {
         pageIndex?: number;
@@ -33,12 +35,28 @@ export async function queryTenant(
     )
 }
 
-export function addTenant(params:TenantTableListItem) {
-   return request<ApiResponse<boolean>>("/v1/tenant/create",{
+export async function addTenant(params:TenantTableListItem) {
+    return request<ApiResponse<TenantTableListItem>>("/v1/tenant/create",{
         method:'POST',
         data:params,
         headers:{
             'Content-Type': 'application/json',
           },
     })
+    
+}
+
+export async function changeTenantStatus(params:TenantTableListItem) {
+    return request<ApiResponse<any>>("/v1/tenant/status",{
+        method:'POST',
+        data:params,
+        headers:{
+            'Content-Type': 'application/json',
+          },
+    })
+}
+
+export async function changeTenantStatusV2(params:TenantTableListItem) {
+    
+    
 }
