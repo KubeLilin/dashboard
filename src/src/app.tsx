@@ -218,10 +218,10 @@ const errorHandler = (error:ResponseError) => {
       message = intl.formatMessage({id:error.data.message})
      
     } else {
-      message = "请求失败"
+      message = "操作失败"
     }
     notification.error({
-      description:'错误',
+      description:'提示',
       message: message
     })
     //console.log(error)
