@@ -221,5 +221,14 @@ export const request: RequestConfig = {
   //prefix:'http://localhost:8080/',
   credentials:'include',
   requestInterceptors: [ headerInterceptor ],
-  errorHandler: errorHandler
+  errorHandler: errorHandler,
+  errorConfig:{
+    adaptor:(resData) => {
+      return {
+        ...resData,
+        success: true,
+        errorMessage: resData.message
+      }
+    }
+  }
 };
