@@ -65,10 +65,10 @@ const Tenant: React.FC = () => {
             title: '状态',
             dataIndex: 'status',
             valueEnum: {
-                0: {
+                1: {
                     text: '停用',
                 },
-                1: {
+                2: {
                     text: '启用'
                 }
             }
@@ -83,11 +83,11 @@ const Tenant: React.FC = () => {
                     console.log(res);
                     if ( res?.success){
                         actionRef.current?.reload();
-                        <Alert message={res.message}></Alert>
+                       
                     }else{
-                        <Alert message="修改状态失败"></Alert>
+                       
                     }
-                }}>{record.status==0?"启用":"停用"}</a>
+                }}>{record.status==1?"启用":"停用"}</a>
             ]
 
         }
@@ -144,11 +144,11 @@ const Tenant: React.FC = () => {
                 <ProFormSelect
                     options={[
                         {
-                            value: 0,
+                            value: 1,
                             label: "停用"            
                         },
                         {
-                            value: 1,
+                            value: 2,
                             label: "启用",
                         }
                     ]}
