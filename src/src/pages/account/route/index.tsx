@@ -6,6 +6,8 @@ import { PlusOutlined } from '@ant-design/icons';
 import { message, Button, Form ,notification ,Drawer ,InputNumber } from 'antd';
 import { ModalForm, ProFormText  } from '@ant-design/pro-form';
 import ReactJson from 'react-json-view'
+import * as allIcons from '@ant-design/icons';
+import {  TrademarkOutlined } from '@ant-design/icons';
 
 import { queryMenuList , postCreateOrUpdateMenu , deleteMenu } from './service'
 import { MenuListItem, TableListPagination } from './data'
@@ -48,8 +50,12 @@ const Route: React.FC = () => {
         },
         {
             width: 35,
-            title: 'ID',
-            dataIndex: 'id',
+            dataIndex: 'isRoot',
+            render: (dom,entity) => {
+                if ( entity.parentId == 0) {
+                    return [  <TrademarkOutlined /> ]
+                } else { return [ <span> -- </span> ] }
+            }
         },
 
         {
@@ -65,6 +71,17 @@ const Route: React.FC = () => {
             width: 150,
             title: '图标',
             dataIndex: 'icon',
+            render: (dom,entity) => {
+                let icon = entity.icon;
+                if (icon) {
+                    let fixIconName = icon.slice(0, 1).toLocaleUpperCase() + icon.slice(1) +'Outlined';
+                    return [React.createElement(allIcons[fixIconName] || allIcons[icon])]
+                } else {
+                    return dom
+                }
+            },
+
+            
         },
         {
             width: 90,
@@ -213,7 +230,7 @@ const Route: React.FC = () => {
                                 rules={[ {  required: true, message: '路由名称为必填项',  }, { max:20 , message:'超过最大输入长度 > 10'}  ]}  />
 
                     <ProFormText  width="md" name="path" label="路径" tooltip="英文名" placeholder="请输入路径"  
-                                rules={[ {  required: true, message: '路由路径为必填项',  }, { max:20 , message:'超过最大输入长度 > 10'}  ]}  />
+                                rules={[ {  required: true, message: '路由路径为必填项',  }, { max:150 , message:'超过最大输入长度 > 10'}  ]}  />
 
 
                     <ProFormText  width="md" name="icon" label="图标" tooltip="英文名" placeholder="请输入图标名称" 

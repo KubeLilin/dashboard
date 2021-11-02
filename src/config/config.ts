@@ -105,6 +105,22 @@ export default defineConfig({
       ],
     },
     {
+      name: 'resources',
+      path: '/resources',
+      routes: [
+        {
+          "name": "clusters",
+          "path": "/resources/clusters",
+          routes: [
+            {
+              "name": "nodes",
+              "path": "/resources/clusters/nodes",
+            }
+          ]
+        }
+      ]
+    },
+    {
       name: 'account',
       icon: 'user',
       path: '/account',
