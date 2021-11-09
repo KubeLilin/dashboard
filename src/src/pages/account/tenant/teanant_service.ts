@@ -14,7 +14,7 @@ export async function queryTenant(
         [key: string]: any
     }
 ) {
-
+console.log(params)
     params.pageIndex = params.current;
     params.current = undefined;
     return request<{
