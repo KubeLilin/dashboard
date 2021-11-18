@@ -20,7 +20,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         dataIndex:'name',
         title:'节点名',
         render: (dom,row) =>{
-           return   <Link style={{color: 'blue', textDecorationLine: 'underline'}} to={'/resources/pods?node='+ row.name}>{dom}</Link> 
+           return   <Link style={{color: 'blue', textDecorationLine: 'underline'}} to={'/resources/pods?node='+ row.name +'&cid='+clusterId }>{dom}</Link> 
         }
     },
     {
@@ -65,22 +65,22 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
     },
     {
         dataIndex: '',
-        title:'未分配/总资源',
+        title:'可用/总资源',
         render:(dom,row)=> {
             return (
             <Space key={row.uid} direction="vertical" size={0}>
                <Paragraph>CPU: { (row.allocatable.cpu).toFixed(2)} / {row.capacity.cpu.toFixed(2)} 核</Paragraph>
                <Paragraph>内存: { (row.allocatable.memory / 1024 / 1024 / 1024 ).toFixed(2)} / {(row.capacity.memory / 1024 / 1024 / 1024).toFixed(2)} Gi</Paragraph>
-               <Paragraph>POD: { row.allocatable.pods  } / { row.capacity.pods } </Paragraph>
             </Space>
         )}
     },
 ]
 
+var clusterId:any
 
 const Nodes: React.FC = (props) => {
     
-    const clusterId = history.location.query?.cid
+    clusterId = history.location.query?.cid
 
     if (clusterId == undefined) {
         history.goBack()

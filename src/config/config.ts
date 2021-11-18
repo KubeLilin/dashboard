@@ -117,6 +117,11 @@ export default defineConfig({
           name: "nodes",
           path: "/resources/nodes",
           component:"./resources/nodes"
+        },
+        {
+          name: "pods",
+          path: "/resources/pods",
+          component:"./resources/pods"
         }
       ]
     },
