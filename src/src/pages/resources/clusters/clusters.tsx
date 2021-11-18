@@ -10,6 +10,7 @@ import { string } from 'yargs';
 import { result } from '@umijs/deps/compiled/lodash';
 import { ClusterItem } from './cluster_data';
 import { getClusterList } from './cluster_service';
+import { Link } from 'umi';
 
 const { TextArea } = Input;
 
@@ -23,7 +24,9 @@ const clusterColumns: ProColumns<ClusterItem>[] = [
         title: '集群名称',
         dataIndex: 'name',
         copyable: true,
-
+        render: (dom,row) =>{
+            return <Link to={'/resources/nodes?cid='+ row.id}>{dom}</Link> 
+        }
     },
     {
         title: '集群版本',
@@ -67,7 +70,8 @@ const Clusters: React.FC = () => {
             <ProTable<ClusterItem>
                 columns={clusterColumns}
                 actionRef={actionRef}
-                headerTitle='集群管理2'
+                headerTitle='集群列表'
+                rowKey="id"
                 request={ getClusterList}
                 toolBarRender={() => [
                     <Button key="button" icon={<PlusOutlined />} type='primary'

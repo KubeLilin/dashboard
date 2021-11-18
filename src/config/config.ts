@@ -112,6 +112,11 @@ export default defineConfig({
           name: "clusters",
           path: "/resources/clusters",
           component:"./resources/clusters/clusters"
+        },
+        {
+          name: "nodes",
+          path: "/resources/nodes",
+          component:"./resources/nodes"
         }
       ]
     },
