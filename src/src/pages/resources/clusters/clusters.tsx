@@ -1,14 +1,14 @@
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Upload, Input,Alert  } from 'antd';
+import { Button, Upload, Input, Alert } from 'antd';
 import React, { useState, useRef } from 'react';
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import ProForm, { ModalForm } from '@ant-design/pro-form';
 import { ClusterItem } from './cluster_data';
 import { getClusterList, importConfigFile, removeCluster } from './cluster_service';
+import { Link } from 'umi';
 
 const { TextArea } = Input;
-
 
 
 
@@ -28,6 +28,9 @@ const Clusters: React.FC = () => {
             title: '集群名称',
             dataIndex: 'name',
             copyable: true,
+            render: (dom, row) => {
+                return <Link to={'/resources/nodes?cid=' + row.id}>{dom}</Link>
+            }
         },
         {
             title: '集群版本',
@@ -37,7 +40,7 @@ const Clusters: React.FC = () => {
             title: '分配',
             dataIndex: 'distrbution',
             search: false
-            
+
         }, {
             title: '操作',
             valueType: 'option',
@@ -52,7 +55,7 @@ const Clusters: React.FC = () => {
                             <Alert message="" type="error" />
                         }
                     }}>
-                        移除
+                    移除
                 </a>
             ]
         }
@@ -70,7 +73,8 @@ const Clusters: React.FC = () => {
             <ProTable<ClusterItem>
                 columns={clusterColumns}
                 actionRef={actionRef}
-                headerTitle='集群管理'
+                headerTitle='集群列表'
+                rowKey="id"
                 request={getClusterList}
                 toolBarRender={() => [
                     <Button key="button" icon={<PlusOutlined />} type='primary'
