@@ -53,8 +53,8 @@ const Route: React.FC = () => {
             dataIndex: 'isRoot',
             render: (dom,entity) => {
                 if ( entity.parentId == 0) {
-                    return [  <TrademarkOutlined /> ]
-                } else { return [ <span> -- </span> ] }
+                    return [  <TrademarkOutlined key={entity.id} /> ]
+                } else { return [ <span key={entity.id}> -- </span> ] }
             }
         },
 
@@ -75,13 +75,11 @@ const Route: React.FC = () => {
                 let icon = entity.icon;
                 if (icon) {
                     let fixIconName = icon.slice(0, 1).toLocaleUpperCase() + icon.slice(1) +'Outlined';
-                    return [React.createElement(allIcons[fixIconName] || allIcons[icon])]
+                    return [React.createElement(allIcons[fixIconName] || allIcons[icon],{key:entity.id})]
                 } else {
                     return dom
                 }
             },
-
-            
         },
         {
             width: 90,

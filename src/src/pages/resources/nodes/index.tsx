@@ -1,5 +1,6 @@
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import { Typography, Button , Space } from 'antd'
+import { Typography, Button , Space ,Tooltip} from 'antd'
+import { HddTwoTone } from '@ant-design/icons'
 const { Text,Paragraph } = Typography;
 import { PageContainer } from '@ant-design/pro-layout';
 import React, { useState, useRef } from 'react';
@@ -10,10 +11,16 @@ import { history,Link } from 'umi';
 
 const nodeListColumns: ProColumns<NodeItem>[] = [
     {
+        width:8,
+        render:()=>{
+            return <HddTwoTone />
+        }
+    },
+    {
         dataIndex:'name',
         title:'节点名',
         render: (dom,row) =>{
-           return   <Link to={'/resources/pods?node='+ row.name}>{dom}</Link> 
+           return   <Link style={{color: 'blue', textDecorationLine: 'underline'}} to={'/resources/pods?node='+ row.name}>{dom}</Link> 
         }
     },
     {
@@ -21,7 +28,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         title:'状态',
         valueEnum: {
             'notready': {
-              text:  <span style={{color: 'red'}}>未知错误</span>,
+              text:  <span style={{color: 'red' }}>未知错误</span>,
               status: 'Default',
             },
             'ready': {
@@ -32,7 +39,10 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
     },
     {
         dataIndex: 'kubeletVersion',
-        title:'Kubernetes版本'
+        title:'Kubernetes版本',
+        render:(dom,row) => {
+            return <span style={{color: 'blue'}}>{dom}</span>
+        },
     },
     {
         dataIndex: 'containerRuntimeVersion',
@@ -43,19 +53,27 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         title:'IP地址',
         render:(dom,row) => {
             return (
-            <Space direction="vertical">
-            {
+            <Space key={row.uid} direction="vertical" size={0}>{
                 row.addresses.map(item=>{
-                   return <Paragraph copyable>{ item.type + ':  ' +  item.address}</Paragraph>
+                   return (
+                       <Tooltip key={row.uid} title={item.type + ':    ' + item.address}>
+                           <Paragraph copyable>{item.address}</Paragraph>
+                      </Tooltip> )
                 })
-            }
-            
-            </Space>)
+            }</Space>)
         }
     },
     {
         dataIndex: '',
-        title:'已分配/总资源'
+        title:'未分配/总资源',
+        render:(dom,row)=> {
+            return (
+            <Space key={row.uid} direction="vertical" size={0}>
+               <Paragraph>CPU: { (row.allocatable.cpu).toFixed(2)} / {row.capacity.cpu.toFixed(2)} 核</Paragraph>
+               <Paragraph>内存: { (row.allocatable.memory / 1024 / 1024 / 1024 ).toFixed(2)} / {(row.capacity.memory / 1024 / 1024 / 1024).toFixed(2)} Gi</Paragraph>
+               <Paragraph>POD: { row.allocatable.pods  } / { row.capacity.pods } </Paragraph>
+            </Space>
+        )}
     },
 ]
 
@@ -72,7 +90,7 @@ const Nodes: React.FC = (props) => {
     return(
         <PageContainer title="节点列表">
             <ProTable<NodeItem>
-                rowKey="uid"
+                rowKey={record=>record.uid}
                 columns={nodeListColumns}
                 headerTitle='节点列表'
                 search={false}
