@@ -4,17 +4,13 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { history,Link } from 'umi';
 import { PodItem } from './data';
 import { Typography, Button , Space ,Tooltip} from 'antd'
-import { getPodList }  from './service'
-
-
-
-
-const podColumns: ProColumns<PodItem>[] = [
-]
+import { getPodList,getNamespaceList }  from './service'
+import React, { useState, useRef } from 'react';
 
 
 
 const Pods: React.FC = (props) => {
+    const actionRef = useRef<ActionType>();
 
     var clusterId = history.location.query?.cid
     var node = history.location.query?.node
@@ -23,6 +19,70 @@ const Pods: React.FC = (props) => {
         history.goBack()
     }
 
+    const podColumns: ProColumns<PodItem>[] = [
+        {
+            title:'实例名称',
+            dataIndex:'name',
+            search:false,
+            render:(dom,_) => {
+                return <span style={{color:'blue'}}>{dom}</span>
+            }
+        },
+        {
+            title:'状态',
+            dataIndex:'status',
+            search:false,
+            render:(dom,row) => {
+                if (row.status == 'Running') {
+                    return <span style={{color:'green'}}>{dom}</span>
+                }
+                return <span style={{color:'red'}}>{dom}</span>
+            }
+        },
+        {
+            title:'实例IP',
+            dataIndex:'ip',
+            search: false,
+            render:(dom,_) => {
+                return <span style={{color:'blue'}}>{dom}</span>
+            }
+        },
+        {
+            title:'实例所在节点IP',
+            dataIndex:'hostIP',
+            search: false,
+        },
+        {
+            title:'命名空间',
+            dataIndex:'namespace',
+            valueType:'select',
+            request: async() =>{
+                var namespaces = [ { label:'全部',value:'' }  ]
+                var ns = await getNamespaceList(String(clusterId))
+                namespaces.push(...ns)
+                return namespaces
+            }
+        },
+        {
+            title:'重启次数',
+            dataIndex:'restarts',
+            search: false,
+            render:(dom,_) => {
+                return <span>{dom} 次</span>
+            }
+        },
+        {
+          title: '操作',
+          dataIndex: 'x',
+          valueType: 'option',
+          render: (_, record) => {
+            return [<a key="delete">销毁重建</a>,<a key="remote">远程登录</a>];
+          },
+        },
+    
+    ]
+
+
     console.log(clusterId)
     console.log(node)
 
@@ -30,14 +90,16 @@ const Pods: React.FC = (props) => {
         <PageContainer title="Pod 管理">
             <ProTable<PodItem>
                 rowKey={record=>record.name}
+                actionRef={actionRef}
                 columns={podColumns}
                 headerTitle='Pod 列表'
-                search={false}
+                //search={true}
                 request={async (params,sort) => {
                     params.cid = clusterId
                     params.node = node
-                    var nodesData = await getPodList(params,sort)
-                    return nodesData
+                    var podsData = await getPodList(params,sort)
+                    console.log(podsData)
+                    return podsData
                  }}
                  toolBarRender={() => [
                     <Button type="primary" key="primary" onClick={() => {

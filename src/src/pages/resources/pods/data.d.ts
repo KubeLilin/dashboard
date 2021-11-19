@@ -9,3 +9,8 @@ export type PodItem = {
     status: string,
     restarts:number
 }
+
+
+export type NamespaceItem = {
+    name : string
+}
