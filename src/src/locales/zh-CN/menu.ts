@@ -40,7 +40,7 @@ export default {
   'menu.exception.not-find': '404',
   'menu.exception.server-error': '500',
   'menu.exception.trigger': '触发错误',
-  'menu.account': '个人页',
+  'menu.account': '系统管理',
   'menu.account.center': '个人中心',
   'menu.account.settings': '个人设置',
   'menu.account.trigger': '触发报错',
@@ -49,4 +49,12 @@ export default {
   'menu.editor.flow': '流程编辑器',
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
+  'menu.user': '用户',
+  'menu.user.login': '登录',
+  'menu.user.register-result': '注册结果',
+  'menu.user.register': '注册',
+  'menu.account.manage': '用户管理',
+  'menu.account.role': '角色管理',
+  'menu.account.tenant': '租户管理',
+  
 };

@@ -1,14 +1,11 @@
 import {
-  AlipayCircleOutlined,
   LockOutlined,
   MobileOutlined,
-  TaobaoCircleOutlined,
   UserOutlined,
-  WeiboCircleOutlined,
 } from '@ant-design/icons';
-import { Alert, Space, message, Tabs } from 'antd';
+import { Alert, message, Tabs } from 'antd';
 import React, { useState } from 'react';
-import ProForm, { ProFormCaptcha, ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
+import ProForm, { ProFormCaptcha, ProFormText } from '@ant-design/pro-form';
 import { useIntl, Link, history, FormattedMessage, SelectLang, useModel } from 'umi';
 import Footer from '@/components/Footer';
 import { login } from '@/services/ant-design-pro/api';
@@ -52,7 +49,7 @@ const Login: React.FC = () => {
     try {
       // 登录
       const loginResult = await login({ ...values, type });
-      console.log(loginResult)
+
       if (loginResult?.data.status === 'ok') {
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
@@ -60,6 +57,11 @@ const Login: React.FC = () => {
         });
 
         await initialState?.setUserId?.(loginResult?.data.userId);
+
+        if (loginResult != undefined) {
+          setUserLoginState(loginResult?.data);
+          sessionStorage.setItem("loginStatus",loginResult.data.token)
+        }
 
         message.success(defaultLoginSuccessMessage);
         await fetchUserInfo(loginResult?.data.userId);
@@ -69,19 +71,20 @@ const Login: React.FC = () => {
         const { redirect } = query as { redirect: string };
         history.push(redirect || '/');
         return;
+
+      } else {
+        const defaultLoginFailureMessage = intl.formatMessage({
+            id: 'pages.login.failure',
+            defaultMessage: '登录失败，请重试！',
+          });
+
+        message.error(defaultLoginFailureMessage);
       }
       // 如果失败去设置用户错误信息
-      if (loginResult != undefined) {
-        setUserLoginState(loginResult?.data);
-      }
+  
 
     } catch (error) {
-      const defaultLoginFailureMessage = intl.formatMessage({
-        id: 'pages.login.failure',
-        defaultMessage: '登录失败，请重试！',
-      });
-
-      message.error(defaultLoginFailureMessage);
+     
     }
     setSubmitting(false);
   };
@@ -127,7 +130,7 @@ const Login: React.FC = () => {
               },
             }}
             onFinish={async (values) => {
-              console.log(values)
+              //console.log(values)
               await handleSubmit(values as API.LoginParams);
             }}
           >
@@ -286,9 +289,7 @@ const Login: React.FC = () => {
                 marginBottom: 24,
               }}
             >
-              <ProFormCheckbox noStyle name="autoLogin">
-                <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录" />
-              </ProFormCheckbox>
+              <a href="/user/register">注册</a>
               <a
                 style={{
                   float: 'right',

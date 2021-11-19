@@ -13,7 +13,7 @@ export default defineConfig({
   },
   layout: {
     // https://umijs.org/zh-CN/plugins/plugin-layout
-    locale: true,
+    locale: false,
     siderWidth: 208,
     ...defaultSettings,
   },
@@ -23,7 +23,7 @@ export default defineConfig({
     default: 'zh-CN',
     antd: true,
     // default true, when it is true, will use `navigator.language` overwrite default
-    baseNavigator: true,
+    baseNavigator: false,
   },
   dynamicImport: {
     loading: '@ant-design/pro-layout/es/PageLoading',
@@ -33,6 +33,27 @@ export default defineConfig({
   },
   // umi routes: https://umijs.org/docs/routing
   routes: [
+    {
+      path: '/test',
+      layout: false,
+    },
+    {
+      path: '/dashboard',
+      icon: 'dashboard',
+      routes: [
+        {
+          name: 'analysis',
+          icon: 'smile',
+          path: '/dashboard/analysis',
+          component: './dashboard/analysis',
+        },
+        {
+          name: 'monitor',
+          path: '/dashboard/monitor',
+          component: './dashboard/monitor',
+        }
+      ]
+    },
     {
       path: '/user',
       layout: false,
@@ -48,188 +69,16 @@ export default defineConfig({
           redirect: '/user/login',
         },
         {
-          name: 'register-result',
-          icon: 'smile',
-          path: '/user/register-result',
-          component: './user/register-result',
-        },
-        {
           name: 'register',
           icon: 'smile',
           path: '/user/register',
           component: './user/register',
         },
-        {
-          component: '404',
-        },
       ],
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      icon: 'dashboard',
-      routes: [
-        {
-          path: '/dashboard',
-          redirect: '/dashboard/analysis',
-        },
-        {
-          name: 'analysis',
-          icon: 'smile',
-          path: '/dashboard/analysis',
-          component: './dashboard/analysis',
-        },
-        {
-          name: 'monitor',
-          icon: 'smile',
-          path: '/dashboard/monitor',
-          component: './dashboard/monitor',
-        },
-        {
-          name: 'workplace',
-          icon: 'smile',
-          path: '/dashboard/workplace',
-          component: './dashboard/workplace',
-        },
-      ],
-    },
-    {
-      path: '/form',
-      icon: 'form',
-      name: 'form',
-      routes: [
-        {
-          path: '/form',
-          redirect: '/form/basic-form',
-        },
-        {
-          name: 'basic-form',
-          icon: 'smile',
-          path: '/form/basic-form',
-          component: './form/basic-form',
-        },
-        {
-          name: 'step-form',
-          icon: 'smile',
-          path: '/form/step-form',
-          component: './form/step-form',
-        },
-        {
-          name: 'advanced-form',
-          icon: 'smile',
-          path: '/form/advanced-form',
-          component: './form/advanced-form',
-        },
-      ],
-    },
-    {
-      path: '/list',
-      icon: 'table',
-      name: 'list',
-      routes: [
-        {
-          path: '/list/search',
-          name: 'search-list',
-          component: './list/search',
-          routes: [
-            {
-              path: '/list/search',
-              redirect: '/list/search/articles',
-            },
-            {
-              name: 'articles',
-              icon: 'smile',
-              path: '/list/search/articles',
-              component: './list/search/articles',
-            },
-            {
-              name: 'projects',
-              icon: 'smile',
-              path: '/list/search/projects',
-              component: './list/search/projects',
-            },
-            {
-              name: 'applications',
-              icon: 'smile',
-              path: '/list/search/applications',
-              component: './list/search/applications',
-            },
-          ],
-        },
-        {
-          path: '/list',
-          redirect: '/list/table-list',
-        },
-        {
-          name: 'table-list',
-          icon: 'smile',
-          path: '/list/table-list',
-          component: './list/table-list',
-        },
-        {
-          name: 'basic-list',
-          icon: 'smile',
-          path: '/list/basic-list',
-          component: './list/basic-list',
-        },
-        {
-          name: 'card-list',
-          icon: 'smile',
-          path: '/list/card-list',
-          component: './list/card-list',
-        },
-      ],
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      icon: 'profile',
-      routes: [
-        {
-          path: '/profile',
-          redirect: '/profile/basic',
-        },
-        {
-          name: 'basic',
-          icon: 'smile',
-          path: '/profile/basic',
-          component: './profile/basic',
-        },
-        {
-          name: 'advanced',
-          icon: 'smile',
-          path: '/profile/advanced',
-          component: './profile/advanced',
-        },
-      ],
-    },
-    {
-      name: 'result',
-      icon: 'CheckCircleOutlined',
-      path: '/result',
-      routes: [
-        {
-          path: '/result',
-          redirect: '/result/success',
-        },
-        {
-          name: 'success',
-          icon: 'smile',
-          path: '/result/success',
-          component: './result/success',
-        },
-        {
-          name: 'fail',
-          icon: 'smile',
-          path: '/result/fail',
-          component: './result/fail',
-        },
-      ],
-    },
-    {
-      name: 'exception',
-      icon: 'warning',
       path: '/exception',
+      layout: false,
       routes: [
         {
           path: '/exception',
@@ -256,56 +105,51 @@ export default defineConfig({
       ],
     },
     {
+      name: 'resources',
+      path: '/resources',
+      routes: [
+        {
+          name: "clusters",
+          path: "/resources/clusters",
+          component:"./resources/clusters/clusters"
+        },
+        {
+          name: "nodes",
+          path: "/resources/nodes",
+          component:"./resources/nodes"
+        },
+        {
+          name: "pods",
+          path: "/resources/pods",
+          component:"./resources/pods"
+        }
+      ]
+    },
+    {
       name: 'account',
       icon: 'user',
       path: '/account',
       routes: [
         {
-          path: '/account',
-          redirect: '/account/center',
+          "component": "./account/manage",
+          "name": "manage",
+          "path": "/account/manage"
         },
         {
-          name: 'center',
-          icon: 'smile',
-          path: '/account/center',
-          component: './account/center',
+          "component": "./account/route",
+          "name": "route",
+          "path": "/account/route"
         },
         {
-          name: 'settings',
-          icon: 'smile',
-          path: '/account/settings',
-          component: './account/settings',
-        },
-      ],
-    },
-    {
-      name: 'editor',
-      icon: 'highlight',
-      path: '/editor',
-      hideInMenu: true,
-      routes: [
-        {
-          path: '/editor',
-          redirect: '/editor/flow',
+          "component": "./account/role",
+          "name": "role",
+          "path": "/account/role"
         },
         {
-          name: 'flow',
-          icon: 'smile',
-          path: '/editor/flow',
-          component: './editor/flow',
-        },
-        {
-          name: 'mind',
-          icon: 'smile',
-          path: '/editor/mind',
-          component: './editor/mind',
-        },
-        {
-          name: 'koni',
-          icon: 'smile',
-          path: '/editor/koni',
-          component: './editor/koni',
-        },
+          "component": "./account/tenant",
+          "name": "tenant",
+          "path": "/account/tenant"
+        }
       ],
     },
     {

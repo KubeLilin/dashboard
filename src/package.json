@@ -49,6 +49,7 @@
   "dependencies": {
     "@ant-design/charts": "^0.9.4",
     "@ant-design/icons": "^4.5.0",
+    "@ant-design/pro-card": "^1.14.21",
     "@ant-design/pro-descriptions": "^1.6.8",
     "@ant-design/pro-form": "^1.18.3",
     "@ant-design/pro-layout": "^6.15.3",
@@ -75,6 +76,7 @@
     "react-dom": "^17.0.0",
     "react-fittext": "^1.0.0",
     "react-helmet-async": "^1.0.4",
+    "react-json-view": "^1.21.3",
     "react-router": "^4.3.1",
     "umi": "^3.5.0",
     "umi-serve": "^1.9.10"
