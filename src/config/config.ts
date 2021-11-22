@@ -126,6 +126,17 @@ export default defineConfig({
       ]
     },
     {
+      name:'applications',
+      path:'/applications',
+      routes:[
+        {
+          name: "apps",
+          path: "/applications/apps",
+          component:"./applications/apps/apps"
+        },
+      ]
+    },
+    {
       name: 'account',
       icon: 'user',
       path: '/account',
