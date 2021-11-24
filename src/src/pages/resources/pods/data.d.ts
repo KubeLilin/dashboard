@@ -5,7 +5,13 @@ export type PodItem = {
     hostIP:string,
     podCount:number,
     podReadyCount:number,
-    age:number,
+    startTime :string,
+    age: Date,
     status: string,
     restarts:number
+}
+
+
+export type NamespaceItem = {
+    name : string
 }

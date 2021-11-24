@@ -1,7 +1,19 @@
 import success from '@/pages/result/success';
 import { ApiResponse } from '@/services/public/service';
 import { request } from 'umi';
-import { PodItem } from './data';
+import { NamespaceItem, PodItem } from './data';
+
+export const getNamespaceList = async(cid?:string)=>{
+    const params = {
+        cid:cid
+    }
+    let resData=await request< ApiResponse<NamespaceItem[]>>("/v1/cluster/namespaces",{
+        method:'GET',
+        params:params
+    })
+
+    return resData.data.map(item =>   {  return  {label: item.name, value: item.name } } )
+}
 
 
 export const getPodList = async (
@@ -18,7 +30,10 @@ export const getPodList = async (
             method:'GET',
             params:params
         })
-        
+        console.log(resData)
+        if (resData.data == null){
+            resData.data = []
+        }  
         return {
             data: resData.data,
             success: resData.success,
