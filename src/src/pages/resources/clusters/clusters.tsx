@@ -106,7 +106,7 @@ const Clusters: React.FC = () => {
                             configFileHandel(fileInfo.file.originFileObj)
                         }}
                     >
-                        <Button icon={<UploadOutlined />}>选择集群配置文件</Button>
+                        <Button icon={<UploadOutlined />}>选择集群YAML配置文件</Button>
                     </Upload>
                 </ProForm.Item>
                 <ProForm.Item>
