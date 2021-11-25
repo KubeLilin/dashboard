@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ApplicationItem, ApplicationModel } from './apps_data';
-import { PageContainer } from '_@ant-design_pro-layout@6.29.1@@ant-design/pro-layout';
+import { PageContainer } from '@ant-design/pro-layout';
 import ProForm, {
     DrawerForm,
     ProFormSelect,
@@ -12,11 +12,7 @@ import ProForm, {
 import { Input, Button, Tag, Space, Menu, Form } from 'antd';
 import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { getAppLanguage, getAppLevel, createApp, getApps, updateApp } from './apps_service';
-import { getLanguage } from '_@ant-design_pro-layout@6.29.1@@ant-design/pro-layout/lib/locales';
-
-
-
-
+import { history,Link } from 'umi';
 
 const Apps: React.FC = () => {
     const actionRef = useRef<ActionType>();
@@ -28,7 +24,6 @@ const Apps: React.FC = () => {
         {
             title: 'id',
             dataIndex: 'id',
-            valueType: 'indexBorder',
             width: 48,
             hideInForm: true,
         },
@@ -36,6 +31,9 @@ const Apps: React.FC = () => {
             title: '应用名称',
             dataIndex: 'name',
             copyable: true,
+            render: (dom,row) =>{
+                return   <Link style={{color: 'blue', textDecorationLine: 'underline'}} to={'/applications/info?appid='+ row.id }>{dom}</Link> 
+             }
         },
         {
             title: '租户id',
@@ -50,7 +48,10 @@ const Apps: React.FC = () => {
         }, {
             title: "Git地址",
             dataIndex: 'git',
-            hideInSearch: true
+            hideInSearch: true,
+            render:(dom,row)=>{
+                return <a href={row.git} target="_blank">{dom}</a>
+            }
         }, {
             title: '级别',
             dataIndex: 'level',
@@ -80,12 +81,13 @@ const Apps: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
+                <Link to={'/applications/info?appid='+ record.id }>进入应用</Link>,
                 <a onClick={() => {
                     formVisibleHandler(true)
                     console.log(record)
                     appForm.setFieldsValue(record)
                     editHandler(true)
-                }}>查看编辑</a>,
+                }}>编辑</a>,
 
             ]
         }
@@ -97,6 +99,7 @@ const Apps: React.FC = () => {
             <ProTable<ApplicationItem>
                 columns={columns}
                 actionRef={actionRef}
+                key="id"
                 headerTitle="应用列表"
                 toolBarRender={() => [
                     <Button key='button' icon={<PlusOutlined />} onClick={() => { formVisibleHandler(true); editHandler(false) }}>创建应用</Button>
@@ -108,7 +111,6 @@ const Apps: React.FC = () => {
                 title="创建应用"
                 visible={formVisible}
                 onVisibleChange={formVisibleHandler}
-                formRef={formRef}
                 onFinish={async (x) => {
                     let res
                     if (edit) {
