@@ -26,6 +26,7 @@ const Apps: React.FC = () => {
             dataIndex: 'id',
             width: 48,
             hideInForm: true,
+            hideInSearch: true
         },
         {
             title: '应用名称',
