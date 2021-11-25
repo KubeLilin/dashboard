@@ -12,7 +12,7 @@ import ProForm, {
 import { Input, Button, Tag, Space, Menu, Form } from 'antd';
 import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { getAppLanguage, getAppLevel, createApp, getApps, updateApp } from './apps_service';
-import { getLanguage } from '_@ant-design_pro-layout@6.29.1@@ant-design/pro-layout/lib/locales';
+
 
 
 
