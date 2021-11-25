@@ -33,7 +33,7 @@ const Apps: React.FC = () => {
             dataIndex: 'name',
             copyable: true,
             render: (dom,row) =>{
-                return   <Link style={{color: 'blue', textDecorationLine: 'underline'}} to={'/applications/info?appid='+ row.id }>{dom}</Link> 
+                return   <Link id={'linkapp' +row.id} style={{color: 'blue', textDecorationLine: 'underline'}} to={'/applications/info?appid='+ row.id }>{dom}</Link> 
              }
         },
         {
@@ -51,7 +51,7 @@ const Apps: React.FC = () => {
             dataIndex: 'git',
             hideInSearch: true,
             render:(dom,row)=>{
-                return <a href={row.git} target="_blank">{dom}</a>
+                return <a id={'gitlink'+row.id} href={row.git} target="_blank">{dom}</a>
             }
         }, {
             title: '级别',
@@ -82,8 +82,8 @@ const Apps: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
-                <Link to={'/applications/info?appid='+ record.id }>进入应用</Link>,
-                <a onClick={() => {
+                <Link key={"link-id"+record.id} to={'/applications/info?appid='+ record.id }>进入应用</Link>,
+                <a id={"edit"+record.id} onClick={() => {
                     formVisibleHandler(true)
                     console.log(record)
                     appForm.setFieldsValue(record)
