@@ -33,7 +33,7 @@ const Apps: React.FC = () => {
             dataIndex: 'name',
             copyable: true,
             render: (dom,row) =>{
-                return   <Link id={'linkapp' +row.id} style={{color: 'blue', textDecorationLine: 'underline'}} to={'/applications/info?appid='+ row.id }>{dom}</Link> 
+                return   <Link key={'linkapp' +row.id} style={{color: 'blue', textDecorationLine: 'underline'}} to={'/applications/info?id='+ row.id +'&name=' + row.name }>{dom}</Link> 
              }
         },
         {
@@ -51,7 +51,7 @@ const Apps: React.FC = () => {
             dataIndex: 'git',
             hideInSearch: true,
             render:(dom,row)=>{
-                return <a id={'gitlink'+row.id} href={row.git} target="_blank">{dom}</a>
+                return <a key={'gitlink'+row.id} href={row.git} target="_blank">{dom}</a>
             }
         }, {
             title: '级别',
@@ -63,6 +63,10 @@ const Apps: React.FC = () => {
             title: '级别',
             dataIndex: 'levelName',
             hideInSearch: true
+        },{
+            title: '语言',
+            dataIndex: 'languageName',
+            hideInSearch: true
         },
         {
             title: "备注",
@@ -73,7 +77,6 @@ const Apps: React.FC = () => {
             title: '状态',
             dataIndex: 'status',
             valueType: 'select',
-            hideInSearch: true,
             valueEnum: {
                 '0': { text: '停用' },
                 '1': { text: '启用' }
@@ -82,14 +85,13 @@ const Apps: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
-                <Link key={"link-id"+record.id} to={'/applications/info?appid='+ record.id }>进入应用</Link>,
-                <a id={"edit"+record.id} onClick={() => {
+                <Link key={"link-id"+record.id} to={'/applications/info?appid='+ record.id +'&name=' + record.name  }>进入应用</Link>,
+                <a key={"edit"+record.id} onClick={() => {
                     formVisibleHandler(true)
                     console.log(record)
                     appForm.setFieldsValue(record)
                     editHandler(true)
                 }}>编辑</a>,
-
             ]
         }
     ]
@@ -99,11 +101,17 @@ const Apps: React.FC = () => {
         <PageContainer>
             <ProTable<ApplicationItem>
                 columns={columns}
+                rowKey="id"
                 actionRef={actionRef}
-                key="id"
                 headerTitle="应用列表"
                 toolBarRender={() => [
-                    <Button key='button' icon={<PlusOutlined />} onClick={() => { formVisibleHandler(true); editHandler(false) }}>创建应用</Button>
+                    <Button key='button' icon={<PlusOutlined />} 
+                    onClick={() => { 
+                        appForm.resetFields()
+                        formVisibleHandler(true); 
+                        editHandler(false) 
+                        appForm.setFieldsValue({ status: 1 })
+                    }}>创建应用</Button>
                 ]}
                 request={getApps}
             ></ProTable>
@@ -123,6 +131,7 @@ const Apps: React.FC = () => {
                     if (res.success) {
                         actionRef.current?.reload()
                     }
+                    appForm.resetFields()
                     return res.success
                 }}
                 drawerProps={{
@@ -154,6 +163,14 @@ const Apps: React.FC = () => {
                 </ProForm.Item>
                 <ProForm.Item name='remark' label='备注'>
                     <ProFormTextArea></ProFormTextArea>
+                </ProForm.Item>
+                <ProForm.Item name='status' label="状态" >
+                    <ProFormSelect initialValue={1}
+                        request={async()=>[
+                            {label:'启用',value: 1},
+                            {label:'停用',value: 0}
+                        ]}
+                    ></ProFormSelect>
                 </ProForm.Item>
             </DrawerForm>
         </PageContainer>
