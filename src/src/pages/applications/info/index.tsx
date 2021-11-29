@@ -12,8 +12,67 @@ import ProForm, {
 import { history,Link } from 'umi';
 import { Input, Button, Tag, Space, Menu, Form } from 'antd';
 import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { DeploymentItem } from './data'
+import { getDeploymentList } from './deployment.service'
+
 const { TabPane } = Tabs;
 
+const columns: ProColumns<DeploymentItem>[] = [
+    {
+        title: 'ID',
+        dataIndex: 'id',
+        width: 48,
+        hideInForm: true,
+        hideInSearch: true
+    },
+    {
+        title: '环境名称',
+        dataIndex: 'nickname',
+    },
+    {
+        title: '集群',
+        dataIndex: 'clusterName',
+        hideInForm: true,
+        hideInSearch: true
+    },
+    {
+        title: '命名空间',
+        dataIndex: 'namespace',
+        hideInForm: true,
+        hideInSearch: true
+    },
+    {
+        title: '部署状态',
+        dataIndex: 'status',
+        hideInForm: true,
+        hideInSearch: true
+    },
+    {
+        title: '镜像(last)',
+        dataIndex: 'lastImage',
+        hideInForm: true,
+        hideInSearch: true
+    },
+    {
+        title: '运行中/预期实例数',
+        dataIndex: 'runningNumber',
+        hideInForm: true,
+        hideInSearch: true
+    },
+    {
+        title: '服务名/IP',
+        dataIndex: 'serviceName',
+        hideInForm: true,
+        hideInSearch: true
+    },
+    {
+        title: '操作',
+        valueType: 'option',
+        render: (dom, record, _, action) => [
+            <Button key="depoly" type="primary" danger>部署应用</Button>
+        ]
+    },
+]
 
 const AppInfo: React.FC = () => {
     var appId = history.location.query?.id
@@ -24,17 +83,21 @@ const AppInfo: React.FC = () => {
             <Tabs defaultActiveKey="1" size="large"  >
                 <TabPane tab="部署环境" key="1">
                     <ProTable
-                    //columns={columns}
+                    columns={columns}
                     rowKey="id"
                     //actionRef={actionRef}
                     headerTitle="部署列表"
                     toolBarRender={() => [
-                        <Button key='button' icon={<PlusOutlined />} 
+                        <Button key='button' type="primary" icon={<PlusOutlined />} 
                         onClick={() => { 
-                     
+                            
                         }}>创建部署环境</Button>
                     ]}
-                    //request={getApps}
+                    request={async (params,sort) => {
+                        params.appid = appId
+                        console.log(params)
+                        return await getDeploymentList(params,sort)
+                     }}
                     ></ProTable>
                 </TabPane>
                 <TabPane tab="基本信息" key="2">
