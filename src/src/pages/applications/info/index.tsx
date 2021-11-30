@@ -1,5 +1,7 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import { Tabs } from 'antd';
+import React, { useEffect } from 'react';
+
 import styles from './index.less';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm, {
@@ -14,7 +16,6 @@ import { Input, Button, Tag, Space, Menu, Form  } from 'antd';
 import { PlusOutlined, EllipsisOutlined , LoadingOutlined } from '@ant-design/icons';
 import {useState,useRef} from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
-
 import { DeploymentItem } from './data'
 import { getDeploymentList , getPodList } from './deployment.service'
 
@@ -35,6 +36,7 @@ const AppInfo: React.FC = () => {
         {
             title: '环境名称',
             dataIndex: 'nickname',
+            width:250,
             render:(_,row) =>{
                 return <span>{row.nickname}/{row.name}</span>
             }
@@ -42,18 +44,21 @@ const AppInfo: React.FC = () => {
         {
             title: '集群',
             dataIndex: 'clusterName',
+            width:180,
             hideInForm: true,
             hideInSearch: true
         },
         {
             title: '命名空间',
             dataIndex: 'namespace',
+            width:180,
             hideInForm: true,
             hideInSearch: true
         },
         {
             title: '部署状态',
             dataIndex: 'status',
+            width:110,
             hideInForm: true,
             hideInSearch: true,
             render:(_,row)=>{
@@ -63,6 +68,7 @@ const AppInfo: React.FC = () => {
         {
             title: '镜像(last)',
             dataIndex: 'lastImage',
+            width:550,
             hideInForm: true,
             hideInSearch: true,
             render:(_,row)=>{
@@ -72,6 +78,7 @@ const AppInfo: React.FC = () => {
         {
             title: '运行中/预期实例数',
             dataIndex: 'runningNumber',
+            width:180,
             hideInForm: true,
             hideInSearch: true,
             render:(_,row) => {
@@ -85,7 +92,7 @@ const AppInfo: React.FC = () => {
             hideInForm: true,
             hideInSearch: true,
             render:(dom,row) => {
-                return <span><LoadingOutlined /> {dom} </span>
+                return <span>{row.serviceIP !='0.0.0.0'?row.serviceIP:<span><LoadingOutlined /> / {dom}</span> }</span>
             }
         },
         {
@@ -97,11 +104,45 @@ const AppInfo: React.FC = () => {
                     setTableListDataSource(tableListDataSource)
                 }}>部署应用</Button>
             ]
-        },
-    ]
+        },]
+
+        // const expandedRowRender = () => {
+        //     const data = [];
+        //     for (let i = 0; i < 3; i += 1) {
+        //       data.push({
+        //         key: i,
+        //         date: '2014-12-24 23:12:00',
+        //         name: 'This is production name',
+        //         upgradeNum: 'Upgraded: 56',
+        //       });
+        //     }
+        //     return (
+        //       <ProTable
+        //         columns={[
+        //           { title: 'Date', dataIndex: 'date', key: 'date' },
+        //           { title: 'Name', dataIndex: 'name', key: 'name' },
+          
+        //           { title: 'Upgrade Status', dataIndex: 'upgradeNum', key: 'upgradeNum' },
+        //           {
+        //             title: 'Action',
+        //             dataIndex: 'operation',
+        //             key: 'operation',
+        //             valueType: 'option',
+        //             render: () => [<a key="Pause">Pause</a>, <a key="Stop">Stop</a>],
+        //           },
+        //         ]}
+        //         headerTitle={false}
+        //         search={false}
+        //         options={false}
+        //         dataSource={data}
+        //         pagination={false}
+        //       />
+        //     );
+        //   };
 
     const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
+
     return (
         <PageContainer title={ '应用: ' + appName } >
             <DevlopmentFormentForm visibleFunc={[stepFormVisible,setStepFormVisible]}/>
@@ -119,19 +160,31 @@ const AppInfo: React.FC = () => {
                             setStepFormVisible(true)
                         }}>创建部署环境</Button>
                     ]}
+                    expandedRowRender={  }
                     request={async (params,sort) => {
                         params.appid = appId
                         console.log(params)
                         var datasource = await getDeploymentList(params,sort)
 
-
+                        var asyncAll = []
                         for(var index=0 ; index <datasource.data.length ; index++ ) {
                             var item = datasource.data[index]
-                            getPodList(item.name).then((data)=>{
-                                datasource.data[index].running = data.length
-                                setTableListDataSource(datasource.data)
-                            })
+                            asyncAll.push(getPodList(item.name,2,index))
                         }
+                        Promise.all(asyncAll).then(asyncPodList=>{
+                            const list = [...datasource.data]
+                            asyncPodList.forEach((podSet)=>{
+                                if (podSet.data){
+                                    list[podSet.index].lastImage = podSet.data.containers[0].image
+                                    list[podSet.index].running = podSet.data.containers.length
+                                    list[podSet.index].serviceIP = podSet.data.ip
+                                }
+                            })
+                            setTimeout(()=>{
+                                setTableListDataSource(list)
+                            },200)
+                           
+                        })
 
                         setTableListDataSource(datasource.data)
                         return datasource

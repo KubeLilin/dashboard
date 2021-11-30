@@ -28,14 +28,14 @@ export const getDeploymentList = async (
 
 
 
-export const getPodList = async (appName:string , clusterId:number)=> {
+export const getPodList = async (appName:string , clusterId:number , index :number)=> {
         let resData=await request< ApiResponse<PodItem[]>>("/v1/cluster/pods",{
             method:'GET',
             params:{ app: appName , cid: clusterId }
         })
         console.log(resData)
         if (resData.data == null){
-            resData.data = []
+            return { index:index, data: null }
         }  
-        return resData.data
+        return { index:index, data: resData.data[0] }
     }
