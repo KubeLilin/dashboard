@@ -10,15 +10,14 @@ import ProForm, {
     ProFormText
 } from '@ant-design/pro-form';
 import { history,Link  } from 'umi';
-import { Input, Button, Tag, Space, Menu, Form } from 'antd';
-import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { DeploymentItem } from './data'
-import { getDeploymentList } from './deployment.service'
+import { Input, Button, Tag, Space, Menu, Form  } from 'antd';
+import { PlusOutlined, EllipsisOutlined , LoadingOutlined } from '@ant-design/icons';
 import {useState,useRef} from 'react'
 
+import { DeploymentItem } from './data'
+import { getDeploymentList , getPodList } from './deployment.service'
 
 const { TabPane } = Tabs;
-
 const AppInfo: React.FC = () => {
     var appId = history.location.query?.id
     var appName = history.location.query?.name
@@ -55,25 +54,38 @@ const AppInfo: React.FC = () => {
             title: '部署状态',
             dataIndex: 'status',
             hideInForm: true,
-            hideInSearch: true
+            hideInSearch: true,
+            render:(_,row)=>{
+                return <span>  {row.running >0?<Tag color='blue'>已部署</Tag>:<Tag color='red'>未部署</Tag> } </span>
+            }
         },
         {
             title: '镜像(last)',
             dataIndex: 'lastImage',
             hideInForm: true,
-            hideInSearch: true
+            hideInSearch: true,
+            render:(_,row)=>{
+                return <span>  {row.lastImage!=''?row.lastImage:<LoadingOutlined /> } </span>
+            }
         },
         {
             title: '运行中/预期实例数',
             dataIndex: 'runningNumber',
             hideInForm: true,
-            hideInSearch: true
+            hideInSearch: true,
+            render:(_,row) => {
+                return <span>  {row.running >0?row.running:<LoadingOutlined /> }
+                        / {row.expected}</span>
+            }
         },
         {
             title: '服务名/IP',
-            dataIndex: 'serviceName',
+            dataIndex: 'serviceIP',
             hideInForm: true,
-            hideInSearch: true
+            hideInSearch: true,
+            render:(dom,row) => {
+                return <span><LoadingOutlined /> {dom} </span>
+            }
         },
         {
             title: '操作',
@@ -109,6 +121,16 @@ const AppInfo: React.FC = () => {
                         params.appid = appId
                         console.log(params)
                         var datasource = await getDeploymentList(params,sort)
+
+
+                        for(var index=0 ; index <datasource.data.length ; index++ ) {
+                            var item = datasource.data[index]
+                            getPodList(item.name).then((data)=>{
+                                datasource.data[index].running = data.length
+                                setTableListDataSource(datasource.data)
+                            })
+                        }
+
                         setTableListDataSource(datasource.data)
                         return datasource
                      }}
