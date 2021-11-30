@@ -160,7 +160,7 @@ const AppInfo: React.FC = () => {
                             setStepFormVisible(true)
                         }}>创建部署环境</Button>
                     ]}
-                    expandedRowRender={  }
+                    //expandedRowRender={  }
                     request={async (params,sort) => {
                         params.appid = appId
                         console.log(params)
