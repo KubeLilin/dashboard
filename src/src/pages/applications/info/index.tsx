@@ -9,83 +9,95 @@ import ProForm, {
     ProFormInstance,
     ProFormText
 } from '@ant-design/pro-form';
-import { history,Link } from 'umi';
+import { history,Link  } from 'umi';
 import { Input, Button, Tag, Space, Menu, Form } from 'antd';
 import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { DeploymentItem } from './data'
 import { getDeploymentList } from './deployment.service'
+import {useState,useRef} from 'react'
+
 
 const { TabPane } = Tabs;
-
-const columns: ProColumns<DeploymentItem>[] = [
-    {
-        title: 'ID',
-        dataIndex: 'id',
-        width: 48,
-        hideInForm: true,
-        hideInSearch: true
-    },
-    {
-        title: '环境名称',
-        dataIndex: 'nickname',
-    },
-    {
-        title: '集群',
-        dataIndex: 'clusterName',
-        hideInForm: true,
-        hideInSearch: true
-    },
-    {
-        title: '命名空间',
-        dataIndex: 'namespace',
-        hideInForm: true,
-        hideInSearch: true
-    },
-    {
-        title: '部署状态',
-        dataIndex: 'status',
-        hideInForm: true,
-        hideInSearch: true
-    },
-    {
-        title: '镜像(last)',
-        dataIndex: 'lastImage',
-        hideInForm: true,
-        hideInSearch: true
-    },
-    {
-        title: '运行中/预期实例数',
-        dataIndex: 'runningNumber',
-        hideInForm: true,
-        hideInSearch: true
-    },
-    {
-        title: '服务名/IP',
-        dataIndex: 'serviceName',
-        hideInForm: true,
-        hideInSearch: true
-    },
-    {
-        title: '操作',
-        valueType: 'option',
-        render: (dom, record, _, action) => [
-            <Button key="depoly" type="primary" danger>部署应用</Button>
-        ]
-    },
-]
 
 const AppInfo: React.FC = () => {
     var appId = history.location.query?.id
     var appName = history.location.query?.name
+    const actionRef = useRef<ActionType>();
+
+    const columns: ProColumns<DeploymentItem>[] = [
+        {
+            title: 'ID',
+            dataIndex: 'id',
+            width: 48,
+            hideInForm: true,
+            hideInSearch: true
+        },
+        {
+            title: '环境名称',
+            dataIndex: 'nickname',
+            render:(_,row) =>{
+                return <span>{row.nickname}/{row.name}</span>
+            }
+        },
+        {
+            title: '集群',
+            dataIndex: 'clusterName',
+            hideInForm: true,
+            hideInSearch: true
+        },
+        {
+            title: '命名空间',
+            dataIndex: 'namespace',
+            hideInForm: true,
+            hideInSearch: true
+        },
+        {
+            title: '部署状态',
+            dataIndex: 'status',
+            hideInForm: true,
+            hideInSearch: true
+        },
+        {
+            title: '镜像(last)',
+            dataIndex: 'lastImage',
+            hideInForm: true,
+            hideInSearch: true
+        },
+        {
+            title: '运行中/预期实例数',
+            dataIndex: 'runningNumber',
+            hideInForm: true,
+            hideInSearch: true
+        },
+        {
+            title: '服务名/IP',
+            dataIndex: 'serviceName',
+            hideInForm: true,
+            hideInSearch: true
+        },
+        {
+            title: '操作',
+            valueType: 'option',
+            render: (dom, record, _, action) => [
+                <Button key="depoly" type="primary" danger onClick={()=>{
+                    tableListDataSource[0].namespace = 'n'+Math.random()
+                    setTableListDataSource(tableListDataSource)
+                }}>部署应用</Button>
+            ]
+        },
+    ]
+
+    const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
 
     return (
         <PageContainer title={ '应用: ' + appName } >
             <Tabs defaultActiveKey="1" size="large"  >
                 <TabPane tab="部署环境" key="1">
-                    <ProTable
+                    <ProTable<DeploymentItem>
                     columns={columns}
                     rowKey="id"
-                    //actionRef={actionRef}
+                    dataSource={tableListDataSource}
+                    actionRef={actionRef}
                     headerTitle="部署列表"
                     toolBarRender={() => [
                         <Button key='button' type="primary" icon={<PlusOutlined />} 
@@ -96,7 +108,9 @@ const AppInfo: React.FC = () => {
                     request={async (params,sort) => {
                         params.appid = appId
                         console.log(params)
-                        return await getDeploymentList(params,sort)
+                        var datasource = await getDeploymentList(params,sort)
+                        setTableListDataSource(datasource.data)
+                        return datasource
                      }}
                     ></ProTable>
                 </TabPane>
