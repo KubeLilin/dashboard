@@ -13,6 +13,7 @@ import { history,Link  } from 'umi';
 import { Input, Button, Tag, Space, Menu, Form  } from 'antd';
 import { PlusOutlined, EllipsisOutlined , LoadingOutlined } from '@ant-design/icons';
 import {useState,useRef} from 'react'
+import DevlopmentFormentForm from '../devlopmentForm';
 
 import { DeploymentItem } from './data'
 import { getDeploymentList , getPodList } from './deployment.service'
@@ -100,9 +101,10 @@ const AppInfo: React.FC = () => {
     ]
 
     const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
-
+    const [stepFormVisible, setStepFormVisible] = useState(false);
     return (
         <PageContainer title={ '应用: ' + appName } >
+            <DevlopmentFormentForm visibleFunc={[stepFormVisible,setStepFormVisible]}/>
             <Tabs defaultActiveKey="1" size="large"  >
                 <TabPane tab="部署环境" key="1">
                     <ProTable<DeploymentItem>
@@ -114,7 +116,7 @@ const AppInfo: React.FC = () => {
                     toolBarRender={() => [
                         <Button key='button' type="primary" icon={<PlusOutlined />} 
                         onClick={() => { 
-                            
+                            setStepFormVisible(true)
                         }}>创建部署环境</Button>
                     ]}
                     request={async (params,sort) => {
