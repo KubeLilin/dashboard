@@ -15,6 +15,7 @@ import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { DeploymentItem } from './data'
 import { getDeploymentList } from './deployment.service'
 import {useState,useRef} from 'react'
+import DevlopmentFormentForm from '../devlopmentForm';
 
 
 const { TabPane } = Tabs;
@@ -88,9 +89,10 @@ const AppInfo: React.FC = () => {
     ]
 
     const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
-
+    const [stepFormVisible, setStepFormVisible] = useState(false);
     return (
         <PageContainer title={ '应用: ' + appName } >
+            <DevlopmentFormentForm visibleFunc={[stepFormVisible,setStepFormVisible]}/>
             <Tabs defaultActiveKey="1" size="large"  >
                 <TabPane tab="部署环境" key="1">
                     <ProTable<DeploymentItem>
@@ -102,7 +104,7 @@ const AppInfo: React.FC = () => {
                     toolBarRender={() => [
                         <Button key='button' type="primary" icon={<PlusOutlined />} 
                         onClick={() => { 
-                            
+                            setStepFormVisible(true)
                         }}>创建部署环境</Button>
                     ]}
                     request={async (params,sort) => {
