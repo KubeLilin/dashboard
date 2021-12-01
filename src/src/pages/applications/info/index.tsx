@@ -154,6 +154,7 @@ const AppInfo: React.FC = () => {
                     dataSource={tableListDataSource}
                     actionRef={actionRef}
                     headerTitle="部署列表"
+                    pagination={false}
                     toolBarRender={() => [
                         <Button key='button' type="primary" icon={<PlusOutlined />} 
                         onClick={() => { 
