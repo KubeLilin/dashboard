@@ -8,20 +8,39 @@ import ProForm, {
     ProFormCheckbox
 } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { Button, Input, Checkbox, Modal, InputNumber, Space } from 'antd';
+import { Select, Input, Checkbox, Modal, InputNumber, Space } from 'antd';
 import ProFormItem from '@ant-design/pro-form/lib/components/FormItem';
-import { BindCluster } from './service';
+import { BindCluster,BindNameSpace,CreateDeploymnet } from './service';
 import { DeploymentStep1, DeploymentStep2 } from './devlopment_data';
-
+const { Option } = Select;
 
 export interface Props {
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>]
+
+}
+function BindNamespaceSelect(clusterId:number,handler:any){
+    let req= BindNameSpace(clusterId)
+    req.then(x=>{if(x.success){
+        handler(x.data.map(y=>{return  {value:y.name,label:y.name}}))
+    }})
 }
 
 const DevlopmentForm: React.FC<Props> = (props: Props) => {
+const [namespace,namespcaeHandler]=useState<any>()
+const [cluster,clusterHandler]=useState<any>()
+const[clusterId,clusterIdHandler]=useState<number>()
+
+
+
+function BindClusterSelect(){
+    let req= BindCluster()
+    req.then(x=>{clusterHandler(x)})
+}
 
     return (
+        
         <ProCard>
+    
             <StepsForm
                 stepsFormRender={(dom, submitter) => {
                     return (
@@ -40,7 +59,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
             >
 
                 <StepsForm.StepForm<DeploymentStep1>
-                    title="部署方式"
+                    title="部署方式"               
                 >
                     <ProForm.Item label="部署名称">
                         <Input></Input>
@@ -49,12 +68,16 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         <ProFormSelect></ProFormSelect>
                     </ProForm.Item>
                     <ProForm.Item label="集群">
-                        <ProFormSelect request={BindCluster}
-                        ></ProFormSelect>
+                    <Select
+                        options= {cluster}     
+                        >
+                        </Select>
                     </ProForm.Item>
                     <ProForm.Item label="命名空间">
-                        <ProFormSelect
-                        ></ProFormSelect>
+                        <Select
+                        options={namespace}
+                        >
+                        </Select>
                     </ProForm.Item>
                     <ProForm.Item >
                         <Checkbox >开启服务访问</Checkbox>
@@ -66,7 +89,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                                 label: 'ClusterPort',
                             },
                             { value: 'NodePort', label: 'NodePort' },
-                        ]}
+                        ]}                  
                         ></ProFormSelect>
                     </ProForm.Item>
                     <ProForm.Item label="服务端口">
