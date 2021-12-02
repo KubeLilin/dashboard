@@ -36,7 +36,7 @@ function BindClusterSelect(){
     let req= BindCluster()
     req.then(x=>{clusterHandler(x)})
 }
-
+BindClusterSelect()
     return (
         
         <ProCard>
