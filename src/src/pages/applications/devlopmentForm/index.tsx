@@ -1,4 +1,4 @@
-import React, { SetStateAction, useState, Dispatch } from 'react';
+import React, { SetStateAction, useState, Dispatch ,useEffect} from 'react';
 import ProForm, {
     StepsForm,
     ProFormText,
@@ -18,7 +18,7 @@ export interface Props {
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>]
 
 }
-function BindNamespaceSelect(clusterId:number,handler:any){
+function BindNamespaceSelect(clusterId:any,handler:any){
     let req= BindNameSpace(clusterId)
     req.then(x=>{if(x.success){
         handler(x.data.map(y=>{return  {value:y.name,label:y.name}}))
@@ -30,13 +30,14 @@ const [namespace,namespcaeHandler]=useState<any>()
 const [cluster,clusterHandler]=useState<any>()
 const[clusterId,clusterIdHandler]=useState<number>()
 
-
-
 function BindClusterSelect(){
     let req= BindCluster()
     req.then(x=>{clusterHandler(x)})
 }
-BindClusterSelect()
+
+useEffect(()=>{
+    BindClusterSelect()
+},props.visibleFunc)
     return (
         
         <ProCard>
@@ -69,7 +70,11 @@ BindClusterSelect()
                     </ProForm.Item>
                     <ProForm.Item label="集群">
                     <Select
-                        options= {cluster}     
+                        options= {cluster}   
+                        onChange={(value)=>{
+                            console.log(value)
+                            BindNamespaceSelect(value,namespcaeHandler)
+                        }}  
                         >
                         </Select>
                     </ProForm.Item>
