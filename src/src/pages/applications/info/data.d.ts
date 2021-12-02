@@ -4,6 +4,7 @@ export type DeploymentItem={
     name:string,
     nickname: string,
     clusterName:string,
+    clusterId:number,
     namespace: string,
     status: string,
     lastImage: string,

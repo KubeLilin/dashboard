@@ -12,7 +12,7 @@ import ProForm, {
     ProFormText
 } from '@ant-design/pro-form';
 import { history,Link  } from 'umi';
-import { Input, Button, Tag, Space, Menu, Form  } from 'antd';
+import { Input, Button, Tag, Space, Menu, Form ,Typography } from 'antd';
 import { PlusOutlined, EllipsisOutlined , LoadingOutlined } from '@ant-design/icons';
 import {useState,useRef} from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
@@ -20,6 +20,8 @@ import { DeploymentItem } from './data'
 import { getDeploymentList , getPodList } from './deployment.service'
 
 const { TabPane } = Tabs;
+const { Text,Paragraph } = Typography;
+
 const AppInfo: React.FC = () => {
     var appId = history.location.query?.id
     var appName = history.location.query?.name
@@ -38,7 +40,10 @@ const AppInfo: React.FC = () => {
             dataIndex: 'nickname',
             width:250,
             render:(_,row) =>{
-                return <span>{row.nickname}/{row.name}</span>
+                return <span>
+                    <Paragraph><Link to={ '/resources/pods?app='+ row.name +'&cid=' + row.clusterId } >{row.name}</Link></Paragraph>
+                    <Paragraph>{row.nickname}</Paragraph>
+                </span>
             }
         },
         {
@@ -92,7 +97,12 @@ const AppInfo: React.FC = () => {
             hideInForm: true,
             hideInSearch: true,
             render:(dom,row) => {
-                return <span>{row.serviceIP !='0.0.0.0'?row.serviceIP:<span><LoadingOutlined /> / {dom}</span> }</span>
+                return (<span>
+                    {row.serviceIP !='0.0.0.0'?<span>
+                        <Paragraph copyable>{row.serviceName}</Paragraph> 
+                        <Paragraph copyable>{row.serviceIP} </Paragraph>
+                    </span>:<span><LoadingOutlined /> / {dom}</span> }
+                </span> )
             }
         },
         {

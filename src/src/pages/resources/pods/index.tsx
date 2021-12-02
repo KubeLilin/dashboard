@@ -26,11 +26,11 @@ import React, { useState, useRef } from 'react';
 
 const Pods: React.FC = (props) => {
     const actionRef = useRef<ActionType>();
-
+    var appName = history.location.query?.app
     var clusterId = history.location.query?.cid
     var node = history.location.query?.node
 
-    if (clusterId == undefined || node == undefined) {
+    if (clusterId == undefined && ( node == undefined || appName ==undefined )) {
         history.goBack()
     }
 
@@ -116,7 +116,12 @@ const Pods: React.FC = (props) => {
                 //search={true}
                 request={async (params,sort) => {
                     params.cid = clusterId
-                    params.node = node
+                    if (appName) {
+                        params.app = appName
+                    } else {
+                        params.node = node
+                    }
+                    
                     var podsData = await getPodList(params,sort)
                     console.log(podsData)
                     return podsData
