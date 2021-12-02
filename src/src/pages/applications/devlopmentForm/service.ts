@@ -16,7 +16,7 @@ export async function BindCluster() :Promise<any>{
 }
 
 export async function BindNameSpace(clusterId:number) :Promise<ApiResponse<K8sNamespcae[]>>{
-    let resData = await request<ApiResponse<K8sNamespcae[]>>("/v1/cluster/list", {
+    let resData = await request<ApiResponse<K8sNamespcae[]>>("/v1/cluster/namespaces", {
         method: 'GET',
         params:{'cid':clusterId}
     })
