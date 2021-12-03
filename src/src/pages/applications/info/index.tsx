@@ -155,7 +155,7 @@ const AppInfo: React.FC = () => {
 
     return (
         <PageContainer title={ '应用: ' + appName } >
-            <DevlopmentFormentForm visibleFunc={[stepFormVisible,setStepFormVisible]}/>
+            <DevlopmentFormentForm visibleFunc={[stepFormVisible,setStepFormVisible]} appId={appId }appName={appName} tableRef={actionRef}/>
             <Tabs defaultActiveKey="1" size="large"  >
                 <TabPane tab="部署环境" key="1">
                     <ProTable<DeploymentItem>

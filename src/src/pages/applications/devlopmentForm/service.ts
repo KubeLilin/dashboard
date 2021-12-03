@@ -2,7 +2,7 @@ import { ClusterItem ,K8sNamespcae} from "@/pages/resources/clusters/cluster_dat
 import { ApiResponse } from "@/services/public/service";
 import { Label } from "bizcharts";
 import request from "umi-request";
-import { DeploymentStep1 } from "./devlopment_data";
+import { DeploymentStep } from "./devlopment_data";
 export async function BindNamespace() {
     
 }
@@ -15,8 +15,8 @@ export async function BindCluster() :Promise<any>{
     return new Promise(x=>x(data))
 }
 
-export async function BindNameSpace(clusterId:number) :Promise<ApiResponse<K8sNamespcae[]>>{
-    let resData = await request<ApiResponse<K8sNamespcae[]>>("/v1/cluster/namespaces", {
+export async function BindNameSpace(clusterId:number) :Promise<ApiResponse<any[]>>{
+    let resData = await request<ApiResponse<any[]>>("/v1/cluster/namespacesfromdb", {
         method: 'GET',
         params:{'cid':clusterId}
     })
@@ -25,10 +25,25 @@ export async function BindNameSpace(clusterId:number) :Promise<ApiResponse<K8sNa
     //return new Promise(x=>x(data))
 }
 
-export async function CreateDeploymnet(params:DeploymentStep1) {
-    let req=await request<ApiResponse<DeploymentStep1>>("/v1/cluster/createdeploymentstep1",{
+export async function CreateDeploymnet(params:DeploymentStep) {
+    let req=await request<ApiResponse<DeploymentStep>>("/v1/deployment/createdeploymentstep1",{
         method:'POST',
-        data:params
+        data:params,
+        headers:{
+            'Content-Type': 'application/json',
+          },
+    })
+    return req
+}
+
+export async function CreateDeploymnetLimit(params:DeploymentStep) {
+    console.log(params)
+    let req=await request<ApiResponse<DeploymentStep>>("/v1/deployment/createdeploymentstep2",{
+        method:'POST',
+        data:params,
+        headers:{
+            'Content-Type': 'application/json',
+          },
     })
     return req
 }

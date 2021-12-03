@@ -1,14 +1,14 @@
-export type DeploymentStep1={
+export type DeploymentStep={
+    id?:number,
+    appId:number,
     name:string,
+    nickname:string,
     level:string,
     clusterId:number,
     namespaceId:number,
     serviceEnable:number,
     serviceAway:string,
     servicePort:number
-}
-
-export type DeploymentStep2={
     replicas:number,
     requestCPU:number,
     requestMemory:number,
