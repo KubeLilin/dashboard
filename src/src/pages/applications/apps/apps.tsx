@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ApplicationItem, ApplicationModel } from './apps_data';
-import { PageContainer } from '_@ant-design_pro-layout@6.29.1@@ant-design/pro-layout';
+import { PageContainer } from '@ant-design/pro-layout';
 import ProForm, {
     DrawerForm,
     ProFormSelect,
@@ -12,11 +12,7 @@ import ProForm, {
 import { Input, Button, Tag, Space, Menu, Form } from 'antd';
 import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { getAppLanguage, getAppLevel, createApp, getApps, updateApp } from './apps_service';
-import { getLanguage } from '_@ant-design_pro-layout@6.29.1@@ant-design/pro-layout/lib/locales';
-
-
-
-
+import { history,Link } from 'umi';
 
 const Apps: React.FC = () => {
     const actionRef = useRef<ActionType>();
@@ -28,14 +24,17 @@ const Apps: React.FC = () => {
         {
             title: 'id',
             dataIndex: 'id',
-            valueType: 'indexBorder',
             width: 48,
             hideInForm: true,
+            hideInSearch: true
         },
         {
             title: '应用名称',
             dataIndex: 'name',
             copyable: true,
+            render: (dom,row) =>{
+                return   <Link key={'linkapp' +row.id} style={{color: 'blue', textDecorationLine: 'underline'}} to={'/applications/info?id='+ row.id +'&name=' + row.name }>{dom}</Link> 
+             }
         },
         {
             title: '租户id',
@@ -50,7 +49,10 @@ const Apps: React.FC = () => {
         }, {
             title: "Git地址",
             dataIndex: 'git',
-            hideInSearch: true
+            hideInSearch: true,
+            render:(dom,row)=>{
+                return <a key={'gitlink'+row.id} href={row.git} target="_blank">{dom}</a>
+            }
         }, {
             title: '级别',
             dataIndex: 'level',
@@ -60,6 +62,10 @@ const Apps: React.FC = () => {
         }, {
             title: '级别',
             dataIndex: 'levelName',
+            hideInSearch: true
+        },{
+            title: '语言',
+            dataIndex: 'languageName',
             hideInSearch: true
         },
         {
@@ -71,7 +77,6 @@ const Apps: React.FC = () => {
             title: '状态',
             dataIndex: 'status',
             valueType: 'select',
-            hideInSearch: true,
             valueEnum: {
                 '0': { text: '停用' },
                 '1': { text: '启用' }
@@ -80,13 +85,13 @@ const Apps: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
-                <a onClick={() => {
+                <Link key={"link-id"+record.id} to={'/applications/info?id='+ record.id +'&name=' + record.name  }>进入应用</Link>,
+                <a key={"edit"+record.id} onClick={() => {
                     formVisibleHandler(true)
                     console.log(record)
                     appForm.setFieldsValue(record)
                     editHandler(true)
-                }}>查看编辑</a>,
-
+                }}>编辑</a>,
             ]
         }
     ]
@@ -96,10 +101,17 @@ const Apps: React.FC = () => {
         <PageContainer>
             <ProTable<ApplicationItem>
                 columns={columns}
+                rowKey="id"
                 actionRef={actionRef}
                 headerTitle="应用列表"
                 toolBarRender={() => [
-                    <Button key='button' icon={<PlusOutlined />} onClick={() => { formVisibleHandler(true); editHandler(false) }}>创建应用</Button>
+                    <Button key='button' icon={<PlusOutlined />} 
+                    onClick={() => { 
+                        appForm.resetFields()
+                        formVisibleHandler(true); 
+                        editHandler(false) 
+                        appForm.setFieldsValue({ status: 1 })
+                    }}>创建应用</Button>
                 ]}
                 request={getApps}
             ></ProTable>
@@ -108,7 +120,6 @@ const Apps: React.FC = () => {
                 title="创建应用"
                 visible={formVisible}
                 onVisibleChange={formVisibleHandler}
-                formRef={formRef}
                 onFinish={async (x) => {
                     let res
                     if (edit) {
@@ -120,6 +131,7 @@ const Apps: React.FC = () => {
                     if (res.success) {
                         actionRef.current?.reload()
                     }
+                    appForm.resetFields()
                     return res.success
                 }}
                 drawerProps={{
@@ -151,6 +163,14 @@ const Apps: React.FC = () => {
                 </ProForm.Item>
                 <ProForm.Item name='remark' label='备注'>
                     <ProFormTextArea></ProFormTextArea>
+                </ProForm.Item>
+                <ProForm.Item name='status' label="状态" >
+                    <ProFormSelect initialValue={1}
+                        request={async()=>[
+                            {label:'启用',value: 1},
+                            {label:'停用',value: 0}
+                        ]}
+                    ></ProFormSelect>
                 </ProForm.Item>
             </DrawerForm>
         </PageContainer>

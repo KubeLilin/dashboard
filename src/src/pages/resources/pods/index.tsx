@@ -8,29 +8,13 @@ import { getPodList,getNamespaceList }  from './service'
 import React, { useState, useRef } from 'react';
 
 
-// const formatDuration = ms => {
-//     if (ms < 0) ms = -ms;
-//     const time = {
-//       day: Math.floor(ms / 86400000),
-//       hour: Math.floor(ms / 3600000) % 24,
-//       minute: Math.floor(ms / 60000) % 60,
-//       second: Math.floor(ms / 1000) % 60,
-//       millisecond: Math.floor(ms) % 1000
-//     };
-//     return Object.entries(time)
-//       .filter(val => val[1] !== 0)
-//       .map(([key, val]) => `${val} ${key}${val !== 1 ? 's' : ''}`)
-//       .join(', ');
-//   };
-
-
 const Pods: React.FC = (props) => {
     const actionRef = useRef<ActionType>();
-
+    var appName = history.location.query?.app
     var clusterId = history.location.query?.cid
     var node = history.location.query?.node
 
-    if (clusterId == undefined || node == undefined) {
+    if (clusterId == undefined && ( node == undefined || appName ==undefined )) {
         history.goBack()
     }
 
@@ -102,21 +86,63 @@ const Pods: React.FC = (props) => {
     
     ]
 
+    const expandedRowRender = () => {
+        const data = [];
+        for (let i = 0; i < 3; i += 1) {
+          data.push({
+            key: i,
+            date: '2014-12-24 23:12:00',
+            name: 'This is production name',
+            upgradeNum: 'Upgraded: 56',
+          });
+        }
+        return (
+          <ProTable
+            columns={[
+              { title: 'Date', dataIndex: 'date', key: 'date' },
+              { title: 'Name', dataIndex: 'name', key: 'name' },
+      
+              { title: 'Upgrade Status', dataIndex: 'upgradeNum', key: 'upgradeNum' },
+              {
+                title: 'Action',
+                dataIndex: 'operation',
+                key: 'operation',
+                valueType: 'option',
+                render: () => [<a key="Pause">Pause</a>, <a key="Stop">Stop</a>],
+              },
+            ]}
+            headerTitle={false}
+            search={false}
+            options={false}
+            dataSource={data}
+            pagination={false}
+          />
+        );
+      };
 
     console.log(clusterId)
     console.log(node)
+    var pageTitle = "Pod 管理     "
+    if (appName) {
+        pageTitle =  pageTitle + ' -- 应用: ' + appName
+    } 
 
     return(
-        <PageContainer title="Pod 管理">
+        <PageContainer title={pageTitle}>
             <ProTable<PodItem>
                 rowKey={record=>record.name}
                 actionRef={actionRef}
                 columns={podColumns}
                 headerTitle='Pod 列表'
-                //search={true}
+                expandable={{ expandedRowRender }}
                 request={async (params,sort) => {
                     params.cid = clusterId
-                    params.node = node
+                    if (appName) {
+                        params.app = appName
+                    } else {
+                        params.node = node
+                    }
+                    
                     var podsData = await getPodList(params,sort)
                     console.log(podsData)
                     return podsData
@@ -125,7 +151,7 @@ const Pods: React.FC = (props) => {
                     <Button type="primary" key="primary" onClick={() => {
                         history.goBack()
                     }}
-                    >  返回集群列表 </Button>,
+                    >  返回 </Button>,
                ]}
             />
         </PageContainer>)
