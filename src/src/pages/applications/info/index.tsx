@@ -27,6 +27,10 @@ const AppInfo: React.FC = () => {
     var appName = history.location.query?.name
     const actionRef = useRef<ActionType>();
 
+    const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
+    const [stepFormVisible, setStepFormVisible] = useState(false);
+    const [stepFormEdit, setStepFormEdit] = useState(false);
+    const [dpId, stepDpId] = useState<number>(0);
     const columns: ProColumns<DeploymentItem>[] = [
         {
             title: 'ID',
@@ -112,7 +116,12 @@ const AppInfo: React.FC = () => {
                 <Button key="depoly" type="primary" danger onClick={()=>{
                     tableListDataSource[0].namespace = 'n'+Math.random()
                     setTableListDataSource(tableListDataSource)
-                }}>部署应用</Button>
+                }}>部署应用</Button>,
+                <Button key="edit" type="primary"  onClick={()=>{
+                    stepDpId(record.id)
+                    setStepFormEdit(true)
+                    setStepFormVisible(true)
+                }}>编辑部署</Button>
             ]
         },]
 
@@ -150,12 +159,11 @@ const AppInfo: React.FC = () => {
         //     );
         //   };
 
-    const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
-    const [stepFormVisible, setStepFormVisible] = useState(false);
 
     return (
         <PageContainer title={ '应用: ' + appName } >
-            <DevlopmentFormentForm visibleFunc={[stepFormVisible,setStepFormVisible]} appId={appId }appName={appName} tableRef={actionRef}/>
+            <DevlopmentFormentForm visibleFunc={[stepFormVisible,setStepFormVisible]}
+             appId={appId }appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId}/>
             <Tabs defaultActiveKey="1" size="large"  >
                 <TabPane tab="部署环境" key="1">
                     <ProTable<DeploymentItem>
@@ -168,6 +176,7 @@ const AppInfo: React.FC = () => {
                     toolBarRender={() => [
                         <Button key='button' type="primary" icon={<PlusOutlined />} 
                         onClick={() => { 
+                            setStepFormEdit(false)
                             setStepFormVisible(true)
                         }}>创建部署环境</Button>
                     ]}
@@ -193,10 +202,8 @@ const AppInfo: React.FC = () => {
                             })
                             setTimeout(()=>{
                                 setTableListDataSource(list)
-                            },200)
-                           
+                            },200)                       
                         })
-
                         setTableListDataSource(datasource.data)
                         return datasource
                      }}

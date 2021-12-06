@@ -7,3 +7,8 @@ export type ClusterItem = {
     sort?: number,
     status: number
 }
+
+export type K8sNamespcae={
+    name:string,
+    status:string,
+}
