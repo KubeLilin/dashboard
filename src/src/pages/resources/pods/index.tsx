@@ -6,10 +6,16 @@ import { PodItem } from './data';
 import { Typography, Button , Space ,Tooltip,Tag} from 'antd'
 import { getPodList,getNamespaceList }  from './service'
 import React, { useState, useRef } from 'react';
+import { BuildTwoTone,LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 
 
 const Pods: React.FC = (props) => {
     const actionRef = useRef<ActionType>();
+    const [time, setTime] = useState(() => Date.now());
+    const [polling, setPolling] = useState<number | undefined>(2000);
+
+
+    var appId = history.location.query?.appId
     var appName = history.location.query?.app
     var clusterId = history.location.query?.cid
     var node = history.location.query?.node
@@ -119,7 +125,6 @@ const Pods: React.FC = (props) => {
                             </Tooltip>
                     ]
                 }
-
               },
               
             ]}
@@ -176,9 +181,17 @@ const Pods: React.FC = (props) => {
                     console.log(podsData)
                     return podsData
                  }}
+                 polling={polling || undefined}
                  toolBarRender={() => [
-                  
-                 ]}
+                    <Button key='button' type="primary" icon={<BuildTwoTone />}
+                        onClick={() => {
+
+                        }}>部署应用</Button>,
+                    <Button key="3" type="primary"
+                      onClick={() => { if (polling) { setPolling(undefined); return;  } setPolling(2000);  }} >
+                        {polling ? <LoadingOutlined /> : <ReloadOutlined />}
+                        {polling ? '停止轮询' : '开始轮询'}
+                    </Button>,  ]}
             />
         </PageContainer>)
 
