@@ -1,17 +1,18 @@
 export type DeploymentStep={
     id?:number,
-    appId:number,
-    name:string,
+    appId?:number,
+    name?:string,
     nickname:string,
     level:string,
     clusterId:number,
     namespaceId:number,
-    serviceEnable:number,
+    serviceEnable:boolean,
     serviceAway:string,
     servicePort:number
     replicas:number,
-    requestCPU:number,
+    requestCpu:number,
     requestMemory:number,
-    limitCPU:number,
-    limitMemory:number
+    limitCpu:number,
+    limitMemory:number,
+    clusterSelect:any
 }

@@ -11,15 +11,17 @@ import ProForm, {
 import ProCard from '@ant-design/pro-card';
 import { Select, Input, Checkbox, Modal, InputNumber, Space, Alert } from 'antd';
 import ProFormItem from '@ant-design/pro-form/lib/components/FormItem';
-import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit } from './service';
+import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, GetDeploymentFormInfo } from './service';
 import { DeploymentStep } from './devlopment_data';
+import e from '@umijs/deps/compiled/express';
 
 export interface Props {
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>],
     appId: any,
     appName: any,
-    tableRef: any
-
+    tableRef: any,
+    isEdit:boolean,
+    id?:number,  
 }
 function BindNamespaceSelect(clusterId: any, handler: any) {
     let req = BindNameSpace(clusterId)
@@ -31,6 +33,14 @@ function BindNamespaceSelect(clusterId: any, handler: any) {
     })
 }
 
+function  BindClusterName(clusterId:number,clusterArr:any,nameHandler:any) {
+    clusterArr.forEach((element:  {value:number,label:string}) => {
+        if(clusterId==element.value){
+            nameHandler(element.label)
+        }
+    });
+}
+
 const DevlopmentForm: React.FC<Props> = (props: Props) => {
     const [namespace, namespcaeHandler] = useState<any>();
     const [cluster, clusterHandler] = useState<any>();
@@ -39,6 +49,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
     const [dpStep, dpStepHandler] = useState<DeploymentStep>();
     const [dpLevel, dpLevelHandler] = useState<string>("");
     const [clusterName, clusterNameHandler] = useState<string>("")
+    const [deployment, deploymentHandler] = useState<DeploymentStep>()
     const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([]);
     function BindClusterSelect() {
         let req = BindCluster()
@@ -47,6 +58,23 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
 
     useEffect(() => {
         BindClusterSelect()
+        if(props.isEdit){
+            let req=GetDeploymentFormInfo(props.id)
+            req.then(x=>{
+                if(!x.success){
+                    props.visibleFunc[1](false)
+                }
+                setTimeout(() => {
+                    deploymentHandler(x.data)
+                    BindClusterName(x.data.clusterId,cluster,clusterNameHandler)
+                   // dpLevelHandler(x.data.level)
+                    formMapRef.current.forEach((formInstanceRef)=>{
+                        BindNamespaceSelect(x.data.clusterId, namespcaeHandler)
+                        formInstanceRef.current?.setFieldsValue(x.data)
+                    })
+                  }, 200)
+            })
+        }
     }, props.visibleFunc)
     return (
 
@@ -83,9 +111,17 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                     title="部署方式"
                     onFinish={async (value) => {
                         value.clusterId = clusterId;
-                        value.serviceEnable = openScv ? 1 : 0;
-                        value.appId = parseInt(props.appId);
-                        value.name = `${dpLevel}-${props.appName}-${clusterName}`
+                        value.serviceEnable = openScv;
+                        if(props.isEdit){
+                            value.appId = deployment?.appId;
+                            value.name =deployment?.name;
+                            value.id=props.id;
+                            
+                        }else{
+                            value.appId = parseInt(props.appId);
+                            value.clusterId=clusterId;
+                            value.name = `${dpLevel}-${props.appName}-${clusterName}`;
+                        }
                         let res = await CreateDeploymnet(value)
                         if (res.success == false) {
                             <Alert message={res.message} type="error" />
@@ -100,6 +136,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                     <ProForm.Item label="环境级别" name='level'>
                         <Select
                             onChange={(x: string) => {
+                                console.log(x)
                                 dpLevelHandler(x)
                             }}
                             options={[
@@ -113,14 +150,13 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
 
                         ></Select>
                     </ProForm.Item>
-                    <ProForm.Item label="集群" name='clusterId'>
-                        <Select
-                            labelInValue
+                    <ProForm.Item label="集群" name='clusterId' >
+                        <Select                                  
                             options={cluster}
                             onChange={(value: any) => {
-                                BindNamespaceSelect(value.value, namespcaeHandler)
-                                clusterIdHandler(value.value)
-                                clusterNameHandler(value.label)
+                                BindNamespaceSelect(value, namespcaeHandler)
+                                clusterIdHandler(value)  
+                                BindClusterName(value,cluster,clusterNameHandler)                          
                             }}
                         >
                         </Select>
@@ -154,36 +190,30 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                     </ProForm.Item>
 
                     <ProForm.Group label="CPU限制 0为不限制" >
-                        <ProFormItem name='requestCpu' rules={[{ required: true, message: "requestCpu不可为空" }]}>
-                            <Space>Request
-                                <InputNumber step={0.1} min={0} max={1}></InputNumber>
-                            </Space>
+                        <ProFormItem name='requestCpu' label='Request' rules={[{ required: true, message: "requestCpu不可为空" }]}>
+                        <InputNumber step={0.1} min={0} max={1}></InputNumber>
                         </ProFormItem>
                         <Space>
                             -
                         </Space>
-                        <ProFormItem name='limitCpu' rules={[{ required: true, message: "limitCpu不可为空" }]}>
-                            <Space>Limit
-                                <InputNumber step={0.1} min={0} max={1}></InputNumber>
-                            </Space>
+                        <ProFormItem name='limitCpu' label='Limit' rules={[{ required: true, message: "limitCpu不可为空" }]} >                        
+                                <InputNumber step={0.1} min={0} max={1}></InputNumber>                          
                         </ProFormItem>
-                        核
+                       
                     </ProForm.Group>
-                    <ProForm.Group label="内存限制 0为不限制">
-                        <ProFormItem name='requestMemory' rules={[{ required: true, message: "requestMemory不可为空" }]}>
-                            <Space>Request
+                    <ProForm.Group label="内存限制(MB) 0为不限制">
+                        <ProFormItem name='requestMemory' label='Request' rules={[{ required: true, message: "requestMemory不可为空" }]}>
+                           
                                 <InputNumber min={0}></InputNumber>
-                            </Space>
+                            
                         </ProFormItem>
                         <Space>
                             -
                         </Space>
-                        <ProFormItem name='limitMemory' rules={[{ required: true, message: "limitMemory不可为空" }]}>
-                            <Space>Limit
+                        <ProFormItem name='limitMemory' label='Limit' rules={[{ required: true, message: "limitMemory不可为空" }]}>                        
                                 <InputNumber min={0} ></InputNumber>
-                            </Space>
+                           
                         </ProFormItem>
-                        MB
                     </ProForm.Group>
                 </StepsForm.StepForm>
             </StepsForm>
