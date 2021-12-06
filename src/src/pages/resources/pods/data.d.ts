@@ -9,8 +9,20 @@ export type PodItem = {
     age: Date,
     status: string,
     restarts:number
+
+    containers: ContainerItem[]
 }
 
+
+export type ContainerItem = {
+    id: string,
+    name: string,
+    image: string,
+    ready: any,
+    started: any,
+    state: string,
+    restartCount: number
+}
 
 export type NamespaceItem = {
     name : string

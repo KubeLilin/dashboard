@@ -116,46 +116,14 @@ const AppInfo: React.FC = () => {
             ]
         },]
 
-        // const expandedRowRender = () => {
-        //     const data = [];
-        //     for (let i = 0; i < 3; i += 1) {
-        //       data.push({
-        //         key: i,
-        //         date: '2014-12-24 23:12:00',
-        //         name: 'This is production name',
-        //         upgradeNum: 'Upgraded: 56',
-        //       });
-        //     }
-        //     return (
-        //       <ProTable
-        //         columns={[
-        //           { title: 'Date', dataIndex: 'date', key: 'date' },
-        //           { title: 'Name', dataIndex: 'name', key: 'name' },
-          
-        //           { title: 'Upgrade Status', dataIndex: 'upgradeNum', key: 'upgradeNum' },
-        //           {
-        //             title: 'Action',
-        //             dataIndex: 'operation',
-        //             key: 'operation',
-        //             valueType: 'option',
-        //             render: () => [<a key="Pause">Pause</a>, <a key="Stop">Stop</a>],
-        //           },
-        //         ]}
-        //         headerTitle={false}
-        //         search={false}
-        //         options={false}
-        //         dataSource={data}
-        //         pagination={false}
-        //       />
-        //     );
-        //   };
-
     const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
 
     return (
-        <PageContainer title={ '应用: ' + appName } >
-            <DevlopmentFormentForm visibleFunc={[stepFormVisible,setStepFormVisible]} appId={appId }appName={appName} tableRef={actionRef}/>
+        <PageContainer title={ '应用: ' + appName }
+            header={{ extra: [
+                <Button key="1" onClick={()=>{ history.goBack() }}>返回上一级</Button>]
+            }}>
             <Tabs defaultActiveKey="1" size="large"  >
                 <TabPane tab="部署环境" key="1">
                     <ProTable<DeploymentItem>
@@ -201,6 +169,7 @@ const AppInfo: React.FC = () => {
                         return datasource
                      }}
                     ></ProTable>
+                    <DevlopmentFormentForm visibleFunc={[stepFormVisible,setStepFormVisible]} appId={appId }appName={appName} tableRef={actionRef}/>
                 </TabPane>
                 <TabPane tab="基本信息" key="2">
                 Content of Tab Pane 2
