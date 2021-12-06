@@ -46,7 +46,7 @@ const AppInfo: React.FC = () => {
             width: 250,
             render: (_, row) => {
                 return <span>
-                    <Paragraph><Link to={'/resources/pods?app=' + row.name + '&cid=' + row.clusterId} >{row.name}</Link></Paragraph>
+                    <Paragraph><Link to={'/resources/pods?appid='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId} >{row.name}</Link></Paragraph>
                     <Paragraph>{row.nickname}</Paragraph>
                 </span>
             }
@@ -205,6 +205,11 @@ const AppInfo: React.FC = () => {
                                         list[podSet.index].lastImage = podSet.data.containers[0].image
                                         list[podSet.index].running = podSet.data.containers.length
                                         list[podSet.index].serviceIP = podSet.data.ip
+                                    } else {
+                                        list[podSet.index].lastImage = '无'
+                                        list[podSet.index].running = 0
+                                        list[podSet.index].serviceName ='no services'
+                                        list[podSet.index].serviceIP = 'x.x.x.x'
                                     }
                                 })
                                 setTimeout(() => {
