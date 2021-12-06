@@ -3,7 +3,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { history,Link } from 'umi';
 import { PodItem } from './data';
-import { Typography, Button , Space ,Tooltip} from 'antd'
+import { Typography, Button , Space ,Tooltip,Tag} from 'antd'
 import { getPodList,getNamespaceList }  from './service'
 import React, { useState, useRef } from 'react';
 
@@ -71,6 +71,13 @@ const Pods: React.FC = (props) => {
             }
         },
         {
+            title:'容器数',
+            search: false,
+            render:(_,row) => {
+                return <span>{row.containers.length}个</span>
+            }
+        },
+        {
             title:'创建时间',
             dataIndex:'startTime',
             search: false,
@@ -86,35 +93,41 @@ const Pods: React.FC = (props) => {
     
     ]
 
-    const expandedRowRender = () => {
-        const data = [];
-        for (let i = 0; i < 3; i += 1) {
-          data.push({
-            key: i,
-            date: '2014-12-24 23:12:00',
-            name: 'This is production name',
-            upgradeNum: 'Upgraded: 56',
-          });
-        }
+    const expandedRowRender = (podItem:PodItem) => {
+        
         return (
           <ProTable
             columns={[
-              { title: 'Date', dataIndex: 'date', key: 'date' },
-              { title: 'Name', dataIndex: 'name', key: 'name' },
+              { title: '容器名称', dataIndex: 'name', key: 'name' },
+              { title: '容器ID', dataIndex: 'id', key: 'id' },
       
-              { title: 'Upgrade Status', dataIndex: 'upgradeNum', key: 'upgradeNum' },
-              {
-                title: 'Action',
-                dataIndex: 'operation',
-                key: 'operation',
-                valueType: 'option',
-                render: () => [<a key="Pause">Pause</a>, <a key="Stop">Stop</a>],
+              { title: '镜像版本号', dataIndex: 'image', key: 'image' },
+            //   { title: 'CPU Request', dataIndex: 'cpuRequest', key: 'cpuRequest' },
+            //   { title: 'CPU Limit', dataIndex: 'cpuLimit', key: 'cpuLimit' },
+            //   { title: '内存 Request', dataIndex: 'memoryRequest', key: 'memoryRequest' },
+            //   { title: '内存 Limit', dataIndex: 'memoryLimit', key: 'memoryLimit' },
+              { title: '重启次数', dataIndex: 'restartCount', key: 'restartCount' },
+              { 
+                title: '状态', dataIndex: 'status', key: 'status' ,
+                render:(_,row) =>{
+                    return [
+                           <Tooltip title={row.state} color="geekblue" key="status">
+                                <Space direction="vertical">
+                                    <span>Readly:  {row.ready?<Tag color="geekblue">{String(row.ready)}</Tag>:<Tag color="#f50">String(row.ready)</Tag>}</span>
+                                    <span>Started:  {row.started?<Tag color="geekblue">{String(row.started)}</Tag>:<Tag color="#f50">String(row.started)</Tag>}</span>
+                                </Space>
+                            </Tooltip>
+                    ]
+                }
+
               },
+              
             ]}
+            rowKey="id"
             headerTitle={false}
             search={false}
             options={false}
-            dataSource={data}
+            dataSource={podItem.containers}
             pagination={false}
           />
         );
@@ -123,12 +136,28 @@ const Pods: React.FC = (props) => {
     console.log(clusterId)
     console.log(node)
     var pageTitle = "Pod 管理     "
+    var breadcrumb =[ 
+        { path: '', breadcrumbName: '资源中心'},
+        { path: '', breadcrumbName: '', }]
     if (appName) {
+        breadcrumb[0] = { path:'', breadcrumbName:'应用中心'  }
+        breadcrumb[1] = { path:'', breadcrumbName:'Pod列表'  }
         pageTitle =  pageTitle + ' -- 应用: ' + appName
+    } else if (node) {
+        breadcrumb[0] = { path:'', breadcrumbName:'资源中心'  }
+        breadcrumb[1] = { path:'', breadcrumbName:'集群管理'  }
+         
     } 
 
     return(
-        <PageContainer title={pageTitle}>
+        <PageContainer title={pageTitle}   
+          header={{
+            breadcrumb: {routes: breadcrumb},
+            extra: [  <Button key="1" onClick={() => {
+                history.goBack()
+            }}>返回上一级</Button>,]
+          }}
+        >
             <ProTable<PodItem>
                 rowKey={record=>record.name}
                 actionRef={actionRef}
@@ -148,11 +177,8 @@ const Pods: React.FC = (props) => {
                     return podsData
                  }}
                  toolBarRender={() => [
-                    <Button type="primary" key="primary" onClick={() => {
-                        history.goBack()
-                    }}
-                    >  返回 </Button>,
-               ]}
+                  
+                 ]}
             />
         </PageContainer>)
 
