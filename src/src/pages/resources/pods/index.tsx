@@ -7,6 +7,7 @@ import { Typography, Button , Space ,Tooltip,Tag} from 'antd'
 import { getPodList,getNamespaceList }  from './service'
 import React, { useState, useRef } from 'react';
 import { BuildTwoTone,LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
+import moment from 'moment';
 
 
 const Pods: React.FC = (props) => {
@@ -167,7 +168,8 @@ const Pods: React.FC = (props) => {
                 rowKey={record=>record.name}
                 actionRef={actionRef}
                 columns={podColumns}
-                headerTitle='Pod 列表'
+                dateFormatter="string"
+                headerTitle={`Pod 列表 - 上次更新时间：${moment(time).format('HH:mm:ss')}`}
                 expandable={{ expandedRowRender }}
                 request={async (params,sort) => {
                     params.cid = clusterId
@@ -178,7 +180,7 @@ const Pods: React.FC = (props) => {
                     }
                     
                     var podsData = await getPodList(params,sort)
-                    console.log(podsData)
+                    setTime(Date.now());
                     return podsData
                  }}
                  polling={polling || undefined}
@@ -187,7 +189,16 @@ const Pods: React.FC = (props) => {
                         onClick={() => {
 
                         }}>部署应用</Button>,
-                    <Button key="3" type="primary"
+                    <Button key='button'  type="primary"
+                        onClick={() => {
+
+                        }}>伸缩实例</Button>,
+                    <Button key='button' danger  type="primary"
+                        onClick={() => {
+
+                        }}>清空实例</Button>,
+      
+                    <Button key="3"  
                       onClick={() => { if (polling) { setPolling(undefined); return;  } setPolling(2000);  }} >
                         {polling ? <LoadingOutlined /> : <ReloadOutlined />}
                         {polling ? '停止轮询' : '开始轮询'}
