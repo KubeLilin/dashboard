@@ -78,7 +78,7 @@ const AppInfo: React.FC = () => {
         {
             title: '镜像(last)',
             dataIndex: 'lastImage',
-            width: 550,
+            width: 450,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
@@ -92,13 +92,13 @@ const AppInfo: React.FC = () => {
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
-                return <span>  {row.running > 0 ? row.running : <LoadingOutlined />}
-                    / {row.expected}</span>
+                return <span>  {row.running > -1 ? row.running : <LoadingOutlined />}   / {row.expected}</span>
             }
         },
         {
             title: '服务名/IP',
             dataIndex: 'serviceIP',
+            width: 350,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
@@ -125,44 +125,6 @@ const AppInfo: React.FC = () => {
                 }}>编辑部署</Button>
             ]
         },]
-
-
-    // const expandedRowRender = () => {
-    //     const data = [];
-    //     for (let i = 0; i < 3; i += 1) {
-    //       data.push({
-    //         key: i,
-    //         date: '2014-12-24 23:12:00',
-    //         name: 'This is production name',
-    //         upgradeNum: 'Upgraded: 56',
-    //       });
-    //     }
-    //     return (
-    //       <ProTable
-    //         columns={[
-    //           { title: 'Date', dataIndex: 'date', key: 'date' },
-    //           { title: 'Name', dataIndex: 'name', key: 'name' },
-
-    //           { title: 'Upgrade Status', dataIndex: 'upgradeNum', key: 'upgradeNum' },
-    //           {
-    //             title: 'Action',
-    //             dataIndex: 'operation',
-    //             key: 'operation',
-    //             valueType: 'option',
-    //             render: () => [<a key="Pause">Pause</a>, <a key="Stop">Stop</a>],
-    //           },
-    //         ]}
-    //         headerTitle={false}
-    //         search={false}
-    //         options={false}
-    //         dataSource={data}
-    //         pagination={false}
-    //       />
-    //     );
-    //   };
-
-
-
 
 
     return (
