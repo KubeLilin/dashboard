@@ -47,7 +47,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
     const [clusterId, clusterIdHandler] = useState<any>();
     const [openScv, openScvHandler] = useState<boolean>(false);
     const [dpStep, dpStepHandler] = useState<DeploymentStep>();
-    const [dpLevel, dpLevelHandler] = useState<string>("");
+
     const [clusterName, clusterNameHandler] = useState<string>("")
     const [deployment, deploymentHandler] = useState<DeploymentStep>()
     const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([]);
@@ -120,7 +120,8 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         }else{
                             value.appId = parseInt(props.appId);
                             value.clusterId=clusterId;
-                            value.name = `${dpLevel}-${props.appName}-${clusterName}`;
+                            value.name = `${value.level}-${props.appName}-${clusterName}`;
+                            console.log(value.level)
                         }
                         let res = await CreateDeploymnet(value)
                         if (res.success == false) {
@@ -135,10 +136,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level'>
                         <Select
-                            onChange={(x: string) => {
-                                console.log(x)
-                                dpLevelHandler(x)
-                            }}
+                  
                             options={[
                                 {
                                     value: 'dev',
