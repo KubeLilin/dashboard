@@ -27,6 +27,7 @@ export async function BindNameSpace(clusterId:number) :Promise<ApiResponse<any[]
 }
 
 export async function CreateDeploymnet(params:DeploymentStep) {
+    console.log(params.servicePort)
 let req=await request<ApiResponse<DeploymentStep>>("/v1/deployment/createdeploymentstep1",{
         method:'POST',
         data:params,
