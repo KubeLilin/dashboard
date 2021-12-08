@@ -13,7 +13,7 @@ import ProForm, {
 } from '@ant-design/pro-form';
 import { history, Link } from 'umi';
 import { Input, Button, Tag, Space, Menu, Form, Typography } from 'antd';
-import { PlusOutlined, EllipsisOutlined, LoadingOutlined } from '@ant-design/icons';
+import { PlusOutlined, EllipsisOutlined, LoadingOutlined,CloudUploadOutlined } from '@ant-design/icons';
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
@@ -46,7 +46,7 @@ const AppInfo: React.FC = () => {
             width: 250,
             render: (_, row) => {
                 return <span>
-                    <Paragraph><Link to={'/resources/pods?appid='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId} >{row.name}</Link></Paragraph>
+                    <Paragraph><Link to={'/resources/pods?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId} >{row.name}</Link></Paragraph>
                     <Paragraph>{row.nickname}</Paragraph>
                 </span>
             }
@@ -114,11 +114,11 @@ const AppInfo: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (dom, record, _, action) => [
-                <Button key="depoly" type="primary" danger onClick={() => {
+                <Button key="depoly" type="primary"  icon={<CloudUploadOutlined />} onClick={() => {
                     tableListDataSource[0].namespace = 'n' + Math.random()
                     setTableListDataSource(tableListDataSource)
                 }}>部署应用</Button>,
-                <Button key="edit" type="primary" onClick={() => {
+                <Button key="edit" onClick={() => {
                     stepDpId(record.id)
                     setStepFormEdit(true)
                     setStepFormVisible(true)

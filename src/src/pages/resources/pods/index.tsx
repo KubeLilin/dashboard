@@ -6,20 +6,26 @@ import { PodItem } from './data';
 import { Typography, Button , Space ,Tooltip,Tag} from 'antd'
 import { getPodList,getNamespaceList }  from './service'
 import React, { useState, useRef } from 'react';
-import { BuildTwoTone,LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
-import moment from 'moment';
-
+import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
+import moment from 'moment'; 
 
 const Pods: React.FC = (props) => {
     const actionRef = useRef<ActionType>();
     const [time, setTime] = useState(() => Date.now());
-    const [polling, setPolling] = useState<number | undefined>(2000);
+    const [polling, setPolling] = useState<number | undefined>(undefined);
 
 
-    var appId = history.location.query?.appId
+    var deployId = history.location.query?.did
     var appName = history.location.query?.app
     var clusterId = history.location.query?.cid
     var node = history.location.query?.node
+    var did = 0
+    if (deployId) {
+        did = Number(deployId)
+    }
+
+
+    console.log(did)
 
     if (clusterId == undefined && ( node == undefined || appName ==undefined )) {
         history.goBack()
@@ -185,19 +191,20 @@ const Pods: React.FC = (props) => {
                  }}
                  polling={polling || undefined}
                  toolBarRender={() => [
-                    <Button key='button' type="primary" icon={<BuildTwoTone />}
+                    <Button key='button' type="primary"  icon={<CloudUploadOutlined />} style={{  display: did>0?'block':'none'}}
                         onClick={() => {
-
+                            //部署请求
+                            setPolling(1000);
                         }}>部署应用</Button>,
-                    <Button key='button'  type="primary"
+                    <Button key='button'  type="primary" icon={<ExpandAltOutlined />} style={{  display: did>0?'block':'none'}}
                         onClick={() => {
-
+                            //伸缩请求
+                            setPolling(1000);
                         }}>伸缩实例</Button>,
-                    <Button key='button' danger  type="primary"
+                    <Button key='button' danger  style={{  display: did>0?'block':'none'}}
                         onClick={() => {
 
-                        }}>清空实例</Button>,
-      
+                    }}>清空实例</Button>,
                     <Button key="3"  
                       onClick={() => { if (polling) { setPolling(undefined); return;  } setPolling(2000);  }} >
                         {polling ? <LoadingOutlined /> : <ReloadOutlined />}
