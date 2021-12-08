@@ -89,8 +89,8 @@ const Apps: React.FC = () => {
                 <a key={"edit"+record.id} onClick={() => {
                     formVisibleHandler(true)
                     console.log(record)
-                    appForm.setFieldsValue(record)
                     editHandler(true)
+                    appForm.setFieldsValue(record)
                 }}>编辑</a>,
             ]
         }
