@@ -5,7 +5,7 @@ import ProForm, {
     ProFormInstance
 } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { Select, Input, Checkbox, Modal, InputNumber, Space, Alert, notification } from 'antd';
+import { Select, Input, Checkbox, Modal, InputNumber, Space, Alert, notification ,Drawer } from 'antd';
 import ProFormItem from '@ant-design/pro-form/lib/components/FormItem';
 import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, GetDeploymentFormInfo } from './service';
 import { DeploymentStep } from './devlopment_data';
@@ -46,6 +46,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
     const [clusterName, clusterNameHandler] = useState<string>("")
     const [deployment, deploymentHandler] = useState<DeploymentStep>()
     const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([]);
+   
     function BindClusterSelect() {
         let req = BindCluster()
         req.then(x => { clusterHandler(x) })
@@ -70,6 +71,19 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                     })
                 }, 200)
             })
+        } else {
+            openScvHandler(true)
+            formMapRef.current.forEach((formInstanceRef) => {
+               
+                formInstanceRef.current?.setFieldsValue({  
+                    level: 'dev',
+                    serviceEnable: 'true',
+                    serviceAway: 'ClusterPort',
+                    servicePort: '8080' ,
+                    replicas: 1,
+                
+                })
+            })
         }
     }, props.visibleFunc)
     return (
@@ -93,16 +107,16 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                 }}
                 stepsFormRender={(dom, submitter) => {
                     return (
-                        <Modal
+                        <Drawer
                             title="创建部署"
                             width={600}
-                            onCancel={() => { props.visibleFunc[1](false) }}
+                            onClose={() => { props.visibleFunc[1](false) }}
                             visible={props.visibleFunc[0]}
                             footer={submitter}
                             destroyOnClose={true}
                         >
                             {dom}
-                        </Modal>
+                        </Drawer>
                     );
                 }}
             >
@@ -131,7 +145,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         return res.success
                     }}
                 >
-                    <ProForm.Item label="部署名称" name='nickname'>
+                    <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }]}>
                         <Input ></Input>
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level'>
@@ -147,7 +161,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                             ]}
                         ></Select>
                     </ProForm.Item>
-                    <ProForm.Item label="集群" name='clusterId' >
+                    <ProForm.Item label="集群" name='clusterId' rules={[{ required: true, message: '请选择集群' }]} >
                         <Select
                             disabled={props.isEdit}
                             options={cluster}
@@ -159,7 +173,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         >
                         </Select>
                     </ProForm.Item>
-                    <ProForm.Item label="命名空间" name='namespaceId'>
+                    <ProForm.Item label="命名空间" name='namespaceId'  rules={[{ required: true, message: '请选择命名空间' }]} >
                         <Select
                             disabled={props.isEdit}
                             options={namespace}

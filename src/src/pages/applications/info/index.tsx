@@ -162,11 +162,12 @@ const AppInfo: React.FC = () => {
                             }
                             Promise.all(asyncAll).then(asyncPodList => {
                                 const list = [...datasource.data]
+                                console.log(asyncPodList)
                                 asyncPodList.forEach((podSet) => {
                                     if (podSet.data) {
-                                        list[podSet.index].lastImage = podSet.data.containers[0].image
-                                        list[podSet.index].running = podSet.data.containers.length
-                                        list[podSet.index].serviceIP = podSet.data.ip
+                                        list[podSet.index].lastImage = podSet.data[0].containers[0].image
+                                        list[podSet.index].running = podSet.data.length
+                                        list[podSet.index].serviceIP = podSet.data[0].ip
                                     } else {
                                         list[podSet.index].lastImage = '无'
                                         list[podSet.index].running = 0

@@ -37,5 +37,5 @@ export const getPodList = async (appName:string , clusterId:number , index :numb
         if (resData.data == null){
             return { index:index, data: null }
         }  
-        return { index:index, data: resData.data[0] }
+        return { index:index, data: resData.data }
     }
