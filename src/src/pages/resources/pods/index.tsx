@@ -1,19 +1,21 @@
 
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
+import ProForm,{ ModalForm,ProFormInstance} from '@ant-design/pro-form';
 import { history,Link } from 'umi';
 import { PodItem } from './data';
-import { Typography, Button , Space ,Tooltip,Tag} from 'antd'
+import { Typography, Button , Space ,Tooltip,Tag , Modal , InputNumber } from 'antd'
 import { getPodList,getNamespaceList }  from './service'
 import React, { useState, useRef } from 'react';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 import moment from 'moment'; 
 
 const Pods: React.FC = (props) => {
-    const actionRef = useRef<ActionType>();
     const [time, setTime] = useState(() => Date.now());
     const [polling, setPolling] = useState<number | undefined>(undefined);
-
+    const [visableScaleModal, setVisableScaleModal] = useState<boolean>(false);
+    const formScaleModalRef = useRef<ProFormInstance>();
+    var deploymentInfo =  history.location.state
 
     var deployId = history.location.query?.did
     var namespace = history.location.query?.ns
@@ -173,7 +175,6 @@ const Pods: React.FC = (props) => {
         >
             <ProTable<PodItem>
                 rowKey={record=>record.name}
-                actionRef={actionRef}
                 columns={podColumns}
                 dateFormatter="string"
                 headerTitle={`Pod 列表 - 上次更新时间：${moment(time).format('HH:mm:ss')}`}
@@ -200,6 +201,15 @@ const Pods: React.FC = (props) => {
                     <Button key='button'  type="primary" icon={<ExpandAltOutlined />} style={{  display: did>0?'block':'none'}}
                         onClick={() => {
                             //伸缩请求
+                            setVisableScaleModal(true)
+                            var replicas = 1
+                            if (deploymentInfo!= null ){
+                                replicas = deploymentInfo.expected
+                            }
+  
+                            setTimeout(()=>{
+                                formScaleModalRef.current?.setFieldsValue({ replicas: replicas })
+                            } , 200)
                             setPolling(1000);
                         }}>伸缩实例</Button>,
                     <Button key='button' danger  style={{  display: did>0?'block':'none'}}
@@ -212,6 +222,25 @@ const Pods: React.FC = (props) => {
                         {polling ? '停止轮询' : '开始轮询'}
                     </Button>,  ]}
             />
+
+        <ModalForm<{ replicas:number; }> 
+          title="实例伸缩"
+          formRef={formScaleModalRef}
+          width={350}
+          visible={visableScaleModal}
+          onVisibleChange={setVisableScaleModal}
+          onFinish={ async (values) => {
+            setVisableScaleModal(false)
+            return true
+          }}
+          autoFocusFirstInput
+          layout="horizontal"
+          modalProps={{ forceRender: true, destroyOnClose: true, centered:true }} >
+           <ProForm.Item label="副本数量" name='replicas' rules={[{ required: true, message: "请输入副本数量" }]}>
+                <InputNumber min={0} max={20}></InputNumber>
+           </ProForm.Item>
+        </ModalForm>
+
         </PageContainer>)
 
 }
