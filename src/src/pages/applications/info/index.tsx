@@ -46,7 +46,7 @@ const AppInfo: React.FC = () => {
             width: 250,
             render: (_, row) => {
                 return <span>
-                    <Paragraph><Link to={'/resources/pods?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId} >{row.name}</Link></Paragraph>
+                    <Paragraph><Link to={'/resources/pods?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId + '&ns=' + row.namespace  } >{row.name}</Link></Paragraph>
                     <Paragraph>{row.nickname}</Paragraph>
                 </span>
             }

@@ -16,6 +16,7 @@ const Pods: React.FC = (props) => {
 
 
     var deployId = history.location.query?.did
+    var namespace = history.location.query?.ns
     var appName = history.location.query?.app
     var clusterId = history.location.query?.cid
     var node = history.location.query?.node
@@ -154,7 +155,7 @@ const Pods: React.FC = (props) => {
     if (appName) {
         breadcrumb[0] = { path:'', breadcrumbName:'应用中心'  }
         breadcrumb[1] = { path:'', breadcrumbName:'Pod列表'  }
-        pageTitle =  pageTitle + ' -- 应用: ' + appName
+        pageTitle =  pageTitle + ' -- 应用部署: ' + appName
     } else if (node) {
         breadcrumb[0] = { path:'', breadcrumbName:'资源中心'  }
         breadcrumb[1] = { path:'', breadcrumbName:'集群管理'  }
