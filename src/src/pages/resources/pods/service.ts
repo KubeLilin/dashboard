@@ -7,12 +7,12 @@ export const getNamespaceList = async(cid?:string)=>{
     const params = {
         cid:cid
     }
-    let resData=await request< ApiResponse<NamespaceItem[]>>("/v1/cluster/namespaces",{
+    let resData=await request< ApiResponse<any[]>>("/v1/cluster/namespacesfromdb",{
         method:'GET',
         params:params
     })
 
-    return resData.data.map(item =>   {  return  {label: item.name, value: item.name } } )
+    return resData.data.map(item =>   {  return  {label: item.namespace, value: item.namespace } } )
 }
 
 
@@ -62,4 +62,15 @@ export const getPodList = async (
             method:'GET',
         })
         return req
+    }
+
+
+    export const destroyPod = (requestData:any) =>{
+        return request< ApiResponse<any>>("/v1/deployment/destroypod",{
+            method:'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            data:requestData
+        })
     }

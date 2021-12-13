@@ -5,7 +5,7 @@ import ProForm,{ ModalForm,ProFormInstance} from '@ant-design/pro-form';
 import { history,Link } from 'umi';
 import { PodItem } from './data';
 import { Typography, Button , Space ,Tooltip,Tag , Modal , InputNumber ,message ,Popconfirm} from 'antd'
-import { getPodList,getNamespaceList,setReplicasByDeployId , GetDeploymentFormInfo }  from './service'
+import { getPodList,getNamespaceList,setReplicasByDeployId , GetDeploymentFormInfo ,destroyPod }  from './service'
 import React, { useState, useRef } from 'react';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 import moment from 'moment'; 
@@ -103,7 +103,22 @@ const Pods: React.FC = (props) => {
           dataIndex: 'x',
           valueType: 'option',
           render: (_, record) => {
-            return [<a key="delete">销毁重建</a>,<a key="remote">远程登录</a>];
+            return [ 
+                <Popconfirm key="confirm_delete" title="确定要销毁实例吗?"
+                    onConfirm={ async()=>{         
+                        const resp = await destroyPod({
+                            clusterId: Number(clusterId),
+                            namespace: record.namespace,
+                            podName:record.name
+                        })
+                        if(resp.success) { 
+                            message.success("销毁操作成功")
+                            setPolling(1000)
+                        } else {  message.error("销毁操作失败") }
+                    }}>
+                <a key="delete">销毁重建</a></Popconfirm>,
+                <a key="remote">远程登录</a>
+            ]
           },
         },
     
