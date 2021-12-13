@@ -4,8 +4,8 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm,{ ModalForm,ProFormInstance} from '@ant-design/pro-form';
 import { history,Link } from 'umi';
 import { PodItem } from './data';
-import { Typography, Button , Space ,Tooltip,Tag , Modal , InputNumber } from 'antd'
-import { getPodList,getNamespaceList }  from './service'
+import { Typography, Button , Space ,Tooltip,Tag , Modal , InputNumber ,message ,Popconfirm} from 'antd'
+import { getPodList,getNamespaceList,setReplicasByDeployId , GetDeploymentFormInfo }  from './service'
 import React, { useState, useRef } from 'react';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 import moment from 'moment'; 
@@ -199,23 +199,33 @@ const Pods: React.FC = (props) => {
                             setPolling(1000);
                         }}>部署应用</Button>,
                     <Button key='button'  type="primary" icon={<ExpandAltOutlined />} style={{  display: did>0?'block':'none'}}
-                        onClick={() => {
-                            //伸缩请求
-                            setVisableScaleModal(true)
+                        onClick={ async () => {
+                            const hide = message.loading('正在加载部署信息...', 0);
+                            const resp = await GetDeploymentFormInfo(did)
                             var replicas = 1
-                            if (deploymentInfo!= null ){
-                                replicas = deploymentInfo.expected
+                            if(resp.success) {
+                                replicas = resp.data.replicas
+                                  //伸缩请求
+                                setVisableScaleModal(true)
+                                setTimeout(()=>{
+                                    formScaleModalRef.current?.setFieldsValue({ replicas: replicas })
+                                } , 200)
+                            } else {
+                                message.error('实例伸缩失败,请重试！');
                             }
-  
-                            setTimeout(()=>{
-                                formScaleModalRef.current?.setFieldsValue({ replicas: replicas })
-                            } , 200)
-                            setPolling(1000);
+                            hide()
                         }}>伸缩实例</Button>,
-                    <Button key='button' danger  style={{  display: did>0?'block':'none'}}
-                        onClick={() => {
-
-                    }}>清空实例</Button>,
+                    <Popconfirm
+                        title="确定要清空实例吗?"
+                        onConfirm={async()=>{
+                            const resp = await setReplicasByDeployId(did,0)
+                            setPolling(1000);
+                            if (resp.success) {
+                                message.success('清空实例成功');
+                            } else {
+                                message.error('清空实例失败！');
+                            }
+                        }}> <Button key='button' danger  style={{  display: did>0?'block':'none'}}>清空实例</Button></Popconfirm>,
                     <Button key="3"  
                       onClick={() => { if (polling) { setPolling(undefined); return;  } setPolling(2000);  }} >
                         {polling ? <LoadingOutlined /> : <ReloadOutlined />}
@@ -230,14 +240,26 @@ const Pods: React.FC = (props) => {
           visible={visableScaleModal}
           onVisibleChange={setVisableScaleModal}
           onFinish={ async (values) => {
-            setVisableScaleModal(false)
+            if (deploymentInfo.expected == values.replicas) {
+                message.warning('伸缩无变化');
+            } else {
+                const resp = await setReplicasByDeployId(did,values.replicas)
+                setPolling(1000);
+                if (resp.success) {
+                    message.success('实例伸缩成功');
+                } else {
+                    message.error('实例伸缩失败！');
+                }
+            }
+
+            //setVisableScaleModal(false)
             return true
           }}
           autoFocusFirstInput
           layout="horizontal"
           modalProps={{ forceRender: true, destroyOnClose: true, centered:true }} >
            <ProForm.Item label="副本数量" name='replicas' rules={[{ required: true, message: "请输入副本数量" }]}>
-                <InputNumber min={0} max={20}></InputNumber>
+                <InputNumber min={1} max={20}></InputNumber>
            </ProForm.Item>
         </ModalForm>
 

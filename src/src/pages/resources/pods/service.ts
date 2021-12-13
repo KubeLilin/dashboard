@@ -41,3 +41,25 @@ export const getPodList = async (
         }
         
     }
+
+
+    export const setReplicasByDeployId = (deployId:number, replicas:number) =>{
+        return request< ApiResponse<any>>("/v1/deployment/replicasbyid",{
+            method:'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            data:{
+                deployId: deployId,
+                number: replicas
+            }
+        })
+    }
+
+
+    export async function GetDeploymentFormInfo(id?:number) {
+        let req=await request<ApiResponse<any>>(`/v1/deployment/deploymentforminfo?dpId=${id}`,{
+            method:'GET',
+        })
+        return req
+    }
