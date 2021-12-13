@@ -259,7 +259,7 @@ const Pods: React.FC = (props) => {
           layout="horizontal"
           modalProps={{ forceRender: true, destroyOnClose: true, centered:true }} >
            <ProForm.Item label="副本数量" name='replicas' rules={[{ required: true, message: "请输入副本数量" }]}>
-                <InputNumber min={1} max={20}></InputNumber>
+                <InputNumber autoFocus={true} min={1} max={20}></InputNumber>
            </ProForm.Item>
         </ModalForm>
 
