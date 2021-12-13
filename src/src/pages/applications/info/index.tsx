@@ -158,7 +158,7 @@ const AppInfo: React.FC = () => {
                             var asyncAll = []
                             for (var index = 0; index < datasource.data.length; index++) {
                                 var item = datasource.data[index]
-                                asyncAll.push(getPodList(item.name, 2, index))
+                                asyncAll.push(getPodList(item.name, item.clusterId, index))
                             }
                             Promise.all(asyncAll).then(asyncPodList => {
                                 const list = [...datasource.data]
