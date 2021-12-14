@@ -98,7 +98,7 @@ const Apps: React.FC = () => {
 
 
     return (
-        <PageContainer>
+        <PageContainer >
             <ProTable<ApplicationItem>
                 columns={columns}
                 rowKey="id"

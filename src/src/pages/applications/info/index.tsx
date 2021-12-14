@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Tabs } from 'antd';
+import { Tabs,Layout } from 'antd';
 import React, { useEffect } from 'react';
 
 import styles from './index.less';
@@ -20,6 +20,8 @@ import { DeploymentItem } from './data'
 import { getDeploymentList, getPodList } from './deployment.service'
 
 const { TabPane } = Tabs;
+const { Content } = Layout;
+
 const { Text, Paragraph } = Typography;
 
 const AppInfo: React.FC = () => {
@@ -128,13 +130,14 @@ const AppInfo: React.FC = () => {
 
 
     return (
-        <PageContainer title={'应用: ' + appName}
+        <PageContainer title={'应用: ' + appName} style={{background:'white'}}
             header={{
                 extra: [
                     <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
-            <Tabs defaultActiveKey="1" size="large"  >
-                <TabPane tab="部署环境" key="1">
+            <Content>
+            <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' }} >
+                <TabPane tab="部署环境" key="1" >
                     <ProTable<DeploymentItem>
                         columns={columns}
                         rowKey="id"
@@ -184,24 +187,23 @@ const AppInfo: React.FC = () => {
                         }}
                     ></ProTable>
                 </TabPane>
-                <TabPane tab="基本信息" key="2">
+                <TabPane tab="基本信息" key="2" >
                     Content of Tab Pane 2
                 </TabPane>
-                <TabPane tab="镜像仓库" key="3">
-                    Content of Tab Pane 3
-                </TabPane>
-                <TabPane tab="发布记录" key="4">
+                <TabPane tab="发布记录" key="3" >
                     Content of Tab Pane 4
                 </TabPane>
-                <TabPane tab="应用配置" key="5">
+                <TabPane tab="应用配置" key="4" disabled>
                     Content of Tab Pane 5
                 </TabPane>
-                <TabPane tab="应用监控" key="6">
+                <TabPane tab="应用监控" key="5" disabled>
                     Content of Tab Pane 6
                 </TabPane>
             </Tabs>
+         
             <DevlopmentFormentForm visibleFunc={[stepFormVisible, setStepFormVisible]}
                 appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+            </Content>
         </PageContainer>
     )
 
