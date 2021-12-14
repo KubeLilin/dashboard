@@ -220,6 +220,7 @@ const Pods: React.FC = (props) => {
                             var replicas = 1
                             if(resp.success) {
                                 replicas = resp.data.replicas
+                                deploymentInfo.expected = replicas
                                   //伸缩请求
                                 setVisableScaleModal(true)
                                 setTimeout(()=>{
