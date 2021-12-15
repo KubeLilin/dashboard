@@ -7,7 +7,7 @@ import { PodItem,ContainerItem,podLogsRequest } from './data';
 import { Tabs, Button , Space ,Tooltip,Tag , Modal , InputNumber ,message ,Popconfirm ,Select ,Switch} from 'antd'
 import { getPodList,getNamespaceList,setReplicasByDeployId , GetDeploymentFormInfo ,destroyPod,getPodLogs }  from './service'
 import React, { useState, useRef, useEffect } from 'react';
-import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
+import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined ,SearchOutlined } from '@ant-design/icons';
 const { TabPane } = Tabs;
 const { Option } = Select;
 import moment from 'moment'; 
@@ -328,7 +328,11 @@ const Pods: React.FC = (props) => {
                         <Option value={1000}>显示1000条数据</Option>
                     </Select>
 
-                    <Button type="primary"  style={{ marginLeft: 5 }}>手动刷新</Button>
+                    <Button type="primary" icon={<SearchOutlined />}  style={{ marginLeft: 5 }}
+                     onClick={()=>{
+                        bindLogsFunc()
+                     }}
+                    >手动刷新</Button>
 
                     <Switch size="default" style={{ marginLeft: 15 }} checkedChildren="自动" unCheckedChildren="手动" checked={autoLogs}
                         onChange={(v)=>{
