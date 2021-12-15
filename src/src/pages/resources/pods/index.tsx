@@ -3,10 +3,10 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm,{ ModalForm,ProFormInstance} from '@ant-design/pro-form';
 import { history,Link } from 'umi';
-import { PodItem,ContainerItem } from './data';
-import { Tabs, Button , Space ,Tooltip,Tag , Modal , InputNumber ,message ,Popconfirm ,Select} from 'antd'
-import { getPodList,getNamespaceList,setReplicasByDeployId , GetDeploymentFormInfo ,destroyPod }  from './service'
-import React, { useState, useRef } from 'react';
+import { PodItem,ContainerItem,podLogsRequest } from './data';
+import { Tabs, Button , Space ,Tooltip,Tag , Modal , InputNumber ,message ,Popconfirm ,Select ,Switch} from 'antd'
+import { getPodList,getNamespaceList,setReplicasByDeployId , GetDeploymentFormInfo ,destroyPod,getPodLogs }  from './service'
+import React, { useState, useRef, useEffect } from 'react';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined } from '@ant-design/icons';
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -18,13 +18,18 @@ const Pods: React.FC = (props) => {
     const [polling, setPolling] = useState<number | undefined>(undefined);
     const [visableScaleModal, setVisableScaleModal] = useState<boolean>(false);
     const formScaleModalRef = useRef<ProFormInstance>();
+    //
     const [podListState, handePodListState] = useState<PodItem[]>([]);
     const [containerListState, handeContainerListState] = useState<ContainerItem[]>([]);
     const [ selectedPodName ,setSelectedPodName ]= useState<string | undefined>(undefined);
     const [ selectedContainerName , setSelectedContainerName ]= useState<string | undefined>(undefined);
+    const [ selectedLines , setSelectedLines ]= useState<number>(100);
+    const [ autoLogs , setAutoLogs ]= useState<boolean>(false)
+    const [ logContent , setLogContent ] = useState<string[]>([]);
+    var text1:any = undefined ;
+    
 
     var deploymentInfo =  history.location.state
-
     var deployId = history.location.query?.did
     var namespace = history.location.query?.ns
     var appName = history.location.query?.app
@@ -34,8 +39,6 @@ const Pods: React.FC = (props) => {
     if (deployId) {
         did = Number(deployId)
     }
-    console.log(did)
-
     if (clusterId == undefined && ( node == undefined || appName ==undefined )) {
         history.goBack()
     }
@@ -185,6 +188,29 @@ const Pods: React.FC = (props) => {
          
     } 
 
+    const bindLogsFunc = async() => {
+        const req:podLogsRequest = { clusterId: Number(clusterId), namespace: namespace?.toString(),
+            podName: selectedPodName, containerName: selectedContainerName, lines: selectedLines }
+        console.log(req)
+        var lines = await getPodLogs(req)
+        setLogContent(lines)
+        if(text1){
+            text1.scrollTop = text1.scrollHeight
+        }
+    }
+   
+    useEffect(()=>{
+        if (selectedPodName && selectedContainerName){
+            bindLogsFunc()
+            var id:NodeJS.Timeout
+            if (autoLogs){
+                id = setInterval(bindLogsFunc,2000)
+            }
+            return ()=>{ clearInterval(id) }
+        }
+    },[selectedPodName,selectedContainerName,selectedLines,autoLogs])
+
+
     return(
         <PageContainer title={pageTitle} style={{background:'white'}}
           header={{
@@ -196,11 +222,14 @@ const Pods: React.FC = (props) => {
         >
          <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' }} 
             onChange={(e)=>{
-                    if(e == "2") {
-                        console.log(podListState)
-                        handePodListState(podListState)
-                        handeContainerListState(podListState[0].containers)
-                        if(podListState.length > 0){
+                if (e!="2") {
+                    setAutoLogs(false)
+                } 
+                else if(e == "2") {
+                    console.log(podListState)
+                    handePodListState(podListState)
+                    handeContainerListState(podListState[0].containers)
+                    if(podListState.length > 0){
                         setSelectedPodName(podListState[0].name)
                         setSelectedContainerName(podListState[0].containers[0].name)
                     }
@@ -271,374 +300,47 @@ const Pods: React.FC = (props) => {
             />
             </TabPane>
             <TabPane tab="日志" key="2"  >
-                        <p>
-                        <Select defaultValue={ selectedPodName } bordered autoFocus  style={{ width: 320 }} 
-                        defaultActiveFirstOption options={ podListState.map(pod=> { return {label:pod.name,value:pod.name}}) }
+               <div style={{ marginBottom: 10  }}>
+                    <Select value={ selectedPodName } bordered autoFocus  style={{ width: 320 }}  defaultActiveFirstOption 
+                        options={ podListState.map(pod=> ({ label:pod.name,value:pod.name }) ) }
                         onChange={(v,op)=>{
+                            setSelectedPodName(v)
                             const filter = podListState.filter(item=>item.name == v)
                             if(filter.length > 0){
                                 handeContainerListState(filter[0].containers)
                                 setSelectedContainerName(filter[0].containers[0].name)
                             }
-                            console.log(op)
-                        }}></Select>
+                        }}
+                    > 
+                    </Select>
+                    <Select value={ selectedContainerName } bordered style={{ width: 320, marginLeft: 5 }} 
+                        options={  containerListState.map(c=> ({ label: c.name,value: c.name }) ) }
+                        onSelect={(val)=>{
+                            setSelectedContainerName(val)
+                        }} > </Select >
+                    <Select value={ selectedLines } bordered  style={{ width: 320, marginLeft: 5 }}
+                        onSelect={(value)=>{
+                            setSelectedLines(value)
+                        }}>
+                        <Option value={100} >显示100条数据</Option>
+                        <Option value={200} >显示200条数据</Option>
+                        <Option value={500} >显示500条数据</Option>
+                        <Option value={1000}>显示1000条数据</Option>
+                    </Select>
 
-                        <Select defaultValue={ selectedContainerName } style={{ width: 320, marginLeft: 5 }}>
-                            { containerListState.map(c=> (
-                                <Option key={c.name} value={c.name}>{c.name}</Option>
-                            ))}
-                        </Select >
-                        <Select defaultValue="100"  style={{ width: 320, marginLeft: 5 }}>
-                            <Option value="100" >显示100条数据</Option>
-                            <Option value="200" >显示200条数据</Option>
-                            <Option value="500" >显示500条数据</Option>
-                            <Option value="1000" >显示1000条数据</Option>
-                        </Select>
-                        </p>
-                        <textarea readOnly style={{ background:'black'  , width:'100%' ,height:780 , 
-                           border:'1px solid rgb(221,221,221)' ,fontSize: '15px',color:'whitesmoke'  }}>
-2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
+                    <Button type="primary"  style={{ marginLeft: 5 }}>手动刷新</Button>
 
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms
-2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms
-2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms
-2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms2021-11-01T17:00:06.391806382Z 
-2021-11-01T17:00:08.195614415Z 2021-11-02 01:00:08,191 INFO Root WebApplicationContext: initialization completed in 23196 ms
-2021-11-01T17:00:08.195653418Z 
-2021-11-01T17:00:30.283789205Z 2021-11-02 01:00:30,275 INFO Initializing ExecutorService 'applicationTaskExecutor'
-2021-11-01T17:00:30.283830252Z 
-2021-11-01T17:00:30.987839913Z 2021-11-02 01:00:30,984 INFO Adding welcome page: class path resource [static/index.html]
-2021-11-01T17:00:30.987873145Z 
-2021-11-01T17:00:32.999790701Z 2021-11-02 01:00:32,994 INFO Creating filter chain: Ant [pattern='/**'], []
-2021-11-01T17:00:32.999814315Z 
-2021-11-01T17:00:33.187785117Z 2021-11-02 01:00:33,182 INFO Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@65c86db8, org.springframework.security.web.context.SecurityContextPersistenceFilter@7e2c64, org.springframework.security.web.header.HeaderWriterFilter@7c8f9c2e, org.springframework.security.web.csrf.CsrfFilter@772861aa, org.springframework.security.web.authentication.logout.LogoutFilter@47b67fcb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@383864d5, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@41b1f51e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7efe7b87, org.springframework.security.web.session.SessionManagementFilter@3cbf1ba4, org.springframework.security.web.access.ExceptionTranslationFilter@19962194]
-2021-11-01T17:00:33.187813079Z 
-2021-11-01T17:00:33.77577466Z 2021-11-02 01:00:33,774 INFO Initializing ExecutorService 'taskScheduler'
-2021-11-01T17:00:33.775797423Z 
-2021-11-01T17:00:33.799280757Z 2021-11-02 01:00:33,799 INFO Exposing 16 endpoint(s) beneath base path '/actuator'
-2021-11-01T17:00:33.799299462Z 
-2021-11-01T17:00:34.475784781Z 2021-11-02 01:00:34,475 INFO Tomcat started on port(s): 8848 (http) with context path '/nacos'
-2021-11-01T17:00:34.47580563Z 
-2021-11-01T17:00:34.494183355Z 2021-11-02 01:00:34,493 INFO Nacos started successfully in stand alone mode. use embedded storage
-2021-11-01T17:00:34.494204234Z 
-2021-11-01T17:00:34.879769549Z 2021-11-02 01:00:34,877 INFO Initializing Servlet 'dispatcherServlet'
-2021-11-01T17:00:34.879791471Z 
-2021-11-01T17:00:34.89177441Z 2021-11-02 01:00:34,890 INFO Completed initialization in 12 ms
-                        </textarea>
+                    <Switch size="default" style={{ marginLeft: 15 }} checkedChildren="自动" unCheckedChildren="手动" checked={autoLogs}
+                        onChange={(v)=>{
+                            setAutoLogs(v)
+                        }}
+                    />
+                </div>
+                <textarea value={logContent} ref={(text)=> { 
+                        if (text){ text.scrollTop = Number(text?.scrollHeight)   }  }} 
+                    rows={selectedLines}  readOnly style={{ background:'black'  , width:'100%' ,height:780 , 
+                    border:'1px solid rgb(221,221,221)' ,fontSize: '15px',color:'whitesmoke'  }}>
+                </textarea>
             </TabPane>
             <TabPane tab="事件" key="3" >
             </TabPane>
@@ -664,8 +366,6 @@ const Pods: React.FC = (props) => {
                     message.error('实例伸缩失败！');
                 }
             }
-
-            //setVisableScaleModal(false)
             return true
           }}
           autoFocusFirstInput

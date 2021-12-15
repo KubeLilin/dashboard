@@ -27,3 +27,11 @@ export type ContainerItem = {
 export type NamespaceItem = {
     name : string
 }
+
+export type podLogsRequest = {
+    clusterId: number,
+    namespace?: string,
+    podName?: string,
+    containerName?:string ,
+    lines:number
+}

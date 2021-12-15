@@ -1,7 +1,7 @@
 import success from '@/pages/result/success';
 import { ApiResponse } from '@/services/public/service';
 import { request } from 'umi';
-import { NamespaceItem, PodItem } from './data';
+import { NamespaceItem, PodItem ,podLogsRequest } from './data';
 
 export const getNamespaceList = async(cid?:string)=>{
     const params = {
@@ -73,4 +73,12 @@ export const getPodList = async (
             },
             data:requestData
         })
+    }
+
+    export const getPodLogs = async (req:podLogsRequest) => {
+        let resData= await request< ApiResponse<string[]>>("/v1/deployment/podlogs",{
+            method:'GET',
+            params:req
+        })
+        return resData.data
     }
