@@ -90,3 +90,11 @@ export const getPodList = async (
         })
         return resData
     }
+
+    export async function getYaml(dpId:any) {
+        let req=await request<ApiResponse<string>>("/v1/deployment/yaml",{
+            method:'GET',
+            params:{dpId:dpId}
+        })
+        return req
+    }

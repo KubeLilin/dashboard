@@ -215,7 +215,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                             -
                         </Space>
                         <ProFormItem name='limitCpu' label='Limit' rules={[{ required: true, message: "limitCpu不可为空" }]} valueType >
-                            <InputNumber step={0.1} min={0} max={1}></InputNumber>
+                            <InputNumber step={0.1} min={0} max={128}></InputNumber>
                         </ProFormItem>
 
                     </ProForm.Group>

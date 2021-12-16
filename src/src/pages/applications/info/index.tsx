@@ -17,7 +17,7 @@ import { PlusOutlined, EllipsisOutlined, LoadingOutlined,CloudUploadOutlined } f
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
-import { getDeploymentList, getPodList } from './deployment.service'
+import { executeDeployment, getDeploymentList, getPodList } from './deployment.service'
 
 const { TabPane } = Tabs;
 const { Content } = Layout;
@@ -119,6 +119,7 @@ const AppInfo: React.FC = () => {
                 <Button key="depoly" type="primary"  icon={<CloudUploadOutlined />} onClick={() => {
                     tableListDataSource[0].namespace = 'n' + Math.random()
                     setTableListDataSource(tableListDataSource)
+                    executeDeployment(record.id)
                 }}>部署应用</Button>,
                 <Button key="edit" onClick={() => {
                     stepDpId(record.id)
