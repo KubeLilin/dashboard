@@ -14,9 +14,10 @@ const { Option } = Select;
 import moment from 'moment'; 
 import ProCard from '@ant-design/pro-card';
 import TextArea from 'antd/lib/input/TextArea';
-import 'codemirror/lib/codemirror.js'
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/mode/yaml/yaml';
+ import 'codemirror/lib/codemirror.js'
+ import 'codemirror/lib/codemirror.css';
+ import 'codemirror/mode/yaml/yaml';
+import'./solarized.css'
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 
 const Pods: React.FC = (props) => {
@@ -381,13 +382,17 @@ const Pods: React.FC = (props) => {
                 </TabPane>
                 <TabPane tab="YAML" key="4" >
                     <CodeMirror
-                                value={yamlContent}
-                                options={{
-                                    mode:{name:'text/yaml'},
-                                    theme: 'solarized',
-                                    readOnly: true
-                                }}
-                            />
+                        value={yamlContent}
+                        options={{
+                            mode:{name:'text/yaml'},
+                            theme: 'solarized dark',
+                            readOnly: true
+                        }}
+
+                    >
+
+                    </CodeMirror>
+
                 </TabPane>
             </Tabs>
 
