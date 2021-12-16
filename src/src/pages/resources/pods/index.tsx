@@ -16,7 +16,7 @@ import TextArea from 'antd/lib/input/TextArea';
  import 'codemirror/lib/codemirror.js'
  import 'codemirror/lib/codemirror.css';
  import 'codemirror/mode/yaml/yaml';
-
+import'./solarized.css'
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 const Pods: React.FC = (props) => {
     const [time, setTime] = useState(() => Date.now());
@@ -387,7 +387,7 @@ const Pods: React.FC = (props) => {
                         value={yamlContent}
                         options={{
                             mode:{name:'text/yaml'},
-                            theme: 'solarized',
+                            theme: 'solarized dark',
                             readOnly: true
                         }}
 
