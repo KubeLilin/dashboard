@@ -35,3 +35,20 @@ export type podLogsRequest = {
     containerName?:string ,
     lines:number
 }
+
+
+export type EventsList = {
+    firstTime: string,
+	lastTime: string,
+	name: string
+	level: string
+	reason :string
+	infomation: string
+	kind: string
+}
+
+export type  EventListProps = {
+    clusterId?:number,
+    namespace?:string,
+    deployment?:string,
+}

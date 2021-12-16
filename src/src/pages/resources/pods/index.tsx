@@ -8,10 +8,12 @@ import { Tabs, Button , Space ,Tooltip,Tag , Modal , InputNumber ,message ,Popco
 import { getPodList,getNamespaceList,setReplicasByDeployId , GetDeploymentFormInfo ,destroyPod,getPodLogs }  from './service'
 import React, { useState, useRef, useEffect } from 'react';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined ,SearchOutlined } from '@ant-design/icons';
+import EventListComponent from './events';
+
 const { TabPane } = Tabs;
 const { Option } = Select;
 import moment from 'moment'; 
-import ProCard from '@ant-design/pro-card';
+
 
 const Pods: React.FC = (props) => {
     const [time, setTime] = useState(() => Date.now());
@@ -347,6 +349,7 @@ const Pods: React.FC = (props) => {
                 </textarea>
             </TabPane>
             <TabPane tab="事件" key="3" >
+                <EventListComponent clusterId={ Number(clusterId) } deployment={ appName?.toString() } namespace={ namespace?.toString() } ></EventListComponent>
             </TabPane>
             <TabPane tab="YAML" key="4" >
             </TabPane>
