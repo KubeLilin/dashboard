@@ -54,13 +54,13 @@ const Pods: React.FC = (props) => {
     function bindYaml() {
         let res = getYaml(deployId)
         res.then((x) => {
-            if (x.success) {
+            if (x?.success) {
                 setyamlContent(x.data)
             } else {
                 notification.open({
                     message: '获取Pod Yaml失败',
                     description:
-                        x.message,
+                        x?.message,
 
                 });
             }
@@ -218,6 +218,10 @@ const Pods: React.FC = (props) => {
             podName: selectedPodName, containerName: selectedContainerName, lines: selectedLines
         }
         console.log(req)
+        if(!req.podName){
+            return 
+        }
+
         var lines = await getPodLogs(req)
         setLogContent(lines)
         if (text1) {
@@ -226,7 +230,6 @@ const Pods: React.FC = (props) => {
     }
 
     useEffect(() => {
-        bindYaml()
         if (selectedPodName && selectedContainerName) {
             bindLogsFunc()
             var id: NodeJS.Timeout
@@ -249,17 +252,22 @@ const Pods: React.FC = (props) => {
         >
             <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background: 'white' }}
                 onChange={(e) => {
-                    if (e != "2") {
-                        setAutoLogs(false)
-                    }
-                    else if (e == "2") {
-                        console.log(podListState)
-                        handePodListState(podListState)
-                        handeContainerListState(podListState[0].containers)
-                        if (podListState.length > 0) {
-                            setSelectedPodName(podListState[0].name)
-                            setSelectedContainerName(podListState[0].containers[0].name)
-                        }
+                    switch(e){
+                        case "2":
+                            console.log(podListState)
+                            if (podListState.length > 0) {
+                                handePodListState(podListState)
+                                handeContainerListState(podListState[0].containers)
+                                setSelectedPodName(podListState[0].name)
+                                setSelectedContainerName(podListState[0].containers[0].name)
+                            }
+                            break;
+                        case "4":
+                            bindYaml()
+                            setAutoLogs(false)
+                            break
+                        default:
+                            setAutoLogs(false)
                     }
                 }}>
                 <TabPane tab="实例管理" key="1" >
@@ -381,18 +389,18 @@ const Pods: React.FC = (props) => {
                     <EventListComponent clusterId={ Number(clusterId) } deployment={ appName?.toString() } namespace={ namespace?.toString() } ></EventListComponent>
                 </TabPane>
                 <TabPane tab="YAML" key="4" >
+                    <div style={{  height: 890 }}>
                     <CodeMirror
+                        editorDidMount={editor => { editor.setSize('auto','780') }}
                         value={yamlContent}
                         options={{
                             mode:{name:'text/yaml'},
                             theme: 'solarized dark',
-                            readOnly: true
+                            readOnly: true,
                         }}
-
                     >
-
                     </CodeMirror>
-
+                    </div>
                 </TabPane>
             </Tabs>
 

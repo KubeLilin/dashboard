@@ -81,7 +81,10 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                     serviceAway: 'ClusterPort',
                     servicePort: '8080' ,
                     replicas: 1,
-                
+                    requestCpu: 0.25,
+                    requestMemory: 128,
+                    limitCpu: 0.25,
+                    limitMemory: 256
                 })
             })
         }
@@ -132,7 +135,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         } else {
                             value.appId = parseInt(props.appId);
                             value.clusterId = clusterId;
-                            value.name = `${value.level}-${props.appName}-${clusterName}`;
+                            value.name = (`${value.level}-${props.appName}-${clusterName}`).trim();
                         }
                         let res = await CreateDeploymnet(value)
                         if (res.success == false) {
