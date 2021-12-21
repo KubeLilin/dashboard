@@ -8,17 +8,18 @@ import { Tabs, Button, Space, Tooltip, Tag, Modal, InputNumber, message, Popconf
 import { getPodList, getNamespaceList, setReplicasByDeployId, GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml } from './service'
 import React, { useState, useRef, useEffect } from 'react';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined ,SearchOutlined } from '@ant-design/icons';
-import EventListComponent from './events';
 const { TabPane } = Tabs;
 const { Option } = Select;
 import moment from 'moment'; 
-import ProCard from '@ant-design/pro-card';
-import TextArea from 'antd/lib/input/TextArea';
- import 'codemirror/lib/codemirror.js'
- import 'codemirror/lib/codemirror.css';
- import 'codemirror/mode/yaml/yaml';
-import'./solarized.css'
+import 'codemirror/lib/codemirror.js'
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/mode/yaml/yaml';
+//import'./solarized.css'
+import './monokai-bright.css'
 import { UnControlled as CodeMirror } from 'react-codemirror2';
+import EventListComponent from './events';
+import WebTerminal from './terminal';
+
 
 const Pods: React.FC = (props) => {
     const [time, setTime] = useState(() => Date.now());
@@ -386,6 +387,7 @@ const Pods: React.FC = (props) => {
                 </TabPane>
                
                 <TabPane tab="事件" key="3" >
+                    {/* <WebTerminal pod_Name='' namespace={ namespace?.toString() } container_Name='' ></WebTerminal> */}
                     <EventListComponent clusterId={ Number(clusterId) } deployment={ appName?.toString() } namespace={ namespace?.toString() } ></EventListComponent>
                 </TabPane>
                 <TabPane tab="YAML" key="4" >
@@ -395,8 +397,9 @@ const Pods: React.FC = (props) => {
                         value={yamlContent}
                         options={{
                             mode:{name:'text/yaml'},
-                            theme: 'solarized dark',
+                            theme: 'monokai-bright',
                             readOnly: true,
+                            lineNumbers:true,
                         }}
                     >
                     </CodeMirror>

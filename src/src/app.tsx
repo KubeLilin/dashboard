@@ -11,6 +11,8 @@ import type { MenuDataItem } from '@umijs/route-utils';
 import React from 'react';
 import { ResponseError } from 'umi-request';
 import { notification } from 'antd';
+import Aegis from 'aegis-web-sdk';
+
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -246,3 +248,12 @@ export const request: RequestConfig = {
   //   }
   // }
 };
+
+
+const aegis = new Aegis({
+  id: '2eVr0fKbqpxy1PyZkx', // 上报 id
+  uin: 'yoyofx', // 用户唯一 ID（可选）
+  reportApiSpeed: true, // 接口测速
+  reportAssetSpeed: true, // 静态资源测速
+  spa: true // spa 应用页面跳转的时候开启 pv 计算
+});
