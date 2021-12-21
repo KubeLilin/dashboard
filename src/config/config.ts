@@ -211,4 +211,7 @@ export default defineConfig({
   mfsu: {},
   webpack5: {},
   exportStatic: {},
+  define: {
+    'process.env.UMI_ENV':process.env.UMI_ENV || 'dev',
+  },
 });

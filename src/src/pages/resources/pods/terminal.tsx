@@ -4,9 +4,11 @@ import { message } from 'antd';
 import { Terminal } from 'xterm';
 import { WebLinksAddon } from 'xterm-addon-web-links';
 import { FitAddon } from 'xterm-addon-fit';
-import { AttachAddon } from 'xterm-addon-attach';
+import { API_SERVER } from '../../../apiserver'
 
 export interface TerminalProps {
+    tenantId?: number;
+    clusterId?: number;
     namespace?: string;
     pod_Name?: string;
     container_Name?: string;
@@ -15,16 +17,16 @@ export interface TerminalProps {
 const WebTerminal: React.FC<TerminalProps> = props => {
     const divRef: any = useRef(null); 
     let socket: WebSocket;
-  
     const initTerminal = () => {  
-        //const { namespace, pod_Name, container_Name } = props;
-        var url = "ws://localhost:8080/v1/pod/terminal?tenantId=1&clusterId=2&namespace=yoyogo&podName=yoyogo-867678b49b-ldtr5&containerName=sm"
-        ///${namespace}/${pod_Name}/${container_Name}
+        const { tenantId,clusterId, namespace, pod_Name, container_Name } = props;
+        //var url = "ws://localhost:8080/v1/pod/terminal?tenantId=1&clusterId=2&namespace=yoyogo&podName=yoyogo-867678b49b-ldtr5&containerName=sm"
+        const reUri = API_SERVER.ws + `/v1/pod/terminal?tenantId=${tenantId}&clusterId=${clusterId}&namespace=${namespace}&podName=${pod_Name}&containerName=${container_Name}`
+        console.log(reUri)
         const terminal = new Terminal({
             cursorBlink: true, // 光标闪烁
         });
       
-        socket = new WebSocket(url);
+        socket = new WebSocket(reUri);
         socket.onopen = () => {
             console.log('connection success');
         };
@@ -88,7 +90,7 @@ const WebTerminal: React.FC<TerminalProps> = props => {
       initTerminal();
     }, [props.namespace, props.pod_Name, props.container_Name]);
   
-    return <div style={{ marginTop: 10, width: '100%', height: 600 }} ref={divRef} />;
+    return <div style={{  width: '100%', height: 960 }} ref={divRef} />;
   };
   
   export default WebTerminal;

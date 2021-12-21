@@ -12,8 +12,9 @@ import React from 'react';
 import { ResponseError } from 'umi-request';
 import { notification } from 'antd';
 import Aegis from 'aegis-web-sdk';
+import { API_SERVER } from './apiserver';
 
-
+console.log(process.env.UMI_ENV)
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 const registerPath = '/user/register';
@@ -233,8 +234,9 @@ const errorHandler = (error:ResponseError) => {
 
 
 
+
 export const request: RequestConfig = {
-  //prefix:'http://localhost:8080/',
+  prefix: isDev? '' : API_SERVER.api,
   credentials:'include',
   requestInterceptors: [ headerInterceptor ],
   errorHandler: errorHandler,
@@ -248,7 +250,6 @@ export const request: RequestConfig = {
   //   }
   // }
 };
-
 
 const aegis = new Aegis({
   id: '2eVr0fKbqpxy1PyZkx', // 上报 id
