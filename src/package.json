@@ -59,6 +59,7 @@
     "@antv/l7-maps": "^2.3.7",
     "@antv/l7-react": "^2.1.9",
     "@umijs/route-utils": "^1.0.36",
+    "aegis-web-sdk": "^1.24.48",
     "ahooks": "^2.0.0",
     "antd": "^4.14.0",
     "bizcharts": "^3.5.3-beta.0",
@@ -81,7 +82,11 @@
     "react-json-view": "^1.21.3",
     "react-router": "^4.3.1",
     "umi": "^3.5.0",
-    "umi-serve": "^1.9.10"
+    "umi-serve": "^1.9.10",
+    "xterm": "^4.15.0",
+    "xterm-addon-attach": "^0.6.0",
+    "xterm-addon-fit": "^0.5.0",
+    "xterm-addon-web-links": "^0.4.0"
   },
   "devDependencies": {
     "@ant-design/pro-cli": "^2.0.2",

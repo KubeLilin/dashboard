@@ -2,30 +2,36 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm, { ModalForm, ProFormInstance } from '@ant-design/pro-form';
-import { history, Link } from 'umi';
+import { history, Link,useModel } from 'umi';
 import { PodItem, ContainerItem, podLogsRequest } from './data';
-import { Tabs, Button, Space, Tooltip, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, Input, notification } from 'antd'
+import { Tabs, Button, Space, Tooltip, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, Input, notification, Radio } from 'antd'
 import { getPodList, getNamespaceList, setReplicasByDeployId, GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml } from './service'
 import React, { useState, useRef, useEffect } from 'react';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined ,SearchOutlined } from '@ant-design/icons';
+import moment from 'moment'; 
+import 'codemirror/lib/codemirror.js'
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/mode/yaml/yaml';
+import './monokai-bright.css'
+import { UnControlled as CodeMirror } from 'react-codemirror2';
 import EventListComponent from './events';
+import WebTerminal from './terminal';
+
+
 const { TabPane } = Tabs;
 const { Option } = Select;
-import moment from 'moment'; 
-import ProCard from '@ant-design/pro-card';
-import TextArea from 'antd/lib/input/TextArea';
- import 'codemirror/lib/codemirror.js'
- import 'codemirror/lib/codemirror.css';
- import 'codemirror/mode/yaml/yaml';
-import'./solarized.css'
-import { UnControlled as CodeMirror } from 'react-codemirror2';
 
 const Pods: React.FC = (props) => {
+    const { initialState } = useModel('@@initialState');
+    const currentUser =  initialState?.currentUser
+
     const [time, setTime] = useState(() => Date.now());
     const [polling, setPolling] = useState<number | undefined>(undefined);
     const [visableScaleModal, setVisableScaleModal] = useState<boolean>(false);
     const formScaleModalRef = useRef<ProFormInstance>();
-    //
+    const [visibleTerminal, setVisibleTerminal] = useState(false);
+    const [visibleWebConsole, setVisibleWebConsole] = useState(false);
+
     const [podListState, handePodListState] = useState<PodItem[]>([]);
     const [containerListState, handeContainerListState] = useState<ContainerItem[]>([]);
     const [selectedPodName, setSelectedPodName] = useState<string | undefined>(undefined);
@@ -34,7 +40,9 @@ const Pods: React.FC = (props) => {
     const [autoLogs, setAutoLogs] = useState<boolean>(false)
     const [logContent, setLogContent] = useState<string[]>([]);
     const [yamlContent, setyamlContent] = useState<string>("");
+
     var text1: any = undefined;
+
 
     var deploymentInfo = history.location.state
     var deployId = history.location.query?.did
@@ -58,9 +66,7 @@ const Pods: React.FC = (props) => {
             } else {
                 notification.open({
                     message: '获取Pod Yaml失败',
-                    description:
-                        x?.message,
-
+                    description: x?.message,
                 });
             }
         })
@@ -149,7 +155,11 @@ const Pods: React.FC = (props) => {
                             } else { message.error("销毁操作失败") }
                         }}>
                         <a key="delete">销毁重建</a></Popconfirm>,
-                    <a key="remote">远程登录</a>
+                    <a key="remote" onClick={()=>{
+                        setSelectedPodName(record.name)
+                        handeContainerListState(record.containers)
+                        setVisibleWebConsole(true)
+                    }}>远程登录</a>
                 ]
             },
         },
@@ -157,13 +167,11 @@ const Pods: React.FC = (props) => {
     ]
 
     const expandedRowRender = (podItem: PodItem) => {
-
         return (
             <ProTable
                 columns={[
                     { title: '容器名称', dataIndex: 'name', key: 'name' },
                     { title: '容器ID', dataIndex: 'id', key: 'id' },
-
                     { title: '镜像版本号', dataIndex: 'image', key: 'image' },
                     //   { title: 'CPU Request', dataIndex: 'cpuRequest', key: 'cpuRequest' },
                     //   { title: 'CPU Limit', dataIndex: 'cpuLimit', key: 'cpuLimit' },
@@ -183,7 +191,6 @@ const Pods: React.FC = (props) => {
                             ]
                         }
                     },
-
                 ]}
                 rowKey="id"
                 headerTitle={false}
@@ -220,12 +227,8 @@ const Pods: React.FC = (props) => {
         if(!req.podName){
             return 
         }
-
         var lines = await getPodLogs(req)
         setLogContent(lines)
-        if (text1) {
-            text1.scrollTop = text1.scrollHeight
-        }
     }
 
     useEffect(() => {
@@ -238,7 +241,6 @@ const Pods: React.FC = (props) => {
             return () => { clearInterval(id) }
         }
     }, [selectedPodName, selectedContainerName, selectedLines, autoLogs])
-
 
     return (
         <PageContainer title={pageTitle} style={{ background: 'white' }}
@@ -279,12 +281,8 @@ const Pods: React.FC = (props) => {
                         expandable={{ expandedRowRender }}
                         request={async (params, sort) => {
                             params.cid = clusterId
-                            if (appName) {
-                                params.app = appName
-                            } else {
-                                params.node = node
-                            }
-
+                            if (appName) { params.app = appName } 
+                            else { params.node = node }
                             var podsData = await getPodList(params, sort)
                             handePodListState(podsData.data)
                             setTime(Date.now());
@@ -293,10 +291,7 @@ const Pods: React.FC = (props) => {
                         polling={polling || undefined}
                         toolBarRender={() => [
                             <Button key='button' type="primary" icon={<CloudUploadOutlined />} style={{ display: did > 0 ? 'block' : 'none' }}
-                                onClick={() => {
-                                    //部署请求
-                                    setPolling(1000);
-                                }}>部署应用</Button>,
+                                onClick={() => { setPolling(1000); }}>部署应用</Button>,
                             <Button key='button' type="primary" icon={<ExpandAltOutlined />} style={{ display: did > 0 ? 'block' : 'none' }}
                                 onClick={async () => {
                                     const hide = message.loading('正在加载部署信息...', 0);
@@ -305,7 +300,6 @@ const Pods: React.FC = (props) => {
                                     if (resp.success) {
                                         replicas = resp.data.replicas
                                         deploymentInfo.expected = replicas
-                                        //伸缩请求
                                         setVisableScaleModal(true)
                                         setTimeout(() => {
                                             formScaleModalRef.current?.setFieldsValue({ replicas: replicas })
@@ -315,8 +309,7 @@ const Pods: React.FC = (props) => {
                                     }
                                     hide()
                                 }}>伸缩实例</Button>,
-                            <Popconfirm
-                                title="确定要清空实例吗?"
+                            <Popconfirm title="确定要清空实例吗?"
                                 onConfirm={async () => {
                                     const resp = await setReplicasByDeployId(did, 0)
                                     setPolling(1000);
@@ -349,41 +342,29 @@ const Pods: React.FC = (props) => {
                         </Select>
                         <Select value={selectedContainerName} bordered style={{ width: 320, marginLeft: 5 }}
                             options={containerListState.map(c => ({ label: c.name, value: c.name }))}
-                            onSelect={(val) => {
-                                setSelectedContainerName(val)
-                            }} > </Select >
+                            onSelect={(val) => { setSelectedContainerName(val)  }} > </Select >
                         <Select value={selectedLines} bordered style={{ width: 320, marginLeft: 5 }}
-                            onSelect={(value) => {
-                                setSelectedLines(value)
-                            }}>
+                            onSelect={(value) => { setSelectedLines(value) }}>
                             <Option value={100} >显示100条数据</Option>
                             <Option value={200} >显示200条数据</Option>
                             <Option value={500} >显示500条数据</Option>
                             <Option value={1000}>显示1000条数据</Option>
                         </Select>
-
                         <Button type="primary" icon={<SearchOutlined />} style={{ marginLeft: 5 }}
-                            onClick={() => {
-                                bindLogsFunc()
-                            }}
-                        >手动刷新</Button>
-
+                            onClick={() => {  bindLogsFunc() }}  >手动刷新</Button>
                         <Switch size="default" style={{ marginLeft: 15 }} checkedChildren="自动" unCheckedChildren="手动" checked={autoLogs}
                             onChange={(v) => {
                                 setAutoLogs(v)
                             }}
                         />
                     </div>
-                    <textarea value={logContent} ref={(text) => {
-                        if (text) { text.scrollTop = Number(text?.scrollHeight) }
-                    }}
+                    <textarea value={logContent} ref={(text) => { if (text) { text.scrollTop = Number(text?.scrollHeight) } }}
                         rows={selectedLines} readOnly style={{
                             background: 'black', width: '100%', height: 780,
                             border: '1px solid rgb(221,221,221)', fontSize: '15px', color: 'whitesmoke'
                         }}>
                     </textarea>
                 </TabPane>
-               
                 <TabPane tab="事件" key="3" >
                     <EventListComponent clusterId={ Number(clusterId) } deployment={ appName?.toString() } namespace={ namespace?.toString() } ></EventListComponent>
                 </TabPane>
@@ -392,18 +373,13 @@ const Pods: React.FC = (props) => {
                     <CodeMirror
                         editorDidMount={editor => { editor.setSize('auto','780') }}
                         value={yamlContent}
-                        options={{
-                            mode:{name:'text/yaml'},
-                            theme: 'solarized dark',
-                            readOnly: true,
-                        }}
-                    >
+                        options={{ mode:{name:'text/yaml'}, theme: 'monokai-bright',
+                            readOnly: true, lineNumbers:true, }} >
                     </CodeMirror>
                     </div>
                 </TabPane>
             </Tabs>
 
-        
             <ModalForm<{ replicas: number; }>
                 title="实例伸缩"
                 formRef={formScaleModalRef}
@@ -432,6 +408,29 @@ const Pods: React.FC = (props) => {
                 </ProForm.Item>
             </ModalForm>
 
+            <Modal title="容器登录" centered visible={visibleWebConsole} width={600}  destroyOnClose footer={[]} onCancel={()=>{ setVisibleWebConsole(false) } } >
+                <p>该实例下共有 {containerListState?.length} 个容器 </p>
+                <ProTable  dataSource={containerListState} 
+                     columns={[ { title: '容器名称', dataIndex: 'name', key: 'name' },
+                                { title: '状态', dataIndex: 'status', key: 'status', render: (_, row) => { return [ <Tooltip title={row.state} color="geekblue" key="status">
+                                    {row.started ? <Tag color="geekblue">{String(row.started)}</Tag> : <Tag color="#f50">String(row.started)</Tag>}
+                                </Tooltip>  ] } },
+                                { title: '操作', render:(_,row)=>{
+                                    return (<a onClick={()=>{ 
+                                        setSelectedContainerName(row.name)
+                                        setVisibleTerminal(true)
+                                    }}>登录</a>)
+                                } }
+                              ]}
+                     rowKey="id" headerTitle={false} search={false} options={false} pagination={false} />
+                 <p>Shell环境（仅做默认环境，登录后可切换至其他环境）</p>
+                 <p><Radio checked>/bin/bash</Radio></p>
+            </Modal>
+
+            <Modal title={`Web Console for SGR --  Pod:${selectedPodName}, Container:${selectedContainerName}` } centered visible={visibleTerminal} width={1920}  destroyOnClose footer={[]} onCancel={()=>{ setVisibleTerminal(false) } } >
+                <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} 
+                        namespace={namespace?.toString()} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
+            </Modal>
         </PageContainer>)
 
 }
