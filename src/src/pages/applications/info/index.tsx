@@ -18,6 +18,7 @@ import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
 import { executeDeployment, getDeploymentList, getPodList } from './deployment.service'
+import ExecDeployment from '../execDeployment';
 
 const { TabPane } = Tabs;
 const { Content } = Layout;
@@ -31,6 +32,7 @@ const AppInfo: React.FC = () => {
 
     const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
+    const [execFormVisible, setExecFormVisible] = useState(false);
     const [stepFormEdit, setStepFormEdit] = useState(false);
     const [dpId, stepDpId] = useState<number>(0);
 
@@ -119,7 +121,8 @@ const AppInfo: React.FC = () => {
                 <Button key="depoly" type="primary"  icon={<CloudUploadOutlined />} onClick={() => {
                     tableListDataSource[0].namespace = 'n' + Math.random()
                     setTableListDataSource(tableListDataSource)
-                    executeDeployment(record.id)
+                    stepDpId(record.id)
+                   setExecFormVisible(true)
                 }}>部署应用</Button>,
                 <Button key="edit" onClick={() => {
                     stepDpId(record.id)
@@ -204,6 +207,7 @@ const AppInfo: React.FC = () => {
          
             <DevlopmentFormentForm visibleFunc={[stepFormVisible, setStepFormVisible]}
                 appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]}deploymentId={dpId} ></ExecDeployment>
             </Content>
         </PageContainer>
     )
