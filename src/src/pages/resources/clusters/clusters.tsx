@@ -1,14 +1,16 @@
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Upload, Input, Alert } from 'antd';
+import { Button, Upload, Input, Alert ,Modal } from 'antd';
 import React, { useState, useRef } from 'react';
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import ProForm, { ModalForm } from '@ant-design/pro-form';
 import { ClusterItem } from './cluster_data';
 import { getClusterList, importConfigFile, removeCluster } from './cluster_service';
 import { Link } from 'umi';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 const { TextArea } = Input;
+const { confirm } = Modal;
 
 
 
@@ -25,12 +27,17 @@ const Clusters: React.FC = () => {
             width: 48
         },
         {
-            title: '集群名称',
+            title: '集群标示',
             dataIndex: 'name',
             copyable: true,
             render: (dom, row) => {
                 return <Link to={'/resources/nodes?cid=' + row.id}>{dom}</Link>
             }
+        },
+        {
+            title: '集群名称',
+            dataIndex: 'nickname',
+            search: false,
         },
         {
             title: '集群版本',
@@ -48,12 +55,24 @@ const Clusters: React.FC = () => {
                 <a
                     key="移除"
                     onClick={async () => {
-                        let res = await removeCluster(record.id)
-                        if (res.success) {
-                            actionRef.current?.reload()
-                        } else {
-                            <Alert message="" type="error" />
-                        }
+                        confirm({
+                            title: `确定要删除 ${record.name} 集群吗?`,
+                            icon: <ExclamationCircleOutlined />,
+                            content: '删除集群后平台上关联的资源将失效！',
+                            okText: '删除',
+                            okType: 'danger',
+                            onOk: async()=>{
+                                let res = await removeCluster(record.id)
+                                if (res.success) {
+                                    actionRef.current?.reload()
+                                } else {
+                                    <Alert message="" type="error" />
+                                }
+                            }
+                          });
+
+
+
                     }}>
                     移除
                 </a>
