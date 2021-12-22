@@ -42,6 +42,9 @@ const Pods: React.FC = (props) => {
     const [logContent, setLogContent] = useState<string[]>([]);
     const [yamlContent, setyamlContent] = useState<string>("");
 
+    var text1: any = undefined;
+
+
     var deploymentInfo = history.location.state
     var deployId = history.location.query?.did
     var namespace = history.location.query?.ns
