@@ -35,7 +35,6 @@ const Pods: React.FC = (props) => {
     const [logContent, setLogContent] = useState<string[]>([]);
     const [yamlContent, setyamlContent] = useState<string>("");
     var text1: any = undefined;
-    const { TextArea } = Input;
 
     var deploymentInfo = history.location.state
     var deployId = history.location.query?.did
