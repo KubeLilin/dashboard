@@ -16,6 +16,7 @@ import './monokai-bright.css'
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import EventListComponent from './events';
 import WebTerminal from './terminal';
+import ExecDeployment from '@/pages/applications/execDeployment';
 
 
 const { TabPane } = Tabs;
@@ -41,7 +42,8 @@ const Pods: React.FC = (props) => {
     const [autoLogs, setAutoLogs] = useState<boolean>(false)
     const [logContent, setLogContent] = useState<string[]>([]);
     const [yamlContent, setyamlContent] = useState<string>("");
-
+    const [execFormVisible, setExecFormVisible] = useState(false);
+    const [dpId, stepDpId] = useState<number>(0);
     var text1: any = undefined;
 
 
@@ -293,7 +295,9 @@ const Pods: React.FC = (props) => {
                         polling={polling || undefined}
                         toolBarRender={() => [
                             <Button key='button' type="primary" icon={<CloudUploadOutlined />} style={{ display: did > 0 ? 'block' : 'none' }}
-                                onClick={() => { setPolling(1000); }}>部署应用</Button>,
+                                onClick={() => { setPolling(1000); 
+                                    stepDpId(Number(deployId)) 
+                                    ;setExecFormVisible(true) }}>部署应用</Button>,
                             <Button key='button' type="primary" icon={<ExpandAltOutlined />} style={{ display: did > 0 ? 'block' : 'none' }}
                                 onClick={async () => {
                                     const hide = message.loading('正在加载部署信息...', 0);
@@ -433,6 +437,7 @@ const Pods: React.FC = (props) => {
                 <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} 
                         namespace={selectedNamespace} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
             </Modal>
+            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]}deploymentId={dpId} ></ExecDeployment>
         </PageContainer>)
 
 }
