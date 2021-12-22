@@ -217,7 +217,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         <Space>
                             -
                         </Space>
-                        <ProFormItem name='limitCpu' label='Limit' rules={[{ required: true, message: "limitCpu不可为空" }]} valueType >
+                        <ProFormItem name='limitCpu' label='Limit' rules={[{ required: true, message: "limitCpu不可为空" }]}  >
                             <InputNumber step={0.1} min={0} max={128}></InputNumber>
                         </ProFormItem>
 
@@ -233,7 +233,6 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         </Space>
                         <ProFormItem name='limitMemory' label='Limit' rules={[{ required: true, message: "limitMemory不可为空" }]}>
                             <InputNumber min={0} ></InputNumber>
-
                         </ProFormItem>
                     </ProForm.Group>
                 </StepsForm.StepForm>
