@@ -34,6 +34,7 @@ const Pods: React.FC = (props) => {
 
     const [podListState, handePodListState] = useState<PodItem[]>([]);
     const [containerListState, handeContainerListState] = useState<ContainerItem[]>([]);
+    const [selectedNamespace, setSelectedNamespace] = useState<string | undefined>(undefined);
     const [selectedPodName, setSelectedPodName] = useState<string | undefined>(undefined);
     const [selectedContainerName, setSelectedContainerName] = useState<string | undefined>(undefined);
     const [selectedLines, setSelectedLines] = useState<number>(100);
@@ -155,6 +156,7 @@ const Pods: React.FC = (props) => {
                     <a key="remote" onClick={()=>{
                         setSelectedPodName(record.name)
                         handeContainerListState(record.containers)
+                        setSelectedNamespace(record.namespace)
                         setVisibleWebConsole(true)
                     }}>远程登录</a>
                 ]
@@ -229,7 +231,7 @@ const Pods: React.FC = (props) => {
     }
 
     useEffect(() => {
-        if (selectedPodName && selectedContainerName) {
+        if (selectedPodName && selectedContainerName && namespace) {
             bindLogsFunc()
             var id: NodeJS.Timeout
             if (autoLogs) {
@@ -323,7 +325,7 @@ const Pods: React.FC = (props) => {
                             </Button>,]}
                     />
                 </TabPane>
-                <TabPane tab="日志" key="2"  >
+                <TabPane tab="日志" key="2" disabled={ namespace==undefined?true:false } >
                     <div style={{ marginBottom: 10 }}>
                         <Select value={selectedPodName} bordered autoFocus style={{ width: 320 }} defaultActiveFirstOption
                             options={podListState.map(pod => ({ label: pod.name, value: pod.name }))}
@@ -362,10 +364,10 @@ const Pods: React.FC = (props) => {
                         }}>
                     </textarea>
                 </TabPane>
-                <TabPane tab="事件" key="3" >
+                <TabPane tab="事件" key="3"  disabled={ namespace==undefined?true:false } >
                     <EventListComponent clusterId={ Number(clusterId) } deployment={ appName?.toString() } namespace={ namespace?.toString() } ></EventListComponent>
                 </TabPane>
-                <TabPane tab="YAML" key="4" >
+                <TabPane tab="YAML" key="4"  disabled={ namespace==undefined?true:false } >
                     <div style={{  height: 890 }}>
                     <CodeMirror
                         editorDidMount={editor => { editor.setSize('auto','780') }}
@@ -426,7 +428,7 @@ const Pods: React.FC = (props) => {
 
             <Modal title={`Web Console for SGR --  Pod:${selectedPodName}, Container:${selectedContainerName}` } centered visible={visibleTerminal} width={1920}  destroyOnClose footer={[]} onCancel={()=>{ setVisibleTerminal(false) } } >
                 <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} 
-                        namespace={namespace?.toString()} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
+                        namespace={selectedNamespace} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
             </Modal>
         </PageContainer>)
 
