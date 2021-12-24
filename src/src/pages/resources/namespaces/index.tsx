@@ -23,9 +23,13 @@ const Namespaces: React.FC = () => {
                 var cs = await GetClusterList()
                 if(cs.length >0) {
                     ref.current?.setFieldsValue({cid:cs[0].value})
+                    setTimeout(()=>{
+                        ref.current?.submit()
+                    },500)
                 }
                 return cs
             },
+            
             hideInTable:true
         },
         {
@@ -74,6 +78,9 @@ const Namespaces: React.FC = () => {
             <ModalForm title="新建命名空间" width={500} visible={formVisible} onVisibleChange={formVisibleFunc}
                 onFinish={async (values) => {
                     var cid = ref.current?.getFieldValue("cid")
+                    var cinfo = ref.current?.getFieldInstance('cid')
+                    console.log(cinfo)
+
                     let rv = {
                         cid: cid,
                         ns: values.namespace
