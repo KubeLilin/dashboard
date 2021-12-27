@@ -19,17 +19,6 @@ const Namespaces: React.FC = () => {
         {
             title: '集群',
             dataIndex: 'cid',
-            // valueType: "select",
-            // request: async()=>{
-            //     var cs = await GetClusterList()
-            //     if(cs.length >0) {
-            //         ref.current?.setFieldsValue({cid:cs[0].value})
-            //         setTimeout(()=>{
-            //             ref.current?.submit()
-            //         },500)
-            //     }
-            //     return cs
-            // },    
             hideInTable:true
         },
         {

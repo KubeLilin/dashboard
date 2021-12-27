@@ -140,9 +140,14 @@ export default defineConfig({
           component:"./applications/apps/apps"
         },
         {
-          name: "nfo",
+          name: "info",
           path: "/applications/info",
           component:"./applications/info"
+        },
+        {
+          name: "deployments",
+          path: "/applications/info/deployments",
+          component:"./applications/info/deployments"
         },
       ]
     },
