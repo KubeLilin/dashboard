@@ -34,3 +34,11 @@ export async function GetNameSpaceList(clusterId:number) :Promise<ApiResponse<K8
     //let data=  resData.data.map(x=>{return  {value:x.name,label:x.name}})
     //return new Promise(x=>x(data))
 }
+
+export async function PutNewNameSpace(clusterId:number,namespace:string) :Promise<ApiResponse<any>>{
+    let resData = await request<ApiResponse<any>>("/v1/cluster/newnamespace", {
+        method: 'PUT',
+        params:{'cid':clusterId ,'namespace': namespace }
+    })
+    return resData
+}

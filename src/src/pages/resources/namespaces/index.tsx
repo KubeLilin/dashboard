@@ -1,10 +1,11 @@
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Upload, Input, Alert ,Modal } from 'antd';
+import { Button, Upload, Input, Alert ,Modal, message,Select } from 'antd';
 import React, { useState, useRef } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
-import ProForm, { ModalForm ,ProFormInstance,ProFormText} from '@ant-design/pro-form';
-import { K8sNamespcae,GetClusterList,GetNameSpaceList } from './service';
+import ProForm, { ModalForm ,ProFormInstance,ProFormSelect,ProFormText} from '@ant-design/pro-form';
+import { K8sNamespcae,GetClusterList,GetNameSpaceList,PutNewNameSpace } from './service';
+import ProCard from '@ant-design/pro-card';
 
 
 
@@ -12,24 +13,23 @@ const Namespaces: React.FC = () => {
     const actionRef = useRef<ActionType>();
     const ref = useRef<ProFormInstance>();
     const [formVisible, formVisibleFunc] = useState<boolean>(false);
-
+    const [selectedCluster,setSelectedCluster] = useState<number | undefined>(undefined);
 
     const NamespcaeColumns: ProColumns<K8sNamespcae>[] = [
         {
             title: '集群',
             dataIndex: 'cid',
-            valueType: "select",
-            request: async()=>{
-                var cs = await GetClusterList()
-                if(cs.length >0) {
-                    ref.current?.setFieldsValue({cid:cs[0].value})
-                    setTimeout(()=>{
-                        ref.current?.submit()
-                    },500)
-                }
-                return cs
-            },
-            
+            // valueType: "select",
+            // request: async()=>{
+            //     var cs = await GetClusterList()
+            //     if(cs.length >0) {
+            //         ref.current?.setFieldsValue({cid:cs[0].value})
+            //         setTimeout(()=>{
+            //             ref.current?.submit()
+            //         },500)
+            //     }
+            //     return cs
+            // },    
             hideInTable:true
         },
         {
@@ -57,14 +57,38 @@ const Namespaces: React.FC = () => {
 
     return (
         <PageContainer>
+            <ProCard>
+            <ProFormSelect name="clusters" width={260} label="集群" rules={[{required:true,message:"请选择集群"}]}
+                fieldProps={{
+                    value: selectedCluster,
+                    onChange:(val)=>{
+                        console.log(val)
+                        setSelectedCluster(Number(val))
+                        actionRef.current?.reload()
+                    }
+                 }}
+                request={async()=>{
+                            var cs = await GetClusterList()
+                            if(cs.length >0) {
+                                setSelectedCluster(cs[0].value)
+                                setTimeout(() => {
+                                    actionRef.current?.reload()
+                                }, 500);
+                            }
+                            return cs
+                }}
+            ></ProFormSelect>
+            </ProCard>
             <ProTable<K8sNamespcae>
                 columns={NamespcaeColumns}
                 formRef={ref}
                 actionRef={actionRef}
                 rowKey="id"
                 headerTitle="管理"
-                request={async (params, sort) => {                   
-                    return await GetNameSpaceList(params.cid)
+                search={false}
+                request={async (params, sort) => { 
+                    console.log(selectedCluster)                  
+                    return await GetNameSpaceList(Number(selectedCluster))
                 }}
                 toolBarRender={() => [
                     <Button key='button' type="primary" icon={<PlusOutlined />} 
@@ -75,17 +99,22 @@ const Namespaces: React.FC = () => {
 
             </ProTable>
 
-            <ModalForm title="新建命名空间" width={500} visible={formVisible} onVisibleChange={formVisibleFunc}
+            <ModalForm title="新建命名空间" width={500} visible={formVisible} onVisibleChange={formVisibleFunc} modalProps={{ destroyOnClose:true }}
                 onFinish={async (values) => {
-                    var cid = ref.current?.getFieldValue("cid")
-                    var cinfo = ref.current?.getFieldInstance('cid')
-                    console.log(cinfo)
-
+                    var cid = Number(selectedCluster)
                     let rv = {
                         cid: cid,
                         ns: values.namespace
                     }
                     console.log(rv)
+                    const resp = await PutNewNameSpace(cid,values.namespace)
+                    if (resp.success) {
+                        message.success("添加成功")
+                        actionRef.current?.reload()
+                    } else {
+                        message.error(resp.message)
+                    }
+                    return true
                 }}
             >
                 <ProFormText width="md" name="namespace" label="命名空间名称" 
