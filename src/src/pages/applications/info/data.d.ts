@@ -12,6 +12,7 @@ export type DeploymentItem={
     expected:number,
     serviceIP: string,
     serviceName: string,
+    appName:string,
 }
 
 
