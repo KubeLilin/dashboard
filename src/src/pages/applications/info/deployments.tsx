@@ -181,9 +181,10 @@ const Deployments: React.FC = () => {
                         }}
                     ></ProTable>
                 
-            <DevlopmentFormentForm visibleFunc={[stepFormVisible, setStepFormVisible]}
-                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
-            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]}deploymentId={dpId} ></ExecDeployment>
+                <DevlopmentFormentForm visibleFunc={[stepFormVisible, setStepFormVisible]}
+                    appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+                    
+                <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} tableRef={null} />
             </Content>
         </PageContainer>
     )

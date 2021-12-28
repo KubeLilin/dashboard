@@ -19,29 +19,32 @@ export interface Props{
 }
 
 const ExecDeployment: React.FC<Props> = (props:Props) => {
-
     const[enableDivImage,setEnableDivImage]=useState<boolean>(false)
     const actionRef =  useRef<ProFormInstance>();
-    return (
 
-        <ModalForm<ExecDeploymentData>
-        formRef={actionRef}
-            title="部署实例"
-            visible={props.visibleFunc[0]}
-            width={500}           
-            onVisibleChange={props.visibleFunc[1]}
+    return (
+        <ModalForm<ExecDeploymentData> title="部署实例" visible={props.visibleFunc[0]} width={500} 
+            formRef={actionRef} modalProps={{ destroyOnClose:true }}
+            onVisibleChange={ (visible)=>{
+               if(visible){
+                    setEnableDivImage(true)
+                    actionRef.current?.setFieldsValue({ image:'', imageTag:'',  wholeImage:''})
+               }
+               const setVisible = props.visibleFunc[1]
+               setVisible?.(visible)
+            }} 
             onFinish={async (x)=>{
                 console.log(props.deploymentId)
                 x.dpId=props.deploymentId
                 x.isDiv=enableDivImage
-               let res=await RequestDeployment(x)
+                let res=await RequestDeployment(x)
                 if(res.success){
                     actionRef.current?.setFieldsValue({ dpId:0,
                         image:'',
                         imageTag:'',
                         wholeImage:'',
                         isDiv:false})
-                        setEnableDivImage(false)
+                        setEnableDivImage(true)
                     props.visibleFunc[1](false)
                     notification.open({
                         message: res.message,
@@ -49,7 +52,6 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
                     });
                     props.tableRef.current?.reload()
                 }else{
-                    
                     notification.open({
                         message: res.message                  
                     });
@@ -57,7 +59,7 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
             }}
         >
             <ProForm.Item >
-                <Checkbox onChange={(x)=>{setEnableDivImage(x.target.checked)}}>自定义镜像</Checkbox>
+                <Checkbox name='isDiv' checked={enableDivImage} onChange={(x)=>{setEnableDivImage(x.target.checked)}}>自定义镜像</Checkbox>
             </ProForm.Item>
             <ProForm.Item name='image' label='镜像仓库' hidden={enableDivImage}>
                 <ProFormText></ProFormText>
