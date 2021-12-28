@@ -14,7 +14,8 @@ import { SmileOutlined } from '@ant-design/icons';
 
 export interface Props{
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>],
-    deploymentId:number
+    deploymentId:number,
+    tableRef:any
 }
 
 const ExecDeployment: React.FC<Props> = (props:Props) => {
@@ -46,6 +47,7 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
                         message: res.message,
                         icon: <SmileOutlined style={{ color: '#108ee9' }} />,
                     });
+                    props.tableRef.current?.reload()
                 }else{
                     
                     notification.open({
