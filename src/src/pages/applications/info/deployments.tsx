@@ -35,6 +35,8 @@ const Deployments: React.FC = () => {
     const [execFormVisible, setExecFormVisible] = useState(false);
     const [stepFormEdit, setStepFormEdit] = useState(false);
     const [dpId, stepDpId] = useState<number>(0);
+    const [deployImage, setDeployImage] = useState<string|undefined>(undefined);
+
 
     const columns: ProColumns<DeploymentItem>[] = [
         {
@@ -127,7 +129,8 @@ const Deployments: React.FC = () => {
                     tableListDataSource[0].namespace = 'n' + Math.random()
                     setTableListDataSource(tableListDataSource)
                     stepDpId(record.id)
-                   setExecFormVisible(true)
+                    setDeployImage(record.lastImage)
+                    setExecFormVisible(true)
                 }}>部署应用</Button>,
                 <Button key="edit" onClick={() => {
                     stepDpId(record.id)
@@ -151,7 +154,6 @@ const Deployments: React.FC = () => {
                             params.appid = appId
                             console.log(params)
                             var datasource = await getDeploymentList(params, sort)
-
                             var asyncAll = []
                             for (var index = 0; index < datasource.data.length; index++) {
                                 var item = datasource.data[index]
@@ -183,8 +185,9 @@ const Deployments: React.FC = () => {
                 
                 <DevlopmentFormentForm visibleFunc={[stepFormVisible, setStepFormVisible]}
                     appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
-                    
-                <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} tableRef={null} />
+
+                <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} 
+                    deploymentId={dpId} deployImage={deployImage}  tableRef={null} />
             </Content>
         </PageContainer>
     )
