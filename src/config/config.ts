@@ -114,6 +114,11 @@ export default defineConfig({
           component:"./resources/clusters/clusters"
         },
         {
+          name: "namespaces",
+          path:"/resources/namespaces",
+          component:"./resources/namespaces"
+        },
+        {
           name: "nodes",
           path: "/resources/nodes",
           component:"./resources/nodes"
@@ -135,9 +140,14 @@ export default defineConfig({
           component:"./applications/apps/apps"
         },
         {
-          name: "nfo",
+          name: "info",
           path: "/applications/info",
           component:"./applications/info"
+        },
+        {
+          name: "deployments",
+          path: "/applications/info/deployments",
+          component:"./applications/info/deployments"
         },
       ]
     },
@@ -211,4 +221,7 @@ export default defineConfig({
   mfsu: {},
   webpack5: {},
   exportStatic: {},
+  define: {
+    'process.env.UMI_ENV':process.env.UMI_ENV || 'dev',
+  },
 });

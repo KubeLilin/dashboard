@@ -8,7 +8,7 @@ export type DeploymentStep={
     namespaceId:number,
     serviceEnable:boolean,
     serviceAway:string,
-    servicePort:number
+    servicePort:number,
     replicas:number,
     requestCpu:number,
     requestMemory:number,

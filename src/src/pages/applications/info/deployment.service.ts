@@ -26,6 +26,13 @@ export const getDeploymentList = async (
     
 }
 
+export async function executeDeployment(dpId:any) {
+    let req=await request<ApiResponse<any>>("/v1/deployment/executedeployment",{
+        method:'POST',
+        params:{dpId:dpId}
+    })
+    return req
+}
 
 
 export const getPodList = async (appName:string , clusterId:number , index :number)=> {
@@ -37,5 +44,5 @@ export const getPodList = async (appName:string , clusterId:number , index :numb
         if (resData.data == null){
             return { index:index, data: null }
         }  
-        return { index:index, data: resData.data[0] }
+        return { index:index, data: resData.data }
     }

@@ -25,7 +25,7 @@ const { Content } = Layout;
 
 const { Text, Paragraph } = Typography;
 
-const AppInfo: React.FC = () => {
+const Deployments: React.FC = () => {
     var appId = history.location.query?.id
     var appName = history.location.query?.name
     const actionRef = useRef<ActionType>();
@@ -70,6 +70,11 @@ const AppInfo: React.FC = () => {
             width: 180,
             hideInForm: true,
             hideInSearch: true
+        },
+        {
+            title: '应用',
+            dataIndex: 'appName',
+            width: 180,
         },
         {
             title: '部署状态',
@@ -137,34 +142,18 @@ const AppInfo: React.FC = () => {
 
 
     return (
-        <PageContainer title={'应用: ' + appName} style={{background:'white'}}
-            header={{
-                extra: [
-                    <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
-            }}>
+        <PageContainer title="部署环境"  >
             <Content>
-            <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' }} >
-                <TabPane tab="部署环境" key="1" >
                     <ProTable<DeploymentItem>
                         columns={columns}
                         rowKey="id"
                         dataSource={tableListDataSource}
                         actionRef={actionRef}
-                        headerTitle="部署列表"
-                        pagination={false}
-                        toolBarRender={() => [
-                            <Button key='button' type="primary" icon={<PlusOutlined />}
-                                onClick={() => {
-                                    setStepFormEdit(false)
-                                    setStepFormVisible(true)
-                                }}>创建部署环境</Button>
-                        ]}
-                        //expandedRowRender={  }
+                        headerTitle="环境列表"
                         request={async (params, sort) => {
                             params.appid = appId
                             console.log(params)
                             var datasource = await getDeploymentList(params, sort)
-
                             var asyncAll = []
                             for (var index = 0; index < datasource.data.length; index++) {
                                 var item = datasource.data[index]
@@ -193,27 +182,12 @@ const AppInfo: React.FC = () => {
                             return datasource
                         }}
                     ></ProTable>
-                </TabPane>
-                <TabPane tab="基本信息" key="2" >
-                    Content of Tab Pane 2
-                </TabPane>
-                <TabPane tab="发布记录" key="3" >
-                    Content of Tab Pane 4
-                </TabPane>
-                <TabPane tab="应用配置" key="4" disabled>
-                    Content of Tab Pane 5
-                </TabPane>
-                <TabPane tab="应用监控" key="5" disabled>
-                    Content of Tab Pane 6
-                </TabPane>
-            </Tabs>
-         
-            <DevlopmentFormentForm visibleFunc={[stepFormVisible, setStepFormVisible]}
-                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+                
+                <DevlopmentFormentForm visibleFunc={[stepFormVisible, setStepFormVisible]}
+                    appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
 
-            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} 
-              deploymentId={dpId} deployImage={deployImage} tableRef={null} ></ExecDeployment>
-              
+                <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} 
+                    deploymentId={dpId} deployImage={deployImage}  tableRef={null} />
             </Content>
         </PageContainer>
     )
@@ -225,4 +199,4 @@ const AppInfo: React.FC = () => {
 
 
 
-export default AppInfo
+export default Deployments

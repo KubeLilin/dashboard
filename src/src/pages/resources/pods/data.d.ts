@@ -27,3 +27,28 @@ export type ContainerItem = {
 export type NamespaceItem = {
     name : string
 }
+
+export type podLogsRequest = {
+    clusterId: number,
+    namespace?: string,
+    podName?: string,
+    containerName?:string ,
+    lines:number
+}
+
+
+export type EventsList = {
+    firstTime: string,
+	lastTime: string,
+	name: string
+	level: string
+	reason :string
+	infomation: string
+	kind: string
+}
+
+export type  EventListProps = {
+    clusterId?:number,
+    namespace?:string,
+    deployment?:string,
+}
