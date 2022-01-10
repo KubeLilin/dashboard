@@ -2,6 +2,8 @@
 /* eslint-disable */
 import { request } from 'umi';
 import { TableListItem } from './data';
+import { ApiResponse } from "@/services/public/service";
+
 
 /** 获取规则列表 GET /api/rule */
 export async function query(
@@ -61,6 +63,7 @@ export async function setUserStatus(options?: { [key: string]: any }) {
 /** 新建用户 POST /v1/user/register */
 export async function addUser(data: TableListItem, options?: { [key: string]: any }) {
   return request<{
+    data?:any
     success? :boolean
     message? :string
   }>('/v1/user/register', {
@@ -79,5 +82,38 @@ export async function removeRule(data: { key: number[] }, options?: { [key: stri
     data,
     method: 'DELETE',
     ...(options || {}),
+  });
+}
+
+
+
+export async function GetQueryUserRole(userId?:number) :Promise<{ value: number; label: string; }[]>{
+  let resData = await request<any>("/v1/tenantuserrole/userrole", {
+      method: 'GET',
+      params: {
+        userId:userId,
+        pageIndex:1,
+        pageSize:10
+      }
+  })
+  let data=  resData.data.data.map(x=>{return  {value:x.roleId,label:x.roleName}})
+  return new Promise(x=>x(data))
+}
+
+export async function GetAllRoleList() :Promise<{ value: number; label: string; }[]>{
+  let resData = await request<ApiResponse<any[]>>("/v1/tenantuserrole/allrole", {
+      method: 'GET',
+  })
+  let data=  resData.data.map(x=>{return  {value:x.roleId,label:x.roleName}})
+  return new Promise(x=>x(data))
+}
+
+export async function PostUserRoles(data:any) {
+  return request<ApiResponse<any>>('/v1/tenantuserrole/userrole', {
+    data: data,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'POST'
   });
 }
