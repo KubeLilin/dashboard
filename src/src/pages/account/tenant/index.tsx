@@ -87,7 +87,7 @@ const Tenant: React.FC = () => {
                     }else{
                        
                     }
-                }}>{record.status==1?"启用":"停用"}</a>
+                }}>{record.status==0?"启用":"停用"}</a>
             ]
 
         }
@@ -141,18 +141,18 @@ const Tenant: React.FC = () => {
             >
                 <ProFormText width="md" name="tName" label="租户名称" placeholder="请输入租户名称" rules={[{ required: true, message: "租户名称不可为空" }]} />
                 <ProFormText width="md" name="tCode" label="租户编码" placeholder="请输入租户编码" rules={[{ required: true, message: "租户编码不可为空" }]} />
-                <ProFormSelect
+                <ProFormSelect 
                     options={[
                         {
-                            value: 1,
+                            value: 0,
                             label: "停用"            
                         },
                         {
-                            value: 2,
+                            value: 1,
                             label: "启用",
                         }
                     ]}
-                    
+                    initialValue={1}
                     name="status"
                     width="md"
                     label="状态"

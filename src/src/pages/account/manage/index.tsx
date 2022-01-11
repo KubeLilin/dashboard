@@ -263,7 +263,7 @@ const Manage: React.FC = () => {
           </Button>
         </FooterToolbar>
       )}
-      <DrawerForm<TableListItem>
+      <DrawerForm<TableListItem> 
           title="新建用户"
           width={600}
           visible={createModalVisible}
@@ -285,23 +285,22 @@ const Manage: React.FC = () => {
             }
           }}
       >
-     
-          <ProFormText  width="md" name="userName" label="用户名" tooltip="英文名" placeholder="请输入名称" 
+          <ProFormText  name="userName" label="用户名" tooltip="英文名" placeholder="请输入名称" 
               rules={[ {  required: true, message: '用户名为必填项',  }, { max:10 , message:'超过最大输入长度 > 10'}  ]}  />
 
-          <ProFormText.Password  width="md" name="password" label="密码" tooltip="密码" placeholder="请输入密码" 
+          <ProFormText.Password name="password" label="密码" tooltip="密码" placeholder="请输入密码" 
               rules={[ {  required: true, message: '密码为必填项',  },{ max:13 , message:'超过最大输入长度 > 10'}  ]}  />
 
-          <ProFormText width="md" name="account" label="姓名" placeholder="请输入姓名" 
+          <ProFormText  name="account" label="姓名" placeholder="请输入姓名" 
               rules={[  { required: true, message: '姓名为必填项'}, { max:10 , message:'超过最大输入长度 > 10'}  ]}  />
 
-          <ProFormText width="md" name="mobile" label="手机号" placeholder="请输入手机号"  
+          <ProFormText name="mobile" label="手机号" placeholder="请输入手机号"  
               rules={[ { required: true, message: '手机号为必填项', }, { pattern: /^1\d{10}$/, message: '不合法的手机号格式!',  }, ]} />
 
-          <ProFormText width="md" name="email" label="邮箱" placeholder="请输入邮箱地址"  
+          <ProFormText  name="email" label="邮箱" placeholder="请输入邮箱地址"  
               rules={[ { required: true, message: '邮箱地址为必填项', }, { max:20 , message:'超过最大输入长度 > 20'}  ]} />
       
-          <ProFormSelect name="roles" width="md" label="角色"  mode="multiple"  request={GetAllRoleList}
+          <ProFormSelect name="roles"  label="角色"  mode="multiple"  request={GetAllRoleList}
             placeholder="请选择至少一个角色" rules={[{ required: true, message: '请选择至少一个角色!' }]} />
       </DrawerForm>
 
