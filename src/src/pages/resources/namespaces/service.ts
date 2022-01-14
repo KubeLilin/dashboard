@@ -1,6 +1,6 @@
 import request from "umi-request";
 import { ApiResponse } from "@/services/public/service";
-
+import { TenantTableListItem } from "./data"
 
 export type ClusterItem = {
     id: number,
@@ -26,7 +26,7 @@ export async function GetClusterList() :Promise<{ value: number; label: string; 
 }
 
 export async function GetNameSpaceList(clusterId:number) :Promise<ApiResponse<K8sNamespcae[]>>{
-    let resData = await request<ApiResponse<K8sNamespcae[]>>("/v1/cluster/namespacesfromdb", {
+    let resData = await request<ApiResponse<K8sNamespcae[]>>("/v1/cluster/namespaces", {
         method: 'GET',
         params:{'cid':clusterId}
     })
@@ -41,4 +41,36 @@ export async function PutNewNameSpace(clusterId:number,namespace:string) :Promis
         params:{'cid':clusterId ,'namespace': namespace }
     })
     return resData
+}
+
+export async function queryTenant(
+    params: {
+        pageIndex?: number;
+        pageSize?: number;
+        current?: number;
+    },
+    options?: {
+        [key: string]: any
+    }
+) {
+    console.log(params)
+    params.tName = params.keyword
+    params.pageIndex = params.current;
+    params.current = undefined;
+    return request<{
+        data: {
+            data: TenantTableListItem[];
+            total?: number;
+        };
+        message?: string;
+        success?: boolean
+    }>(
+        '/v1/tenant/tenantlist', {
+        method: 'GET',
+        params: {
+            ...params
+        },
+        ...(options || {}), 
+    }
+    )
 }

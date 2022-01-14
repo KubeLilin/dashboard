@@ -1,12 +1,13 @@
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Upload, Input, Alert ,Modal, message,Select } from 'antd';
+import { Button, Upload, Input, Alert ,Modal, message,Select ,Divider} from 'antd';
 import React, { useState, useRef } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
-import ProForm, { ModalForm ,ProFormInstance,ProFormSelect,ProFormText} from '@ant-design/pro-form';
-import { K8sNamespcae,GetClusterList,GetNameSpaceList,PutNewNameSpace } from './service';
+import ProForm, { DrawerForm, ModalForm ,ProFormInstance,ProFormSelect,ProFormText} from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
 
+import { TenantTableListItem, TenantTableListPagination } from './data'
+import { K8sNamespcae,GetClusterList,GetNameSpaceList,PutNewNameSpace , queryTenant } from './service';
 
 
 const Namespaces: React.FC = () => {
@@ -23,7 +24,7 @@ const Namespaces: React.FC = () => {
         },
         {
             title: '命名空间',
-            dataIndex: 'namespace',
+            dataIndex: 'name',
             search:false
         },
         {
@@ -31,13 +32,10 @@ const Namespaces: React.FC = () => {
             search:false,
             dataIndex: 'status',
             valueEnum: {
-              0: {
-                text: '失效',
-                status: 'Default',
-              },
-              1: {
-                text: '生效',
+              'Active': {
+                text: 'Active',
                 status: 'Success',
+                color:"green"
               },
             },
           },
@@ -77,18 +75,21 @@ const Namespaces: React.FC = () => {
                 search={false}
                 request={async (params, sort) => { 
                     console.log(selectedCluster)                  
-                    return await GetNameSpaceList(Number(selectedCluster))
+                    const nsList = await GetNameSpaceList(Number(selectedCluster))
+                    nsList.data = nsList.data.filter(v=> v.name.indexOf('kube') < 0 && v.name !='default')
+                    return nsList
                 }}
                 toolBarRender={() => [
                     <Button key='button' type="primary" icon={<PlusOutlined />} 
                         onClick={() => { 
                             formVisibleFunc(true)
                          }}>新建</Button>]}
+                
              >
 
             </ProTable>
 
-            <ModalForm title="新建命名空间" width={500} visible={formVisible} onVisibleChange={formVisibleFunc} modalProps={{ destroyOnClose:true }}
+            <DrawerForm title="新建命名空间" width={500} visible={formVisible} onVisibleChange={formVisibleFunc} modalProps={{ destroyOnClose:true }}
                 onFinish={async (values) => {
                     var cid = Number(selectedCluster)
                     let rv = {
@@ -106,10 +107,30 @@ const Namespaces: React.FC = () => {
                     return true
                 }}
             >
-                <ProFormText width="md" name="namespace" label="命名空间名称" 
+                <ProFormText name="namespace" label="命名空间名称"  
                     tooltip="最长为 24 位" placeholder="请输入名称"
                     rules={[ {  required: true, message: '命名空间为必填项',  }, { max:24 , message:'超过最大输入长度 > 24'}  ]} />
-            </ModalForm>
+            
+            <Divider  />
+
+                <ProTable<TenantTableListItem, TenantTableListPagination> 
+                    columns={ [ 
+                        {  title: 'ID', dataIndex: 'id', filters: true, onFilter: true, 
+                        
+                    },
+                        {  title: '租户名称',dataIndex: 'tName', filtered:true },
+                        {  title: '租户编号', dataIndex: 'tCode', }, ]}
+                    request={ 
+                        async ( params,sort,options) => {
+                            let reqData = await queryTenant(params, options)
+                            return {data: reqData.data.data,success: reqData.success,total: reqData.data.total }
+                        }
+                    }
+                     rowKey="id" search={false} pagination={false}   options={{ search: true, }}
+                />
+            
+            
+            </DrawerForm>
         </PageContainer>
         )
 }

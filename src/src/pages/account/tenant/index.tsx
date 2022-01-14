@@ -65,10 +65,10 @@ const Tenant: React.FC = () => {
             title: '状态',
             dataIndex: 'status',
             valueEnum: {
-                1: {
+                0: {
                     text: '停用',
                 },
-                2: {
+                1: {
                     text: '启用'
                 }
             }
