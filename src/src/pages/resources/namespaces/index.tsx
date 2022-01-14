@@ -75,6 +75,9 @@ const Namespaces: React.FC = () => {
                 search={false}
                 request={async (params, sort) => { 
                     console.log(selectedCluster)                  
+                    if (!selectedCluster){
+                        return []
+                    }
                     const nsList = await GetNameSpaceList(Number(selectedCluster))
                     nsList.data = nsList.data.filter(v=> v.name.indexOf('kube') < 0 && v.name !='default')
                     return nsList
@@ -89,7 +92,7 @@ const Namespaces: React.FC = () => {
 
             </ProTable>
 
-            <DrawerForm title="新建命名空间" width={500} visible={formVisible} onVisibleChange={formVisibleFunc} modalProps={{ destroyOnClose:true }}
+            <DrawerForm title="新建命名空间" width={500} visible={formVisible} onVisibleChange={formVisibleFunc} drawerProps={{ destroyOnClose:true }}
                 onFinish={async (values) => {
                     var cid = Number(selectedCluster)
                     let rv = {

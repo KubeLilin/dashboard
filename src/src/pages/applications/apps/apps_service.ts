@@ -1,7 +1,6 @@
 import { ApiResponse } from "@/services/public/service";
 import { SortOrder } from "antd/lib/table/interface";
-import request from "umi-request";
-import { RequestOptionsType } from "_@ant-design_pro-utils@1.28.1@@ant-design/pro-utils";
+import {request} from "umi";
 import { ApplicationItem,ApplicationLevel,ApplicationModel } from "./apps_data";
 export async function createApp(params:ApplicationModel){
     let req=await request<ApiResponse<ApplicationModel>>('/v1/application/createapp',{
@@ -25,7 +24,7 @@ export async function updateApp(params:ApplicationModel){
     return req
 }
 
-export async  function getAppLevel():Promise<RequestOptionsType[]> {
+export async  function getAppLevel() {
     let req= await request<ApiResponse<ApplicationLevel[]>>('/v1/application/applevel',{
         method:'GET',
     })
@@ -34,7 +33,7 @@ export async  function getAppLevel():Promise<RequestOptionsType[]> {
 }
 
 
-export async  function bindAppLevel():Promise<RequestOptionsType[]> {
+export async  function bindAppLevel() {
     let req= await request<ApiResponse<ApplicationLevel[]>>('/v1/application/applevel',{
         method:'GET',
     })
@@ -42,7 +41,7 @@ export async  function bindAppLevel():Promise<RequestOptionsType[]> {
    return new Promise(x=>x(data))
 }
 
-export async function getAppLanguage():Promise<RequestOptionsType[]> {
+export async function getAppLanguage() {
     let req= await request<ApiResponse<ApplicationLevel[]>>('/v1/application/applanguage',{
         method:'GET',
     })

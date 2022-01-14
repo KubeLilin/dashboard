@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/services/public/service";
-import request from "umi-request";
+import {request} from "umi";
 import { ExecDeploymentData } from "./execDeployment_data";
 
 export async function RequestDeployment(params:ExecDeploymentData) {
