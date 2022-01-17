@@ -2,7 +2,7 @@ import { ClusterItem ,K8sNamespcae} from "@/pages/resources/clusters/cluster_dat
 import { ApiResponse } from "@/services/public/service";
 import { method } from "@umijs/deps/compiled/lodash";
 import { Label } from "bizcharts";
-import request from "umi-request";
+import request from "umi";
 import { DeploymentStep } from "./devlopment_data";
 export async function BindNamespace() {
     

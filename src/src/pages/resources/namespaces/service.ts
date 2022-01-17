@@ -1,4 +1,4 @@
-import request from "umi-request";
+import {request} from "umi";
 import { ApiResponse } from "@/services/public/service";
 import { TenantTableListItem } from "./data"
 
