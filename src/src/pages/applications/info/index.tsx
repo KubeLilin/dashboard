@@ -18,6 +18,7 @@ import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
 import { executeDeployment, getDeploymentList, getPodList } from './deployment.service'
+import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 
 const { TabPane } = Tabs;
@@ -45,6 +46,12 @@ const AppInfo: React.FC = () => {
             width: 48,
             hideInForm: true,
             hideInSearch: true
+        },
+        {
+            title:'集群',
+            dataIndex:'clusterId',
+            hideInTable:true,
+            request:BindCluster
         },
         {
             title: '环境名称',
@@ -137,13 +144,18 @@ const AppInfo: React.FC = () => {
 
 
     return (
-        <PageContainer title={'应用: ' + appName} style={{background:'white'}}
+        <PageContainer title={'应用: ' + appName} 
             header={{
                 extra: [
+                    <Button key='button' type="primary" icon={<PlusOutlined />}
+                    onClick={() => {
+                        setStepFormEdit(false)
+                        setStepFormVisible(true)
+                    }}>创建部署环境</Button>,
                     <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
-            <Content>
-            <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' }} >
+            <Content style={{ background:'white' }} > 
+            <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }}  >
                 <TabPane tab="部署环境" key="1" >
                     <ProTable<DeploymentItem>
                         columns={columns}
@@ -152,13 +164,13 @@ const AppInfo: React.FC = () => {
                         actionRef={actionRef}
                         headerTitle="部署列表"
                         pagination={false}
-                        toolBarRender={() => [
-                            <Button key='button' type="primary" icon={<PlusOutlined />}
-                                onClick={() => {
-                                    setStepFormEdit(false)
-                                    setStepFormVisible(true)
-                                }}>创建部署环境</Button>
-                        ]}
+                        // toolBarRender={() => [
+                        //     <Button key='button' type="primary" icon={<PlusOutlined />}
+                        //         onClick={() => {
+                        //             setStepFormEdit(false)
+                        //             setStepFormVisible(true)
+                        //         }}>创建部署环境</Button>
+                        // ]}
                         //expandedRowRender={  }
                         request={async (params, sort) => {
                             params.appid = appId

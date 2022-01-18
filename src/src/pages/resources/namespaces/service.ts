@@ -1,6 +1,6 @@
 import {request} from "umi";
 import { ApiResponse } from "@/services/public/service";
-import { TenantTableListItem } from "./data"
+import { TenantTableListItem,NamespcaeInfo } from "./data"
 
 export type ClusterItem = {
     id: number,
@@ -17,6 +17,8 @@ export type K8sNamespcae={
     status:string,
 }
 
+
+
 export async function GetClusterList() :Promise<{ value: number; label: string; }[]>{
     let resData = await request<ApiResponse<ClusterItem[]>>("/v1/cluster/list", {
         method: 'GET',
@@ -25,20 +27,31 @@ export async function GetClusterList() :Promise<{ value: number; label: string; 
     return new Promise(x=>x(data))
 }
 
-export async function GetNameSpaceList(clusterId:number) :Promise<ApiResponse<K8sNamespcae[]>>{
-    let resData = await request<ApiResponse<K8sNamespcae[]>>("/v1/cluster/namespaces", {
+export async function GetNameSpaceList(clusterId:number,tentantName:string,pageIndex:number,pageSize:number) :Promise<{ data:NamespcaeInfo[],success:boolean,total:number } >{
+    let resData = await request<any>("/v1/cluster/namespacelist", {
         method: 'GET',
-        params:{'cid':clusterId}
+        params:{'cid':clusterId , 'tenant': tentantName , 'current': pageIndex, 'pageSize':pageSize }
     })
-    return resData
-    //let data=  resData.data.map(x=>{return  {value:x.name,label:x.name}})
-    //return new Promise(x=>x(data))
+    return { 
+        data: resData.data.data,
+        success : resData.success,
+        total : resData.data.total,
+    }
 }
 
-export async function PutNewNameSpace(clusterId:number,namespace:string) :Promise<ApiResponse<any>>{
+export async function PutNewK8sNameSpace(clusterId:number,namespace:string ) :Promise<ApiResponse<any>>{
+    let resData = await request<ApiResponse<any>>("/v1/cluster/newk8snamespace", {
+        method: 'PUT',
+        params:{'cid':clusterId ,'namespace': namespace}
+    })
+    return resData
+}
+
+
+export async function PutNewNameSpace(clusterId:number,namespace:string , tentantId:number) :Promise<ApiResponse<any>>{
     let resData = await request<ApiResponse<any>>("/v1/cluster/newnamespace", {
         method: 'PUT',
-        params:{'cid':clusterId ,'namespace': namespace }
+        params:{'cid':clusterId ,'namespace': namespace, 'tentantId': tentantId}
     })
     return resData
 }
@@ -73,4 +86,13 @@ export async function queryTenant(
         ...(options || {}), 
     }
     )
+}
+
+
+export async function GetResourceQuota(clusterId:number,namespace:string ) :Promise<ApiResponse<any>>{
+    let resData = await request<ApiResponse<any>>("/v1/cluster/resourcequota", {
+        method: 'GET',
+        params:{'cid':clusterId ,'namespace': namespace}
+    })
+    return resData
 }

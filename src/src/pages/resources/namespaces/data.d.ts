@@ -1,5 +1,5 @@
 export type TenantTableListItem={
-    Id:number,
+    id:number,
     tCode:string,
     tName:string,
     status:number,
@@ -10,3 +10,13 @@ export type TenantTableListPagination = {
     pageSize: number;
     pageIndex: number;
   };
+
+export type NamespcaeInfo={
+  id : number,
+  tenantId:number,
+	clusterId: number,
+	tenantCode: string,
+	clusterName :string,
+	namespace :string,
+	tenantName:string,
+}

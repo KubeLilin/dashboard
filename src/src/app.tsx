@@ -195,7 +195,7 @@ const headerInterceptor = (url: string, options: RequestInit) => {
 }
 
 const errorHandler = (error:ResponseError) => {
-  const { response } = error;
+  const { response,data } = error;
   if (response && response.status) {
 
     if (response.status == 401) {
@@ -206,12 +206,11 @@ const errorHandler = (error:ResponseError) => {
       sessionStorage.clear()
       history.push(loginPath)
     } else {
-        const errorText = response.statusText
-        const {status ,url} = response
-
+        // const errorText = response.statusText
+        // const {status ,url } = response
         notification.error({
-          message: `请求错误 ${status} : ${url}` , 
-          description: errorText
+          message: `错误异常` , 
+          description: data.message
         })
     }
   } else {

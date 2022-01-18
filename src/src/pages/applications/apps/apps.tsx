@@ -2,21 +2,14 @@ import React, { useState, useRef } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ApplicationItem, ApplicationModel } from './apps_data';
 import { PageContainer } from '@ant-design/pro-layout';
-import ProForm, {
-    DrawerForm,
-    ProFormSelect,
-    ProFormTextArea,
-    ProFormInstance,
-    ProFormText
-} from '@ant-design/pro-form';
-import { Input, Button, Tag, Space, Menu, Form } from 'antd';
-import { PlusOutlined, EllipsisOutlined } from '@ant-design/icons';
+import ProForm, { DrawerForm, ProFormSelect, ProFormTextArea,ProFormText } from '@ant-design/pro-form';
+import { Input, Button, Form } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { getAppLanguage, getAppLevel, createApp, getApps, updateApp } from './apps_service';
-import { history,Link } from 'umi';
+import { Link } from 'umi';
 
 const Apps: React.FC = () => {
     const actionRef = useRef<ActionType>();
-    const formRef = useRef<ProFormInstance>();
     const [formVisible, formVisibleHandler] = useState<boolean>(false)
     const [appForm] = Form.useForm()
     const [edit, editHandler] = useState<boolean>(false)

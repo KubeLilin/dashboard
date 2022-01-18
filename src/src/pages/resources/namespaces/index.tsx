@@ -1,90 +1,109 @@
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Upload, Input, Alert ,Modal, message,Select ,Divider} from 'antd';
+import {Modal, Button ,Divider ,Space, message, Card,InputNumber, Input,Progress} from 'antd';
 import React, { useState, useRef } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
-import ProForm, { DrawerForm, ModalForm ,ProFormInstance,ProFormSelect,ProFormText} from '@ant-design/pro-form';
-import ProCard from '@ant-design/pro-card';
+import Form,{ DrawerForm ,ProFormInstance,ProFormSelect,ProFormText} from '@ant-design/pro-form';
 
-import { TenantTableListItem, TenantTableListPagination } from './data'
-import { K8sNamespcae,GetClusterList,GetNameSpaceList,PutNewNameSpace , queryTenant } from './service';
-
+import { TenantTableListItem, TenantTableListPagination,NamespcaeInfo } from './data'
+import { GetClusterList,GetNameSpaceList,PutNewNameSpace , queryTenant ,PutNewK8sNameSpace, GetResourceQuota } from './service';
+const { confirm } = Modal;
 
 const Namespaces: React.FC = () => {
     const actionRef = useRef<ActionType>();
     const ref = useRef<ProFormInstance>();
     const [formVisible, formVisibleFunc] = useState<boolean>(false);
-    const [selectedCluster,setSelectedCluster] = useState<number | undefined>(undefined);
+    const formNewNSRef = useRef<ProFormInstance>();
+    const NewNSRefActionRef = useRef<ActionType>();
+    const quotaActionRef = useRef<ProFormInstance>();
+    const [quotaVisible, quotaVisibleFunc] = useState<boolean>(false);
+    const [quotaEdit,quotaEditSet] = useState<boolean>(false);
+    const [selectNsRow,selectNsRowSet] = useState<NamespcaeInfo|undefined>(undefined);
+    const [quotaInfo,quotaInfoSet] = useState<any>(undefined);
 
-    const NamespcaeColumns: ProColumns<K8sNamespcae>[] = [
+
+
+    const NamespcaeColumns: ProColumns<NamespcaeInfo>[] = [
         {
-            title: '集群',
-            dataIndex: 'cid',
-            hideInTable:true
+            title: 'ID',
+            dataIndex: 'id',
+            search:false,
         },
         {
             title: '命名空间',
-            dataIndex: 'name',
+            dataIndex: 'namespace',
             search:false
         },
         {
-            title: '状态',
+            title: '租户',
+            dataIndex: 'tenantName',
+        },
+        {
+            title: '集群ID',
+            dataIndex: 'clusterId',
+            request:GetClusterList,
+            hideInTable:true,
+        },
+        {
+            title: '集群',
+            dataIndex: 'clusterName',
             search:false,
-            dataIndex: 'status',
-            valueEnum: {
-              'Active': {
-                text: 'Active',
-                status: 'Success',
-                color:"green"
-              },
-            },
-          },
+        },
+        {
+            title: '操作',
+            dataIndex: 'option',
+            render:(_,row)=> [
+                <Space key="option">
+                <a key="nsdeploy" onClick={ async ()=>{
+                    console.log(row)
+                    confirm({
+                        title: `确定要重新部署Namesapce吗?`,
+                        content: '部署后PaaS中的Namespace会重新部署到K8s中！',
+                        okText: '部署',
+                        okType: 'danger',
+                        onOk: async()=>{
+                            console.log(row)
+                           const res = await PutNewK8sNameSpace(row.clusterId,row.namespace)
+                           if(res.success) {
+                                message.success("部署成功")
+                           } else {
+                                message.error(res.message)
+                           }
+                        }
+                      });
+
+                }}>部署</a>
+
+                <span>   </span>
+                <a key="nsconfig" onClick={ ()=> {
+                    selectNsRowSet(row)
+                    quotaVisibleFunc(true)
+                    
+                } }>配额</a>
+                </Space>
+             
+            ]
+            
+        }
     ]
 
 
     return (
         <PageContainer>
-            <ProCard>
-            <ProFormSelect name="clusters" width={260} label="集群" rules={[{required:true,message:"请选择集群"}]}
-                fieldProps={{
-                    value: selectedCluster,
-                    onChange:(val)=>{
-                        console.log(val)
-                        setSelectedCluster(Number(val))
-                        actionRef.current?.reload()
-                    }
-                 }}
-                request={async()=>{
-                            var cs = await GetClusterList()
-                            if(cs.length >0) {
-                                setSelectedCluster(cs[0].value)
-                                setTimeout(() => {
-                                    actionRef.current?.reload()
-                                }, 500);
-                            }
-                            return cs
-                }}
-            ></ProFormSelect>
-            </ProCard>
-            <ProTable<K8sNamespcae>
+            <ProTable<NamespcaeInfo>
                 columns={NamespcaeColumns}
                 formRef={ref}
                 actionRef={actionRef}
                 rowKey="id"
                 headerTitle="管理"
-                search={false}
                 request={async (params, sort) => { 
-                    console.log(selectedCluster)                  
-                    if (!selectedCluster){
-                        return []
-                    }
-                    const nsList = await GetNameSpaceList(Number(selectedCluster))
-                    nsList.data = nsList.data.filter(v=> v.name.indexOf('kube') < 0 && v.name !='default')
-                    return nsList
+                    return await GetNameSpaceList(params.clusterId,params.tenantName,Number(params.current),Number(params.pageSize))
                 }}
                 toolBarRender={() => [
                     <Button key='button' type="primary" icon={<PlusOutlined />} 
                         onClick={() => { 
+                            NewNSRefActionRef.current?.clearSelected?.()
+                            formNewNSRef.current?.setFieldsValue({ namespace:'',cluster:'' ,tentantId:0  })
                             formVisibleFunc(true)
                          }}>新建</Button>]}
                 
@@ -92,15 +111,10 @@ const Namespaces: React.FC = () => {
 
             </ProTable>
 
-            <DrawerForm title="新建命名空间" width={500} visible={formVisible} onVisibleChange={formVisibleFunc} drawerProps={{ destroyOnClose:true }}
+            <DrawerForm title="新建命名空间" width={500} visible={formVisible}  onVisibleChange={formVisibleFunc} formRef={formNewNSRef}
                 onFinish={async (values) => {
-                    var cid = Number(selectedCluster)
-                    let rv = {
-                        cid: cid,
-                        ns: values.namespace
-                    }
-                    console.log(rv)
-                    const resp = await PutNewNameSpace(cid,values.namespace)
+                    console.log(values)
+                    const resp = await PutNewNameSpace(values.cluster,values.namespace,values.tentantId)
                     if (resp.success) {
                         message.success("添加成功")
                         actionRef.current?.reload()
@@ -110,30 +124,98 @@ const Namespaces: React.FC = () => {
                     return true
                 }}
             >
-                <ProFormText name="namespace" label="命名空间名称"  
+                <ProFormText name="tentantId" hidden ></ProFormText>
+                <ProFormText name="namespace" label="命名空间名称"  disabled={true} 
                     tooltip="最长为 24 位" placeholder="请输入名称"
                     rules={[ {  required: true, message: '命名空间为必填项',  }, { max:24 , message:'超过最大输入长度 > 24'}  ]} />
             
             <Divider  />
 
-                <ProTable<TenantTableListItem, TenantTableListPagination> 
-                    columns={ [ 
-                        {  title: 'ID', dataIndex: 'id', filters: true, onFilter: true, 
-                        
-                    },
-                        {  title: '租户名称',dataIndex: 'tName', filtered:true },
-                        {  title: '租户编号', dataIndex: 'tCode', }, ]}
-                    request={ 
-                        async ( params,sort,options) => {
-                            let reqData = await queryTenant(params, options)
-                            return {data: reqData.data.data,success: reqData.success,total: reqData.data.total }
+            <ProFormSelect name="cluster" label="集群" rules={[{required:true,message:"请选择集群"}]}
+                request={GetClusterList} ></ProFormSelect>
+
+            <Divider  />
+
+            <ProTable<TenantTableListItem, TenantTableListPagination>
+                columns={ [ 
+                    {  title: 'ID', dataIndex: 'id', filters: true, onFilter: true, 
+                    
+                },
+                    {  title: '租户名称',dataIndex: 'tName', filtered:true },
+                    {  title: '租户Code', dataIndex: 'tCode', }, ]}
+                request={ 
+                    async ( params,sort,options) => {
+                        let reqData = await queryTenant(params, options)
+                        return {data: reqData.data.data,success: reqData.success,total: reqData.data.total }
+                    }
+                }
+                rowKey="id" search={false} pagination={false}   options={{ search: true, }} actionRef={NewNSRefActionRef}
+                rowSelection={{
+                    type:"radio",
+                    onSelect: (row)=>{
+                        console.log(row)
+                        formNewNSRef.current?.setFieldsValue({ namespace: 'sgrns-'+ row.tCode ,tentantId: row.id  })
+                    }
+                }}
+            />
+            </DrawerForm>
+
+            <DrawerForm title="命名空间配额" width={460} visible={quotaVisible} formRef={quotaActionRef}
+                onVisibleChange={async (visible)=>{  quotaVisibleFunc(visible) 
+                    if (!visible) {   // on closed
+                        quotaEditSet(false)
+                    } else {         // on loaded
+                        if(selectNsRow) {
+                            const res = await GetResourceQuota(selectNsRow.clusterId,selectNsRow.namespace)
+                            console.log(res.data)
+                            quotaInfoSet(res.data)
                         }
                     }
-                     rowKey="id" search={false} pagination={false}   options={{ search: true, }}
-                />
-            
-            
+                }} 
+                onFinish={async (values) => {
+
+                }}
+            >
+             
+                <div style={{ display: !quotaEdit?'block':'none'   }} >
+                    <p><Button type="primary" onClick={()=>  quotaEditSet(true) } >编辑</Button><b/></p>
+                    <Space direction="horizontal">
+                        <div>CPU限制：</div>
+                        <div style={{ marginRight:5 }}>{ quotaInfo?quotaInfo[0].displayUsedValue:0} / {quotaInfo?quotaInfo[0].displayValue:0} </div>
+                    </Space>
+                    <Progress percent={quotaInfo?Number(((quotaInfo[0].usedValue / quotaInfo[0].limitValue) * 100).toFixed(1)):0 } status="active" />
+
+                    <Space direction="horizontal">
+                    <div>内存限制：</div>
+                    <div style={{ marginRight:5 }}>{ quotaInfo?quotaInfo[1].displayUsedValue:0} / {quotaInfo?quotaInfo[1].displayValue:0} </div>
+                    </Space>
+                    <Progress percent={quotaInfo?Number(((quotaInfo[1].usedValue / quotaInfo[1].limitValue) * 100).toFixed(1)):0 } status="active" />
+
+
+                    <Space direction="horizontal">
+                    <div>Pod限制：</div>
+                    <div style={{ marginRight:5 }}>{ quotaInfo?quotaInfo[2].displayUsedValue:0} / {quotaInfo?quotaInfo[2].displayValue:0} </div>
+                    </Space>
+                    <Progress percent={quotaInfo?Number(((quotaInfo[2].usedValue / quotaInfo[2].limitValue) * 100).toFixed(1)):0 } status="active" />
+
+
+                </div>
+
+                <div style={{ display: quotaEdit?'block':'none'   }}>
+                <Form.Item label="CPU配额:" name="cpu" > 
+                    <InputNumber addonBefore="CPU:" addonAfter="CORE" defaultValue={0} width="md" />   
+                </Form.Item>
+
+                <Form.Item label="内存配额:" name="memory"> 
+                    <InputNumber  addonBefore="内存:" addonAfter="Gi" defaultValue={0} />   
+                </Form.Item>
+
+                <Form.Item label="Pod 配额:" name="pods"> 
+                    <InputNumber  addonBefore="Pods:" addonAfter="PCS" defaultValue={0} />   
+                </Form.Item>
+                </div>
             </DrawerForm>
+
         </PageContainer>
         )
 }

@@ -24,7 +24,7 @@ export async function updateApp(params:ApplicationModel){
     return req
 }
 
-export async  function getAppLevel() {
+export async  function getAppLevel():Promise<{ value:number,label:string}[]>  {
     let req= await request<ApiResponse<ApplicationLevel[]>>('/v1/application/applevel',{
         method:'GET',
     })
@@ -33,7 +33,7 @@ export async  function getAppLevel() {
 }
 
 
-export async  function bindAppLevel() {
+export async  function bindAppLevel() :Promise<{ value:number,label:string}[]> {
     let req= await request<ApiResponse<ApplicationLevel[]>>('/v1/application/applevel',{
         method:'GET',
     })
@@ -41,7 +41,7 @@ export async  function bindAppLevel() {
    return new Promise(x=>x(data))
 }
 
-export async function getAppLanguage() {
+export async function getAppLanguage() :Promise<{ value:number,label:string}[]> {
     let req= await request<ApiResponse<ApplicationLevel[]>>('/v1/application/applanguage',{
         method:'GET',
     })
