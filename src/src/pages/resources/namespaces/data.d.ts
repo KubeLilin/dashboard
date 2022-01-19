@@ -20,3 +20,11 @@ export type NamespcaeInfo={
 	namespace :string,
 	tenantName:string,
 }
+
+
+export type NewQuota = {
+  namespace: string,
+  cpu:number,
+  memory:number,
+  pods:number,
+}
