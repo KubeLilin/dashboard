@@ -62,3 +62,10 @@ export async function getApps(params:{
    return new Promise(x=>x({data:req.data.data,success:req.success,total:req.data.total}))
 }
 
+export async function initGitRepoistry(appName:string) {
+    let req=await request<ApiResponse<string>>(`/v1/application/gitrepo?appName=${appName}`,{
+        method:'GET',
+    })
+    return req;
+}
+

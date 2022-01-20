@@ -5,7 +5,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProForm, { DrawerForm, ProFormSelect, ProFormTextArea,ProFormText } from '@ant-design/pro-form';
 import { Input, Button, Form } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { getAppLanguage, getAppLevel, createApp, getApps, updateApp } from './apps_service';
+import { getAppLanguage, getAppLevel, createApp, getApps, updateApp, initGitRepoistry } from './apps_service';
 import { Link } from 'umi';
 
 const Apps: React.FC = () => {
@@ -13,6 +13,8 @@ const Apps: React.FC = () => {
     const [formVisible, formVisibleHandler] = useState<boolean>(false)
     const [appForm] = Form.useForm()
     const [edit, editHandler] = useState<boolean>(false)
+    const [gitRepo,gieRepoHandler]=useState<string>("");
+    const [appName,appNamehandler]=useState<string>("")
     const columns: ProColumns<ApplicationItem>[] = [
         {
             title: 'id',
@@ -135,14 +137,22 @@ const Apps: React.FC = () => {
 
                 <ProFormText width="md" name="id" label="id" readonly={true} hidden={true} />
                 <ProForm.Item name="name" label="应用名称" rules={[{ required: true, message: '请输入应用名' }]} >
-                    <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^\w_-]/g, ''); }} disabled={edit} />
+                    <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^\w_-]/g, ''); appNamehandler(e.currentTarget.value )}} disabled={edit} />
                 </ProForm.Item>
                 <ProForm.Item name="labels" label="应用标签">
                     <Input placeholder="" />
                 </ProForm.Item>
                 <ProForm.Item name="git" label="Git地址" rules={[{ required: true, message: '请录入应用Git地址!' }]}>
-                    <Input placeholder="请输入Git地址" disabled={edit} />
+                    <Input placeholder="请输入Git地址" style={{ width: 'calc(100% - 150px)' }}  value={gitRepo} />
+                    <Button type="primary" onClick={async (e)=>{
+                       let res=await initGitRepoistry(appName)
+                       if (res.success){
+                           gieRepoHandler(res.data)
+                       }
+                    }}
+                    >生成GIT地址</Button>
                 </ProForm.Item>
+            
                 <ProForm.Item name='level' label="应用等级" >
                     <ProFormSelect
                         request={getAppLevel}
