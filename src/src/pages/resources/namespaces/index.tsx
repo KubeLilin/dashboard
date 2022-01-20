@@ -2,11 +2,12 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
 import {Modal, Button ,Divider ,Space, message, Card,InputNumber, Input,Progress} from 'antd';
 import React, { useState, useRef } from 'react';
-import { PlusOutlined } from '@ant-design/icons';
+import { ContactsOutlined, PlusOutlined } from '@ant-design/icons';
 import Form,{ DrawerForm ,ProFormInstance,ProFormSelect,ProFormText} from '@ant-design/pro-form';
 
 import { TenantTableListItem, TenantTableListPagination,NamespcaeInfo } from './data'
-import { GetClusterList,GetNameSpaceList,PutNewNameSpace , queryTenant ,PutNewK8sNameSpace, GetResourceQuota } from './service';
+import { GetClusterList,GetNameSpaceList,PutNewNameSpace ,
+     queryTenant ,PutNewK8sNameSpace, GetResourceQuota,PostResourceQuota } from './service';
 const { confirm } = Modal;
 
 const Namespaces: React.FC = () => {
@@ -76,6 +77,7 @@ const Namespaces: React.FC = () => {
 
                 <span>   </span>
                 <a key="nsconfig" onClick={ ()=> {
+                    
                     selectNsRowSet(row)
                     quotaVisibleFunc(true)
                     
@@ -169,11 +171,24 @@ const Namespaces: React.FC = () => {
                             const res = await GetResourceQuota(selectNsRow.clusterId,selectNsRow.namespace)
                             console.log(res.data)
                             quotaInfoSet(res.data)
+                            quotaActionRef.current?.setFieldsValue({ 
+                                cpu: res.data[0].limitValue ,
+                                memory: String(res.data[1].displayValue).replace('Gi','') ,
+                                pods: res.data[2].limitValue
+                            })
                         }
                     }
                 }} 
                 onFinish={async (values) => {
-
+                    console.log(values)
+                    if(selectNsRow) {
+                        values.namespace = selectNsRow.namespace
+                        const res = await PostResourceQuota(selectNsRow.clusterId, values)
+                        if (res.success) {
+                            message.success("配额已生效")
+                        }
+                    }
+                    return true
                 }}
             >
              

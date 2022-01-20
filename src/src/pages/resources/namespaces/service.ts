@@ -1,6 +1,6 @@
 import {request} from "umi";
 import { ApiResponse } from "@/services/public/service";
-import { TenantTableListItem,NamespcaeInfo } from "./data"
+import { TenantTableListItem,NamespcaeInfo,NewQuota } from "./data"
 
 export type ClusterItem = {
     id: number,
@@ -93,6 +93,21 @@ export async function GetResourceQuota(clusterId:number,namespace:string ) :Prom
     let resData = await request<ApiResponse<any>>("/v1/cluster/resourcequota", {
         method: 'GET',
         params:{'cid':clusterId ,'namespace': namespace}
+    })
+    return resData
+}
+
+
+
+export async function PostResourceQuota(clusterId:number,postData:NewQuota ) :Promise<ApiResponse<any>>{
+    let resData = await request<ApiResponse<any>>("/v1/cluster/resourcequota", {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        params:{'cid':clusterId },
+        data: postData
+
     })
     return resData
 }
