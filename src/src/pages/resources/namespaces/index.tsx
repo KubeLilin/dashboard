@@ -173,7 +173,7 @@ const Namespaces: React.FC = () => {
                             quotaInfoSet(res.data)
                             quotaActionRef.current?.setFieldsValue({ 
                                 cpu: res.data[0].limitValue ,
-                                memory: String(res.data[1].displayValue).replace('Gi','') ,
+                                memory: Number(String(res.data[1].displayValue).replace('Gi','')) ,
                                 pods: res.data[2].limitValue
                             })
                         }
