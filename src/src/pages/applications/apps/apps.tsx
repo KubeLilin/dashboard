@@ -149,6 +149,7 @@ const Apps: React.FC = () => {
                         allowClear
                         enterButton="生成git地址"
                         name='git'
+                        disabled={ edit?true:false }
                         onSearch={async () => {
                             let res = await initGitRepoistry(appName)
                             if (res.success) {
