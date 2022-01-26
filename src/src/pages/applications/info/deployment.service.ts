@@ -1,9 +1,8 @@
-import success from '@/pages/result/success';
-import { ApiResponse } from '@/services/public/service';
+import { ApiResponse,PageResponse ,PageInfo } from '@/services/public/service';
 import { request } from 'umi';
 import { DeploymentItem ,PodItem } from './data';
 
-export const getDeploymentList = async (
+export async function getDeploymentList(
     params: {
         pageIndex?: number;
         current?: number;
@@ -12,17 +11,14 @@ export const getDeploymentList = async (
         name?: string;
     }, 
     sort: Record<string, any>,
-    options?: { [key: string]: any },)=> {
-        let resData=await request< ApiResponse<DeploymentItem[]>>("/v1/deployment/list",{
+    options?: { [key: string]: any }):Promise<PageInfo<DeploymentItem[]>> {
+
+        let resData=await request< PageResponse<DeploymentItem[]>>("/v1/deployment/list",{
             method:'GET',
             params:params
         })
         
-        return {
-            data: resData.data,
-            success: resData.success,
-            total:  resData.data.length
-        }
+    return new Promise(x=>x( resData.data ))
     
 }
 

@@ -143,6 +143,11 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                                 message: res.message,
                                 icon: <CloseCircleTwoTone />,
                             });
+                        } else {
+                            notification.open({
+                                message: "保存成功",
+                                icon: <SmileOutlined style={{ color: '#108ee9' }} />,
+                            });
                         }
                         dpStepHandler(res.data)
                         return res.success

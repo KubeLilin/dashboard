@@ -157,13 +157,13 @@ const AppInfo: React.FC = () => {
             <Content style={{ background:'white' }} > 
             <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }}  >
                 <TabPane tab="部署环境" key="1" >
-                    <ProTable<DeploymentItem>
+                    <ProTable
                         columns={columns}
                         rowKey="id"
                         dataSource={tableListDataSource}
                         actionRef={actionRef}
                         headerTitle="部署列表"
-                        pagination={false}
+                        //pagination={false}
                         // toolBarRender={() => [
                         //     <Button key='button' type="primary" icon={<PlusOutlined />}
                         //         onClick={() => {
@@ -201,6 +201,7 @@ const AppInfo: React.FC = () => {
                                     setTableListDataSource(list)
                                 }, 200)
                             })
+                            console.log(datasource)
                             setTableListDataSource(datasource.data)
                             return datasource
                         }}
