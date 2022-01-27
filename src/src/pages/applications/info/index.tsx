@@ -1,30 +1,22 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import { Tabs,Layout } from 'antd';
 import React, { useEffect } from 'react';
-
-import styles from './index.less';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProForm, {
-    DrawerForm,
-    ProFormSelect,
-    ProFormTextArea,
-    ProFormInstance,
-    ProFormText
-} from '@ant-design/pro-form';
+import ProDescriptions from '@ant-design/pro-descriptions';
+
 import { history, Link } from 'umi';
-import { Input, Button, Tag, Space, Menu, Form, Typography } from 'antd';
-import { PlusOutlined, EllipsisOutlined, LoadingOutlined,CloudUploadOutlined } from '@ant-design/icons';
+import { Button, Tag, Typography } from 'antd';
+import { PlusOutlined, LoadingOutlined,CloudUploadOutlined } from '@ant-design/icons';
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
-import { executeDeployment, getDeploymentList, getPodList } from './deployment.service'
+import {  getDeploymentList, getPodList ,GetApplicationInfo } from './deployment.service'
 import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 
 const { TabPane } = Tabs;
 const { Content } = Layout;
-
-const { Text, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 const AppInfo: React.FC = () => {
     var appId = history.location.query?.id
@@ -48,7 +40,7 @@ const AppInfo: React.FC = () => {
             hideInSearch: true
         },
         {
-            title:'集群',
+            title:'可用集群',
             dataIndex:'clusterId',
             hideInTable:true,
             request:BindCluster
@@ -127,7 +119,7 @@ const AppInfo: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (dom, record, _, action) => [
-                <Button key="depoly" type="primary"  icon={<CloudUploadOutlined />} onClick={() => {
+                <Button key="depoly"   icon={<CloudUploadOutlined />} onClick={() => {
                     tableListDataSource[0].namespace = 'n' + Math.random()
                     setTableListDataSource(tableListDataSource)
                     stepDpId(record.id)
@@ -145,33 +137,26 @@ const AppInfo: React.FC = () => {
 
     return (
         <PageContainer title={'应用: ' + appName} 
+            breadcrumb={{ routes:[
+                { path: '', breadcrumbName: '应用中心' },
+                { path: '', breadcrumbName: '应用管理', }
+            ] }}
             header={{
                 extra: [
-                    <Button key='button' type="primary" icon={<PlusOutlined />}
-                    onClick={() => {
-                        setStepFormEdit(false)
-                        setStepFormVisible(true)
-                    }}>创建部署环境</Button>,
                     <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
             <Content style={{ background:'white' }} > 
             <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }}  >
                 <TabPane tab="部署环境" key="1" >
-                    <ProTable
-                        columns={columns}
-                        rowKey="id"
-                        dataSource={tableListDataSource}
-                        actionRef={actionRef}
-                        headerTitle="部署列表"
-                        //pagination={false}
-                        // toolBarRender={() => [
-                        //     <Button key='button' type="primary" icon={<PlusOutlined />}
-                        //         onClick={() => {
-                        //             setStepFormEdit(false)
-                        //             setStepFormVisible(true)
-                        //         }}>创建部署环境</Button>
-                        // ]}
-                        //expandedRowRender={  }
+                    <ProTable  columns={columns} rowKey="id" dataSource={tableListDataSource}
+                        actionRef={actionRef} headerTitle="部署列表"
+                        toolBarRender={() => [
+                            <Button key='button' type="primary" icon={<PlusOutlined />}
+                                onClick={() => {
+                                    setStepFormEdit(false)
+                                    setStepFormVisible(true)
+                                }}>创建部署环境</Button>
+                        ]}
                         request={async (params, sort) => {
                             params.appid = appId
                             console.log(params)
@@ -208,15 +193,29 @@ const AppInfo: React.FC = () => {
                     ></ProTable>
                 </TabPane>
                 <TabPane tab="基本信息" key="2" >
-                    Content of Tab Pane 2
+                    <ProDescriptions request={ async () => GetApplicationInfo(Number(appId)) } style={{ padding:35, }} 
+                        column={2}  bordered	
+                        columns={[
+                            { title: '所属团队', dataIndex: 'tenantName'},
+                            { title: '应用名称', dataIndex: 'name' },
+                            { title: '应用级别',  dataIndex: 'level' },
+                            { title: '应用语言', dataIndex: 'language' },
+                            { title: 'Git仓库',  dataIndex: 'git' },
+                            { title: '镜像仓库', dataIndex: 'hub' },
+                            { title: '应用标签', dataIndex: 'labels' },
+                            { title: '应用状态', dataIndex: 'status',valueEnum:{ 1: "生效",0:"失效" } }
+                        ]}/>
                 </TabPane>
-                <TabPane tab="发布记录" key="3" >
+                <TabPane tab="应用流水线" key="3" >
+                    Content of Tab Pane 3
+                </TabPane>
+                <TabPane tab="发布记录" key="4" >
                     Content of Tab Pane 4
                 </TabPane>
-                <TabPane tab="应用配置" key="4" disabled>
+                <TabPane tab="应用配置" key="5" disabled>
                     Content of Tab Pane 5
                 </TabPane>
-                <TabPane tab="应用监控" key="5" disabled>
+                <TabPane tab="应用监控" key="6" disabled>
                     Content of Tab Pane 6
                 </TabPane>
             </Tabs>

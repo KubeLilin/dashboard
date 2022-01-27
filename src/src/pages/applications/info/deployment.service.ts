@@ -42,3 +42,11 @@ export const getPodList = async (appName:string , clusterId:number , index :numb
         }  
         return { index:index, data: resData.data }
     }
+
+export async function GetApplicationInfo(appid:number) {
+    let resData = await request<ApiResponse<any>>("/v1/application/info",{
+        method:'GET',
+        params:{ appid: appid }
+    })
+    return resData
+}
