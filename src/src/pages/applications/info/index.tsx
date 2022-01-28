@@ -13,6 +13,8 @@ import { DeploymentItem } from './data'
 import {  getDeploymentList, getPodList ,GetApplicationInfo } from './deployment.service'
 import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
+import AppBuildList from '../builds'
+
 
 const { TabPane } = Tabs;
 const { Content } = Layout;
@@ -207,7 +209,7 @@ const AppInfo: React.FC = () => {
                         ]}/>
                 </TabPane>
                 <TabPane tab="应用构建" key="3" >
-                    Content of Tab Pane 3
+                    <AppBuildList/>
                 </TabPane>
                 <TabPane tab="发布记录" key="4" >
                     Content of Tab Pane 4
