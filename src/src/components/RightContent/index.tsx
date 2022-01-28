@@ -28,11 +28,11 @@ const GlobalHeaderRight: React.FC = () => {
       <HeaderSearch
         className={`${styles.action} ${styles.search}`}
         placeholder="站内搜索"
-        defaultValue="sgr"
+        defaultValue="Lilin"
         options={[
           {
             label: <a href="http://sgr.yoyogo.run">sgr</a>,
-            value: 'sgr',
+            value: 'Lilin',
           },
       
         ]} // onSearch={value => {

@@ -435,7 +435,7 @@ const Pods: React.FC = (props) => {
                  <p><Radio checked>/bin/bash</Radio></p>
             </Modal>
 
-            <Modal title={`Web Console for SGR --  Pod:${selectedPodName}, Container:${selectedContainerName}` } centered visible={visibleTerminal} width={1920}  destroyOnClose footer={[]} onCancel={()=>{ setVisibleTerminal(false) } } >
+            <Modal title={`Web Console for KubeLilin --  Pod:${selectedPodName}, Container:${selectedContainerName}` } centered visible={visibleTerminal} width={1920}  destroyOnClose footer={[]} onCancel={()=>{ setVisibleTerminal(false) } } >
                 <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} 
                         namespace={selectedNamespace} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
             </Modal>

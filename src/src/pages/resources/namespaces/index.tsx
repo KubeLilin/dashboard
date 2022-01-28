@@ -156,7 +156,7 @@ const Namespaces: React.FC = () => {
                     type:"radio",
                     onSelect: (row)=>{
                         console.log(row)
-                        formNewNSRef.current?.setFieldsValue({ namespace: 'sgrns-'+ row.tCode ,tentantId: row.id  })
+                        formNewNSRef.current?.setFieldsValue({ namespace: 'klns-'+ row.tCode ,tentantId: row.id  })
                     }
                 }}
             />
