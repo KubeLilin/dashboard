@@ -9,9 +9,7 @@ export async function getDeploymentList(
         pageSize?: number;
         appid?: number;
         name?: string;
-    }, 
-    sort: Record<string, any>,
-    options?: { [key: string]: any }):Promise<PageInfo<DeploymentItem[]>> {
+    }, ):Promise<PageInfo<DeploymentItem[]>> {
 
         let resData=await request< PageResponse<DeploymentItem[]>>("/v1/deployment/list",{
             method:'GET',
