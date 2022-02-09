@@ -48,3 +48,12 @@ export async function GetApplicationInfo(appid:number) {
     })
     return resData
 }
+
+
+export async function GetAppGitBranches(appid:number) {
+    let resData = await request<ApiResponse<string[]>>("/v1/application/gitbranches",{
+        method:'GET',
+        params:{ appid: appid }
+    })
+    return resData
+}

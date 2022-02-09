@@ -12,10 +12,12 @@ import ProForm, {
   ProFormSelect,
 } from '@ant-design/pro-form';
 
-import { getDeploymentList } from '../info/deployment.service'
+import { getDeploymentList,GetAppGitBranches } from '../info/deployment.service'
 
 
 interface Props{
+
+    AppId:number
     // deploymentId:number,
     // tableRef:any,
     // deployImage?:string,
@@ -56,7 +58,8 @@ const AppBuildList : React.FC<Props> = (props) => {
     const buildForm =  useRef<ProFormInstance>();
 
     useEffect(()=>{
-        console.log('onload')
+        console.log("page loaded")
+        console.log(props.AppId)
         var buildList1:BuildItem[] =[]
         buildList1.push({title:'dev-nginx-cls-hbktlqm5', lastBuildRecords:undefined    })
         buildList1.push({title:'test-nginx-cls-hbktlqm5', lastBuildRecords:{ success:true,status:'completed', action:'管理员: 手动触发', time:'30分钟', task:'#22' }   })
@@ -126,7 +129,10 @@ const AppBuildList : React.FC<Props> = (props) => {
                     }} ></ProFormSelect>
                 </ProForm.Item>
                 <ProForm.Item name="branch">
-                    <ProFormSelect label="代码分支" width="md"  ></ProFormSelect>
+                    <ProFormSelect label="代码分支" width="md"  request={async()=>{
+                        const namesRes = await GetAppGitBranches(props.AppId)
+                        return namesRes.data.map((item)=> ({label: item ,value:item}) )
+                    }} ></ProFormSelect>
                 </ProForm.Item>
                 <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"}>
                     <CheckCard.Group style={{ width: '100%' }} onChange={(val)=>{

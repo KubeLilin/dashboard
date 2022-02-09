@@ -210,7 +210,7 @@ const AppInfo: React.FC = () => {
                         ]}/>
                 </TabPane>
                 <TabPane tab="应用构建" key="3" >
-                    <AppBuildList />
+                    <AppBuildList AppId={Number(appId)} />
                 </TabPane>
                 <TabPane tab="发布记录" key="4" >
                     Content of Tab Pane 4
