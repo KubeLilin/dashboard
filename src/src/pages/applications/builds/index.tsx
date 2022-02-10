@@ -72,19 +72,19 @@ const AppBuildList : React.FC<Props> = (props) => {
 
 
     return (<div>
-            <div  style={{ marginLeft: 56,}}> 
-            <Button type="primary" size="large" icon={<PlusOutlined />} 
+            <div  style={{   marginRight: 55, textAlign:"right" }}> 
+            <Button type="primary" icon={<PlusOutlined />}  
             onClick={()=>{
                 setVisableForm(true)
             }} >新建构建</Button>
                 
             </div>
-            <div style={{width:1580,  marginLeft: 55,marginTop: 10,marginRight: 55 ,   background: "#f0f2f5" ,padding: 30} }>
-                <div  style={{width:1580, }}>
-                <List dataSource={buildList} grid={{ gutter: 0,column:5,xs:2,xl:3,xxl:5 }}
+            <div style={{  marginLeft: 55,marginTop: 10,marginRight: 55 ,   background: "#f0f2f5" ,padding: 30} }>
+                <div  >
+                <List dataSource={buildList}  grid={{ gutter: 16, xs: 1, sm: 2, md: 3,lg: 3,xl: 4,xxl: 5,}}
                     renderItem={item => (
                         <List.Item>
-                        <Card hoverable bordered style={{ width: 260 }} 
+                        <Card hoverable bordered  
                                 title={  <Tooltip title={item.title}>{item.title}</Tooltip>  } 
                                 actions={[ 
                                 <Tooltip title="开始构建"> <PlayCircleFilled key="building" style={{ fontSize:23}} twoToneColor="#52c41a" /></Tooltip>,

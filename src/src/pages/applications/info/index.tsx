@@ -209,7 +209,7 @@ const AppInfo: React.FC = () => {
                             { title: '应用状态', dataIndex: 'status',valueEnum:{ 1: "生效",0:"失效" } }
                         ]}/>
                 </TabPane>
-                <TabPane tab="应用构建" key="3" >
+                <TabPane tab="应用流水线" key="3" >
                     <AppBuildList AppId={Number(appId)} />
                 </TabPane>
                 <TabPane tab="发布记录" key="4" >
