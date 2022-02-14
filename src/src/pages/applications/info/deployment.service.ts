@@ -57,3 +57,11 @@ export async function GetAppGitBranches(appid:number) {
     })
     return resData
 }
+
+
+export async function GetBuildScripts() {
+    let resData = await request<ApiResponse<any>>("/v1/application/buildscripts",{
+        method:'GET',
+    })
+    return resData
+}
