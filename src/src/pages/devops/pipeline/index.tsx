@@ -16,17 +16,19 @@ const { TabPane } = Tabs;
 const { Content } = Layout;
 
 import { getDeploymentList,GetAppGitBranches,GetBuildScripts } from '../../applications/info/deployment.service'
-import { StageItem } from './data'
+import { StageItem, StepItem } from './data'
+var buildScriptList:any
 
 const Pipeline : React.FC = () => {
 
     var appId = history.location.query?.appid
-    var buildScriptList:any
-
-    GetBuildScripts().then((v)=>{
-        buildScriptList =  v.data
-        console.log(buildScriptList)
-    })
+   
+    if (!buildScriptList){
+        GetBuildScripts().then((v)=>{
+            buildScriptList =  v.data
+            console.log(buildScriptList)
+        })
+    }   
 
 
     const StepCommands = [
@@ -65,13 +67,20 @@ const Pipeline : React.FC = () => {
 
 
     const addNewStage= (index:number) => {
-        allStages.splice(index,0,{ name:'新阶段',steps:[ { name:'打包构建',key:'app_deploy' }] })
+        allStages.splice(index,0,{ name:'新阶段',steps:[{ name:'命令执行',key:'cmd_shell' }] })
         bindAllStages()
     }
 
     const removeStage = () => {
         if(allStages.length > 0){
             allStages.splice(currentStageIndex,1)
+            bindAllStages()
+        }
+    }
+
+    const removeStep = (stepIndex:number) => {
+        if(allStages[currentStageIndex].steps.length > 0) {
+            allStages[currentStageIndex].steps.splice(stepIndex,1)
             bindAllStages()
         }
     }
@@ -86,6 +95,35 @@ const Pipeline : React.FC = () => {
         console.log(formData)
         allStages[currentStageIndex].steps[currentStageSetpIndex].content = formData
         return true
+    }
+
+    const onStepItemClick = (item:StepItem,index:number) => {
+        if (allStages[currentStageIndex].steps.length > index) {
+            allStages[currentStageIndex].steps[index].name = item.name
+          
+            
+            const currentSetpItem = allStages[currentStageIndex].steps[index]
+            if (currentSetpItem.content) {
+                var currentForm:any
+                switch (currentSetpItem.key) {
+                case "git_pull":
+                    currentForm = gitForm
+                    break
+                case "code_build":
+                    currentForm = buildForm
+                    break
+                case "cmd_shell":
+                    currentForm = shellForm
+                    break
+                case "app_deploy":
+                    currentForm = deployForm    
+                    break
+                }
+                currentForm?.current?.resetFields()
+                currentForm?.current.setFieldsValue(currentSetpItem.content)
+            }
+            setCurrentStageSetpIndex(index)
+        }
     }
 
 
@@ -108,7 +146,7 @@ const Pipeline : React.FC = () => {
                         <Button size="large">开始</Button>--<Button onClick={()=>addNewStage(0)} shape="circle" icon={<PlusOutlined />} size="small"/>
                         
                         { allStages.map((item,index)=>{ 
-                           return <span key={item.name}>
+                           return <span key={item.name+index}>
                                 --<Button shape="round" type="primary" size="large" icon={<FormOutlined />}
                                 onClick={()=>{
                                     setCurrentStageIndex(index)
@@ -137,10 +175,13 @@ const Pipeline : React.FC = () => {
                                 renderItem={(item,index) => (
                                     <List.Item>
                                          <Card hoverable bordered style={{ textAlign:"center",height:"10",width:"100%", backgroundColor: currentStageSetpIndex== index?"whitesmoke":""}} 
-                                            onClick={()=>{
-                                                allStages[currentStageIndex].steps[index].name = item.name
-                                                setCurrentStageSetpIndex(index)
-                                            }}>{item.name}</Card>
+                                            onClick={()=>onStepItemClick(item,index)}>
+                                            <div> {item.name}  
+                                            <Popconfirm title="确定要删除这个阶段吗?" onConfirm={()=>removeStep(index)}>
+                                            <Button type="primary" danger icon={<DeleteOutlined />} style={{marginLeft:20}} />
+                                            </Popconfirm>
+                                            </div>
+                                         </Card>
                                     </List.Item>
                                 )}   footer={<a style={{fontSize:16}} onClick={()=>{  
                                     setVisableStepsSelected(true)
@@ -184,7 +225,7 @@ const Pipeline : React.FC = () => {
 
                                     <ProForm.Item name="buildScript" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "}  >
                                         <ProFormTextArea label="构建脚本"  
-                                            fieldProps={ {autoSize:{minRows: 4, maxRows: 8},style:{ background:"black" ,color: 'whitesmoke'}  } }   ></ProFormTextArea>
+                                            fieldProps={ {autoSize:{minRows: 6, maxRows: 16},style:{ background:"black" ,color: 'whitesmoke'}  } }   ></ProFormTextArea>
                                     </ProForm.Item>
                                     <ProForm.Item name="buildFile" initialValue={"./Dockerfile"} >
                                         <ProFormText label="构建文件"  ></ProFormText>
@@ -196,8 +237,8 @@ const Pipeline : React.FC = () => {
                                 <ProForm formRef={shellForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存</Button> ] }} 
                                   onFinish={onFormSave} >
                                     <ProForm.Item name="shell" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "}  >
-                                        <ProFormTextArea label="命令行"  
-                                            fieldProps={ {autoSize:{minRows: 4, maxRows: 8},style:{ background:"black" ,color: 'whitesmoke'}  } }   ></ProFormTextArea>
+                                        <ProFormTextArea 
+                                            fieldProps={ {autoSize:{minRows: 16, maxRows: 28},style:{ background:"black" ,color: 'whitesmoke'}  } }   ></ProFormTextArea>
                                     </ProForm.Item>
                                 </ProForm>
                                 </div>
@@ -223,7 +264,10 @@ const Pipeline : React.FC = () => {
                         <List.Item>
                             <div>
                                 <span>{item.name} </span>
-                                <Button type="primary">创建</Button>
+                                <Button type="primary" onClick={()=>{
+                                    allStages[currentStageIndex].steps.push(item)
+                                    setVisableStepsSelected(false)
+                                }}>创建</Button>
                             </div>
                         </List.Item>
                     )}>
