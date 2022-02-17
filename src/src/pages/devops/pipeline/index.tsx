@@ -1,10 +1,10 @@
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Tag, Typography,Tabs,Layout,List,Card,Divider,Input, Space,Popconfirm, Drawer,Avatar } from 'antd';
+import { Button, Tag, Typography,Tabs,Layout,List,Card,Divider,Input, Space,Popconfirm, Drawer,Avatar,Tooltip,message } from 'antd';
 import { history, Link } from 'umi';
 import ProCard from '@ant-design/pro-card';
 import { FormOutlined,SettingOutlined,EditOutlined ,CloseCircleTwoTone,SyncOutlined,CheckCircleOutlined,CloseCircleOutlined,
-    EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone,DeleteOutlined} from '@ant-design/icons'
+    EllipsisOutlined,PlayCircleFilled,SaveTwoTone,PlusOutlined,ScheduleTwoTone ,CheckCircleTwoTone,DeleteOutlined} from '@ant-design/icons'
 import type { ProFormInstance } from '@ant-design/pro-form';
 import { CheckCard } from '@ant-design/pro-card';
 import ProForm, {
@@ -17,7 +17,10 @@ const { Content } = Layout;
 
 import { getDeploymentList,GetAppGitBranches,GetBuildScripts } from '../../applications/info/deployment.service'
 import { StageItem, StepItem } from './data'
+import { json } from 'express';
+
 var buildScriptList:any
+var initStages:StageItem[]
 
 const Pipeline : React.FC = () => {
 
@@ -32,42 +35,60 @@ const Pipeline : React.FC = () => {
 
 
     const StepCommands = [
-        { name:'拉取代码',key:'git_pull' },
-        { name:'编译构建',key:'code_build' },
-        { name:'命令执行',key:'cmd_shell' },
-        { name:'应用部署',key:'app_deploy' },
+        { name:'拉取代码',key:'git_pull',save:false },
+        { name:'编译构建',key:'code_build' ,save:false},
+        { name:'命令执行',key:'cmd_shell' ,save:false},
+        { name:'应用部署',key:'app_deploy' ,save:false},
     ]
 
-    const initStages:StageItem[] = [
-        {
-           name: '编译构建',
-           steps:[
-               { name:'拉取代码',key:'git_pull' },
-               { name:'编译命令',key:'code_build' },
-               { name:'命令执行',key:'cmd_shell' },
-           ]
-        },
-        {
-            name: '部署',
-            steps:[
-                { name:'应用部署',key:'app_deploy' },
-            ]
-        }
-    ]
-    const [allStages, setAllStages] = useState<StageItem[]>(initStages);
+    if (!initStages) {
+        initStages = [
+            {
+                name: '代码',
+                steps:[
+                    { name:'拉取代码',key:'git_pull',save:false },
+                ]
+            },
+            {
+               name: '编译构建',
+               steps:[
+                   { name:'编译命令',key:'code_build',save:false },
+                   { name:'命令执行',key:'cmd_shell' ,save:false},
+               ]
+            },
+            {
+                name: '部署',
+                steps:[
+                    { name:'应用部署',key:'app_deploy' ,save:false},
+                ]
+            },
+            {
+                name: '通知',
+                steps:[
+                    { name:'命令执行',key:'cmd_shell',save:false },            ]
+            }
+        ]
+    }
+
+    const [allStages, setAllStages] = useState<StageItem[]>([]);
     const [currentStageIndex, setCurrentStageIndex] = useState<number>(0);
-    const [currentStageName, setCurrentStageName] = useState<string>(initStages[0].name);
+    const [currentStageName, setCurrentStageName] = useState<string>("");
     const [currentStageSetpIndex, setCurrentStageSetpIndex] = useState<number>(0);
     const [visableStepsSelected, setVisableStepsSelected] = useState(false);
+    const [onLoaded, _] = useState<boolean|undefined>(false);
 
     const gitForm =  useRef<ProFormInstance>();
     const buildForm =  useRef<ProFormInstance>();
     const shellForm =  useRef<ProFormInstance>();
     const deployForm =  useRef<ProFormInstance>();
 
+    useEffect(()=>{
+        console.log("page loaded")
+        setAllStages([...initStages])
+    },[onLoaded])
 
     const addNewStage= (index:number) => {
-        allStages.splice(index,0,{ name:'新阶段',steps:[{ name:'命令执行',key:'cmd_shell' }] })
+        allStages.splice(index,0,{ name:'新阶段',steps:[{ name:'命令执行',key:'cmd_shell', save:false, }] })
         bindAllStages()
     }
 
@@ -81,7 +102,8 @@ const Pipeline : React.FC = () => {
     const removeStep = (stepIndex:number) => {
         if(allStages[currentStageIndex].steps.length > 0) {
             allStages[currentStageIndex].steps.splice(stepIndex,1)
-            bindAllStages()
+            setAllStages([...allStages])
+            setCurrentStageSetpIndex(0)
         }
     }
 
@@ -91,11 +113,34 @@ const Pipeline : React.FC = () => {
         setCurrentStageSetpIndex(0)
     }
 
+    const getCurrentStep = (index:number):(StepItem|undefined) =>  {
+        if (allStages.length > 0) {
+            return allStages[currentStageIndex].steps[index]
+        } else {
+            return undefined
+        }
+    }
+
     const onFormSave = async (formData: Record<string, any>) => {
         console.log(formData)
         allStages[currentStageIndex].steps[currentStageSetpIndex].content = formData
+        allStages[currentStageIndex].steps[currentStageSetpIndex].save = true
+        setAllStages([...allStages])
+
+        const key = 'onSaveForm';
+        message.loading({ content: '保存中...', key });
+        setTimeout(() => {
+          message.success({ content: '保存成功!', key, duration: 0.5 });
+        }, 1000);
+
         return true
     }
+
+    const onSavePipeline = async () => {
+        
+        console.log(JSON.stringify(allStages))
+    }
+
 
     const onStepItemClick = (item:StepItem,index:number) => {
         if (allStages[currentStageIndex].steps.length > index) {
@@ -141,58 +186,75 @@ const Pipeline : React.FC = () => {
         <Content style={{ background:'white' }} > 
                 <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} >
                     <TabPane tab="编辑泳道" key="1" >
+                    <div>
+                    <div  style={{  marginRight: 55,textAlign:"right"  }}>  
+                        <Button type="primary"   icon={<SaveTwoTone />}  
+                        onClick={onSavePipeline} >保存流程线</Button>
+                    </div>
+                    <div style={{ fontSize:16,fontStyle:"oblique", marginLeft: 23  }}>         
+                        <Space direction='horizontal'>
+                            当前阶段:
+                            <Input value={currentStageName} onChange={(e)=>{ setCurrentStageName(e.currentTarget.value) }} />
+                            <Button type="primary" onClick={()=>{
+                                allStages[currentStageIndex].name = currentStageName
+                                setAllStages([...allStages])
+                            }} icon={<CheckCircleOutlined />} />
+                            <Popconfirm title="确定要删除这个阶段吗?" onConfirm={removeStage}>
+                                <Button type="primary" danger icon={<DeleteOutlined />}/>
+                            </Popconfirm>
+                        </Space>
+                    </div>
+
+                    </div>
+           
                     <ProCard split="horizontal" >
                         <ProCard headerBordered >   
-                        <Button size="large">开始</Button>--<Button onClick={()=>addNewStage(0)} shape="circle" icon={<PlusOutlined />} size="small"/>
+                        <Button size="large">开始</Button>———<Button onClick={()=>addNewStage(0)} shape="circle" icon={<PlusOutlined />} size="small"/>
                         
                         { allStages.map((item,index)=>{ 
                            return <span key={item.name+index}>
-                                --<Button shape="round" type="primary" size="large" icon={<FormOutlined />}
+                                ———<Button shape="round" type="primary" size="large" ghost={currentStageIndex!=index} icon={<FormOutlined />}
                                 onClick={()=>{
                                     setCurrentStageIndex(index)
                                     setCurrentStageName(allStages[index].name)
                                     setCurrentStageSetpIndex(0)
                                 }}>{item.name}</Button>
-                                --<Button onClick={()=>addNewStage(index+1)} shape="circle" icon={<PlusOutlined />} size="small"/></span>
+                                ———<Button onClick={()=>addNewStage(index+1)} shape="circle" icon={<PlusOutlined />} size="small"/></span>
                         }) }
 
-                        --<Button size="large">结束</Button>
+                        ———<Button size="large">结束</Button>
                         </ProCard>
                         <ProCard split="vertical">
                             <ProCard colSpan="17%">
-                            <Space direction='horizontal'>
-                                <Input value={currentStageName} onChange={(e)=>{ setCurrentStageName(e.currentTarget.value) }} />
-                                <Button type="primary" onClick={()=>{
-                                    allStages[currentStageIndex].name = currentStageName
-                                    setAllStages([...allStages])
-                                }} icon={<CheckCircleOutlined />} />
-                                <Popconfirm title="确定要删除这个阶段吗?" onConfirm={removeStage}>
-                                    <Button type="primary" danger icon={<DeleteOutlined />}/>
-                                </Popconfirm>
-                            </Space>
-                                <Divider />
-                                <List dataSource={allStages[currentStageIndex].steps} header={<span style={{fontSize:16}}> 步骤(子任务列表):</span>}
+                                <List dataSource={allStages.length>0?allStages[currentStageIndex].steps:[]} bordered header={<span style={{fontSize:16}}> 步骤列表:</span>}
                                 renderItem={(item,index) => (
                                     <List.Item>
-                                         <Card hoverable bordered style={{ textAlign:"center",height:"10",width:"100%", backgroundColor: currentStageSetpIndex== index?"whitesmoke":""}} 
-                                            onClick={()=>onStepItemClick(item,index)}>
-                                            <div> {item.name}  
-                                            <Popconfirm title="确定要删除这个阶段吗?" onConfirm={()=>removeStep(index)}>
-                                            <Button type="primary" danger icon={<DeleteOutlined />} style={{marginLeft:20}} />
+                                        <Tooltip title={"步骤"+ (index+1) + ":" +item.name}  >
+                                         <Card hoverable bordered bodyStyle={{ backgroundColor: currentStageSetpIndex== index?"#f0f5ff":""}} 
+                                            onClick={()=>onStepItemClick(item,index)}> 
+                                            <div style={{color:"ButtonText"}}><ScheduleTwoTone />     {item.name} <span style={{ width:50,color:"red"}}>{getCurrentStep(index)?.save?"        ":"**        "}</span>  
+                                            <Popconfirm title="确定要删除这个阶段吗?" 
+                                                onConfirm={(e)=>{ 
+                                                    removeStep(index)
+                                                    e?.stopPropagation()
+                                                }}>
+                                           <Button type="primary" size="small" danger icon={<DeleteOutlined />} style={{marginLeft:20 , width:40}} />
                                             </Popconfirm>
                                             </div>
                                          </Card>
+                                         </Tooltip>
                                     </List.Item>
-                                )}   footer={<a style={{fontSize:16}} onClick={()=>{  
+                                )}   
+                                footer={<Tooltip title="为当前阶段添加步骤" ><a href='#' style={{fontSize:16}} onClick={()=>{  
                                     setVisableStepsSelected(true)
-                                }} >添加子任务+</a>}  />
+                                }} >    添加步骤</a></Tooltip>}  />
                             </ProCard >
                             <ProCard >
-                                <span style={{fontSize:16}}>{allStages[currentStageIndex].steps[currentStageSetpIndex].name}</span>
+                                <span style={{fontSize:16}}>步骤: { getCurrentStep()?.name }  (每个步骤必须保存才能生效) </span>
                                 <Divider />
 
-                                <div id="git_pull" style={{ display: allStages[currentStageIndex].steps[currentStageSetpIndex].key=="git_pull"?"block":"none" }}  >
-                                    <ProForm formRef={gitForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存</Button> ] }}
+                                <div id="git_pull" style={{ display:allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="git_pull"?"block":"none" :"none" }}  >
+                                    <ProForm formRef={gitForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }}
                                      onFinish={onFormSave} >
                                         <ProForm.Item name="branch">
                                         <ProFormSelect label="代码分支" width="md"  request={async()=>{
@@ -202,11 +264,10 @@ const Pipeline : React.FC = () => {
                                         </ProForm.Item>
                                     </ProForm>  
                                 </div>
-                                <div id="code_build" style={{ display: allStages[currentStageIndex].steps[currentStageSetpIndex].key=="code_build"?"block":"none" }}>
-                                    <ProForm formRef={buildForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存</Button> ] }} 
+                                <div id="code_build" style={{ display: allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="code_build"?"block":"none" :"none"}}>
+                                    <ProForm formRef={buildForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                         onFinish={onFormSave} >
                                     <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"}>
-                                      
                                         <CheckCard.Group style={{ width: '100%' }} onChange={(val)=>{
                                             console.log(val)
                                             var script = buildScriptList[String(val)]
@@ -233,8 +294,8 @@ const Pipeline : React.FC = () => {
                                     </ProForm>  
                                     
                                 </div>
-                                <div id="cmd_shell" style={{ display: allStages[currentStageIndex].steps[currentStageSetpIndex].key=="cmd_shell"?"block":"none" }}>
-                                <ProForm formRef={shellForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存</Button> ] }} 
+                                <div id="cmd_shell" style={{ display: allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="cmd_shell"?"block":"none":"none" }}>
+                                <ProForm formRef={shellForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                   onFinish={onFormSave} >
                                     <ProForm.Item name="shell" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "}  >
                                         <ProFormTextArea 
@@ -243,8 +304,8 @@ const Pipeline : React.FC = () => {
                                 </ProForm>
                                 </div>
                    
-                                <div id="app_deploy" style={{ display: allStages[currentStageIndex].steps[currentStageSetpIndex].key=="app_deploy"?"block":"none" }}>
-                                <ProForm formRef={deployForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存</Button> ] }} 
+                                <div id="app_deploy" style={{ display: allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="app_deploy"?"block":"none":"none" }}>
+                                <ProForm formRef={deployForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                   onFinish={onFormSave} >
                                     <ProForm.Item name="depolyment">
                                         <ProFormSelect label="部署环境" width="md" request={async()=>{
@@ -276,9 +337,9 @@ const Pipeline : React.FC = () => {
                     </Drawer>
 
                     </TabPane>
-                    <TabPane tab="环境变量" key="2" >
+                    <TabPane tab="环境变量" key="2" disabled >
                     </TabPane>
-                    <TabPane tab="WebHooks" key="3" >
+                    <TabPane tab="WebHooks" key="3" disabled >
                     </TabPane>
                 </Tabs>
         </Content>
