@@ -250,7 +250,7 @@ const Pipeline : React.FC = () => {
                                 }} >    添加步骤</a></Tooltip>}  />
                             </ProCard >
                             <ProCard >
-                                <span style={{fontSize:16}}>步骤: { getCurrentStep()?.name }  (每个步骤必须保存才能生效) </span>
+                                <span style={{fontSize:16}}>步骤: { getCurrentStep(currentStageSetpIndex)?.name }  (每个步骤必须保存才能生效) </span>
                                 <Divider />
 
                                 <div id="git_pull" style={{ display:allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="git_pull"?"block":"none" :"none" }}  >
