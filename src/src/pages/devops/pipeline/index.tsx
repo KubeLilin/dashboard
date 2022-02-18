@@ -256,7 +256,7 @@ const Pipeline : React.FC = () => {
                                 <div id="git_pull" style={{ display:allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="git_pull"?"block":"none" :"none" }}  >
                                     <ProForm formRef={gitForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }}
                                      onFinish={onFormSave} >
-                                        <ProForm.Item name="branch">
+                                        <ProForm.Item name="branch" rules={[{ required: true, message: '请选择代码分支' }]}>
                                         <ProFormSelect label="代码分支" width="md"  request={async()=>{
                                             const namesRes = await GetAppGitBranches(Number(appId))
                                             return namesRes.data.map((item)=> ({label: item ,value:item}) )
@@ -267,7 +267,7 @@ const Pipeline : React.FC = () => {
                                 <div id="code_build" style={{ display: allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="code_build"?"block":"none" :"none"}}>
                                     <ProForm formRef={buildForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                         onFinish={onFormSave} >
-                                    <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"}>
+                                    <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"} rules={[{ required: true, message: '请选择构建环境' }]}>
                                         <CheckCard.Group style={{ width: '100%' }} onChange={(val)=>{
                                             console.log(val)
                                             var script = buildScriptList[String(val)]
@@ -284,7 +284,7 @@ const Pipeline : React.FC = () => {
                                         </CheckCard.Group>
                                     </ProForm.Item>
 
-                                    <ProForm.Item name="buildScript" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "}  >
+                                    <ProForm.Item name="buildScript" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "} rules={[{ required: true, message: '请选择填写构建脚本' }]} >
                                         <ProFormTextArea label="构建脚本"  
                                             fieldProps={ {autoSize:{minRows: 6, maxRows: 16},style:{ background:"black" ,color: 'whitesmoke'}  } }   ></ProFormTextArea>
                                     </ProForm.Item>
@@ -297,7 +297,7 @@ const Pipeline : React.FC = () => {
                                 <div id="cmd_shell" style={{ display: allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="cmd_shell"?"block":"none":"none" }}>
                                 <ProForm formRef={shellForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                   onFinish={onFormSave} >
-                                    <ProForm.Item name="shell" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "}  >
+                                    <ProForm.Item name="shell" initialValue={"# bash"} rules={[{ required: true, message: '请填写命令行' }]}  >
                                         <ProFormTextArea 
                                             fieldProps={ {autoSize:{minRows: 16, maxRows: 28},style:{ background:"black" ,color: 'whitesmoke'}  } }   ></ProFormTextArea>
                                     </ProForm.Item>
@@ -307,7 +307,7 @@ const Pipeline : React.FC = () => {
                                 <div id="app_deploy" style={{ display: allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="app_deploy"?"block":"none":"none" }}>
                                 <ProForm formRef={deployForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                   onFinish={onFormSave} >
-                                    <ProForm.Item name="depolyment">
+                                    <ProForm.Item name="depolyment" rules={[{ required: true, message: '请选择部署环境' }]}>
                                         <ProFormSelect label="部署环境" width="md" request={async()=>{
                                                             const deployPage = await getDeploymentList({appid:1,current:1,pageSize:50})
                                                             return deployPage.data.map((item)=> ({label: item.name ,value:item.id}) )
