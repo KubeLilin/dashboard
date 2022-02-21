@@ -65,7 +65,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
     },
     {
         dataIndex: '',
-        title:'可用/总资源',
+        title:'可分配/总资源',
         render:(dom,row)=> {
             return (
             <Space key={row.uid} direction="vertical" size={0}>

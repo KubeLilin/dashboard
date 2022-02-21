@@ -11,7 +11,7 @@ import { history } from 'umi';
 
 
 
-import { NewPipeline } from '../info/deployment.service'
+import { NewPipeline,GetPipelineList } from '../info/deployment.service'
 
 
 
@@ -44,14 +44,37 @@ const AppBuildList : React.FC<Props> = (props) => {
     useEffect(()=>{
         console.log("page loaded")
         console.log(props.AppId)
-        var buildList1:BuildItem[] =[]
-        buildList1.push({title:'dev-nginx-cls-hbktlqm5', lastBuildRecords:undefined    })
-        buildList1.push({title:'test-nginx-cls-hbktlqm5', lastBuildRecords:{ success:true,status:'completed', action:'管理员: 手动触发', time:'30分钟', task:'#22' }   })
-        buildList1.push({title:'prod-nginx-cls-hbktlqm5', lastBuildRecords:{ success:false,status:'completed', action:'管理员: 手动触发', time:'21分钟', task:'#21' }  })
-        buildList1.push({title:'prod-yoyogodemo-cls-hbktlqm5', lastBuildRecords:{ success:true,status:'running', action:'管理员: 手动触发', time:'21分钟', task:'#21' }  })
-        buildList1.push({title:'prod-yoyogodemo-cls-hbktlqm5', lastBuildRecords:{ success:true,status:'running', action:'管理员: 手动触发', time:'21分钟', task:'#21' }  })
 
-        setBuildList(buildList1)
+        GetPipelineList(props.AppId).then((res)=>{
+            
+            const appBuildList = res.data.map(v=>{
+                var buildItem:BuildItem
+                buildItem = { title: v.name , lastBuildRecords:undefined }
+                if (v.taskid) {
+                    buildItem.lastBuildRecords = { success:false,status:'completed', action:'管理员: 手动触发', time:'30分钟', task:v.taskid   } 
+                    if (v.status == 1) {
+                        buildItem.lastBuildRecords.status = 'running'
+                    }
+                    if (v.status == 2 || v.status == 3) {
+                        buildItem.lastBuildRecords.status = 'completed'
+                        buildItem.lastBuildRecords.success = v.status == 2?true:false
+                    }
+
+                }
+                return buildItem
+            })
+            console.log(appBuildList)
+            setBuildList(appBuildList)
+
+        })
+
+        // var buildList1:BuildItem[] =[]
+        // buildList1.push({title:'dev-nginx-cls-hbktlqm5', lastBuildRecords:undefined    })
+        // buildList1.push({title:'test-nginx-cls-hbktlqm5', lastBuildRecords:{ success:true,status:'completed', action:'管理员: 手动触发', time:'30分钟', task:'#22' }   })
+        // buildList1.push({title:'prod-nginx-cls-hbktlqm5', lastBuildRecords:{ success:false,status:'completed', action:'管理员: 手动触发', time:'21分钟', task:'#21' }  })
+        // buildList1.push({title:'prod-yoyogodemo-cls-hbktlqm5', lastBuildRecords:{ success:true,status:'running', action:'管理员: 手动触发', time:'21分钟', task:'#21' }  })
+        // buildList1.push({title:'prod-yoyogodemo-cls-hbktlqm5', lastBuildRecords:{ success:true,status:'running', action:'管理员: 手动触发', time:'21分钟', task:'#21' }  })
+
     },[onLoaded])
 
 
@@ -108,7 +131,7 @@ const AppBuildList : React.FC<Props> = (props) => {
             <ProForm onFinish={async (values)=>{
                 const res = await NewPipeline(props.AppId,values.name)
                 if (res.success){
-                    history.push(`/devops/pipeline?id=${res.data}&appid=${props.AppId}&appname=${props.AppName}`)
+                    history.push(`/devops/pipeline?id=${res.data}&name=${values.name}&appid=${props.AppId}&appname=${props.AppName}`)
                 }
                 return true
             }} >

@@ -15,13 +15,15 @@ import ProForm, {
 const { TabPane } = Tabs;
 const { Content } = Layout;
 
-import { getDeploymentList,GetAppGitBranches,GetBuildScripts } from '../../applications/info/deployment.service'
+import { getDeploymentList,GetAppGitBranches,GetBuildScripts  } from '../../applications/info/deployment.service'
 import { StageItem, StepItem } from './data'
 
 var buildScriptList:any
 var initStages:StageItem[]
 
 const Pipeline : React.FC = () => {
+    var PipelineId = Number(history.location.query?.id)
+    var PipelineName = history.location.query?.name
 
    
     var appId = history.location.query?.appid
@@ -84,7 +86,8 @@ const Pipeline : React.FC = () => {
     const deployForm =  useRef<ProFormInstance>();
 
     useEffect(()=>{
-        console.log("page loaded")
+        console.log("page loaded: pipeline id="+ PipelineId)
+        setCurrentStageName(initStages[0].name)
         setAllStages([...initStages])
     },[onLoaded])
 
@@ -172,12 +175,11 @@ const Pipeline : React.FC = () => {
         }
     }
 
-
     return (        
-    <PageContainer title={'流水线名称: xxx'} 
+    <PageContainer title={`流水线名称: ${PipelineName} `} 
         breadcrumb={{ routes:[
             { path: '/applications/apps', breadcrumbName: '返回应用中心' },
-            { path: '', breadcrumbName: 'xxx应用', },
+            { path: '', breadcrumbName: `应用:${appName}`, },
             { path: '', breadcrumbName: '流水线编辑', }
         ] }}
         header={{

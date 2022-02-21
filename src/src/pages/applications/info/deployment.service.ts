@@ -1,6 +1,6 @@
 import { ApiResponse,PageResponse ,PageInfo } from '@/services/public/service';
 import { request } from 'umi';
-import { DeploymentItem ,PodItem } from './data';
+import { DeploymentItem ,PodItem,PipelineInfo } from './data';
 
 export async function getDeploymentList(
     params: {
@@ -79,3 +79,11 @@ export async function NewPipeline(appid:number , name:string) {
     })
     return resData
 }
+
+export async function GetPipelineList(appid:number) {
+    let resData = await request<ApiResponse<PipelineInfo[]>>("/v1/application/pipelines",{
+        method:'GET',
+        params:{ appid: appid }
+    })
+    return resData
+} 

@@ -40,3 +40,12 @@ export type ContainerItem = {
     restartCount : number,
     Started: boolean
 }
+
+
+export type PipelineInfo  = {
+    appid: number,
+    id: number,
+    name: string,
+    status: number,
+    taskid: string,
+}
