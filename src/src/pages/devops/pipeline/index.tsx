@@ -17,15 +17,16 @@ const { Content } = Layout;
 
 import { getDeploymentList,GetAppGitBranches,GetBuildScripts } from '../../applications/info/deployment.service'
 import { StageItem, StepItem } from './data'
-import { json } from 'express';
 
 var buildScriptList:any
 var initStages:StageItem[]
 
 const Pipeline : React.FC = () => {
 
-    var appId = history.location.query?.appid
    
+    var appId = history.location.query?.appid
+    var appName =  history.location.query?.appname
+
     if (!buildScriptList){
         GetBuildScripts().then((v)=>{
             buildScriptList =  v.data
@@ -181,7 +182,10 @@ const Pipeline : React.FC = () => {
         ] }}
         header={{
             extra: [
-                <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
+                <Button key="1" onClick={() => { 
+                    const returnUrl = `/applications/info?id=${appId}&name=${appName}&returnkey=3`
+                    history.replace(returnUrl)
+                 }}>返回上一级</Button>]
         }}>
         <Content style={{ background:'white' }} > 
                 <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} >

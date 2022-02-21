@@ -23,6 +23,13 @@ const { Paragraph } = Typography;
 const AppInfo: React.FC = () => {
     var appId = history.location.query?.id
     var appName = history.location.query?.name
+    var returnKey = history.location.query?.returnkey
+    var defaultActiveKey = "1"
+    if (returnKey) {
+        defaultActiveKey = returnKey.toString()
+    }
+
+
     const actionRef = useRef<ActionType>();
 
     const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
@@ -149,7 +156,7 @@ const AppInfo: React.FC = () => {
                     <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
             <Content style={{ background:'white' }} > 
-            <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }}  >
+            <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }}  >
                 <TabPane tab="部署环境" key="1" >
                     <ProTable  columns={columns} rowKey="id" dataSource={tableListDataSource}
                         actionRef={actionRef} headerTitle="部署列表"
@@ -210,7 +217,7 @@ const AppInfo: React.FC = () => {
                         ]}/>
                 </TabPane>
                 <TabPane tab="应用流水线" key="3" >
-                    <AppBuildList AppId={Number(appId)} />
+                    <AppBuildList AppId={Number(appId)} AppName={String(appName)} />
                 </TabPane>
                 <TabPane tab="发布记录" key="4" >
                     Content of Tab Pane 4

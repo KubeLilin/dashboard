@@ -65,3 +65,17 @@ export async function GetBuildScripts() {
     })
     return resData
 }
+
+export async function NewPipeline(appid:number , name:string) {
+    let resData = await request<ApiResponse<number>>("/v1/application/newpipeline",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: {
+            appid: appid,
+            name: name,
+        }
+    })
+    return resData
+}

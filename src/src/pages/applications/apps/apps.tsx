@@ -80,7 +80,7 @@ const Apps: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
-                <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name}>进入应用</Link>,
+                <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name }>进入应用</Link>,
                 <a key={"edit" + record.id} onClick={() => {
                     formVisibleHandler(true)
                     console.log(record)

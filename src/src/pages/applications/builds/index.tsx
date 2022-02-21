@@ -2,25 +2,23 @@ import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'r
 import {List,Card ,Tooltip,Button,Space,Empty,Tag } from 'antd'
 import { SettingOutlined,EditOutlined ,CloseCircleTwoTone,SyncOutlined,CheckCircleOutlined,CloseCircleOutlined,
     EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone} from '@ant-design/icons'
-import { CheckCard } from '@ant-design/pro-card';
 
-import { Drawer,Avatar } from 'antd'
-import type { ProFormInstance } from '@ant-design/pro-form';
+import { Drawer } from 'antd'
 import ProForm, {
-  ProFormTextArea	,
   ProFormText,
-  ProFormSelect,
 } from '@ant-design/pro-form';
+import { history } from 'umi';
 
-import { getDeploymentList,GetAppGitBranches } from '../info/deployment.service'
+
+
+import { NewPipeline } from '../info/deployment.service'
+
+
 
 
 interface Props{
-
-    AppId:number
-    // deploymentId:number,
-    // tableRef:any,
-    // deployImage?:string,
+    AppId:number,
+    AppName:string,
 }
 
 
@@ -35,27 +33,13 @@ type BuildItem = {
     }
 }
 
-const buildScriptList = {
-    golang: `# 编译命令，注：当前已在代码根路径下
-go env -w GOPROXY=https://goproxy.cn,direct
-go build -ldflags="-s -w" -o app .
-    `,
-    java: `# 编译命令，注：当前已在代码根路径下
-mvn clean package                         
-    `,
-    nodejs: `# 编译命令，注：当前已在代码根路径下
-npm config set registry https://registry.npm.taobao.org --global
-npm install
-npm run build
-`
-}
+
 
 
 const AppBuildList : React.FC<Props> = (props) => {
-    const [onLoaded, setOnLoaded] = useState<boolean|undefined>(false);
+    const [onLoaded, _] = useState<boolean|undefined>(false);
     const [visableForm, setVisableForm] = useState(false);
     const [buildList, setBuildList] = useState<BuildItem[]>([]);
-    const buildForm =  useRef<ProFormInstance>();
 
     useEffect(()=>{
         console.log("page loaded")
@@ -121,43 +105,17 @@ const AppBuildList : React.FC<Props> = (props) => {
                 </div>
             </div>
             <Drawer title="应用构建设置" width={720} visible={visableForm} destroyOnClose  onClose={() => { setVisableForm(false) }} > 
-            <ProForm formRef={buildForm}>
-                <ProForm.Item name="depolyment">
-                    <ProFormSelect label="部署环境" width="md" request={async()=>{
-                         const deployPage = await getDeploymentList({appid:1,current:1,pageSize:50})
-                         return deployPage.data.map((item)=> ({label: item.name ,value:item.id}) )
-                    }} ></ProFormSelect>
+            <ProForm onFinish={async (values)=>{
+                const res = await NewPipeline(props.AppId,values.name)
+                if (res.success){
+                    history.push(`/devops/pipeline?id=${res.data}&appid=${props.AppId}&appname=${props.AppName}`)
+                }
+                return true
+            }} >
+                <ProForm.Item name="name" initialValue="" rules={[{ required: true, message: '请填写流水线名称' }]}>
+                   <ProFormText label="流水线名称:" ></ProFormText>
                 </ProForm.Item>
-                <ProForm.Item name="branch">
-                    <ProFormSelect label="代码分支" width="md"  request={async()=>{
-                        const namesRes = await GetAppGitBranches(props.AppId)
-                        return namesRes.data.map((item)=> ({label: item ,value:item}) )
-                    }} ></ProFormSelect>
-                </ProForm.Item>
-                <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"}>
-                    <CheckCard.Group style={{ width: '100%' }} onChange={(val)=>{
-                        console.log(val)
-                        var script = buildScriptList[String(val)]
-                        buildForm.current?.setFieldsValue({buildScript: script})
-                    }}>
-                        <CheckCard  title="Spring Boot" avatar={  <Avatar src="https://gw.alipayobjects.com/zos/bmw-prod/2dd637c7-5f50-4d89-a819-33b3d6da73b6.svg"
-                            size="large" /> } description="通过业界流行的技术栈来快速构建 Java 后端应用" value="java" />
-                        <CheckCard title="Golang" avatar={ <Avatar
-                            src="https://gw.alipayobjects.com/zos/bmw-prod/6935b98e-96f6-464f-9d4f-215b917c6548.svg"
-                            size="large" /> } description="使用Golang来快速构建分布式后端应用" value="golang" />
-                        <CheckCard title="Node JS" avatar={ <Avatar
-                            src="https://gw.alipayobjects.com/zos/bmw-prod/d12c3392-61fa-489e-a82c-71de0f888a8e.svg"
-                            size="large" /> } description="使用前后端统一的语言方案快速构建后端应用" value="nodejs" />
-                    </CheckCard.Group>
-                </ProForm.Item>
-
-                <ProForm.Item name="buildScript" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "}  >
-                    <ProFormTextArea label="构建脚本"  
-                        fieldProps={ {autoSize:{minRows: 4, maxRows: 8},style:{ background:"black" ,color: 'whitesmoke'}  } }   ></ProFormTextArea>
-                </ProForm.Item>
-                <ProForm.Item name="buildFile" initialValue={"./Dockerfile"} >
-                    <ProFormText label="构建文件"  ></ProFormText>
-                </ProForm.Item>
+                
              </ProForm>
             </Drawer>
         </div>
