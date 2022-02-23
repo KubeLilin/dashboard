@@ -87,3 +87,23 @@ export async function GetPipelineList(appid:number) {
     })
     return resData
 } 
+
+
+export async function SavePipeline(formdata:any) {
+    let resData = await request<ApiResponse<boolean>>("/v1/application/editpipeline",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: formdata
+    })
+    return resData
+}
+
+export async function GetPipelineById(id:number) {
+    let resData = await request<ApiResponse<PipelineInfo>>("/v1/application/pipeline",{
+        method:'GET',
+        params:{ id: id }
+    })
+    return resData
+} 

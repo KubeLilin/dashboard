@@ -46,6 +46,7 @@ export type PipelineInfo  = {
     appid: number,
     id: number,
     name: string,
+    dsl: string,
     status: number,
     taskid: string,
 }

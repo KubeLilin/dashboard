@@ -23,6 +23,7 @@ interface Props{
 
 
 type BuildItem = {
+    id:number,
     title: string
     lastBuildRecords?: {
         status: string  // normal,running,completed
@@ -49,7 +50,7 @@ const AppBuildList : React.FC<Props> = (props) => {
             
             const appBuildList = res.data.map(v=>{
                 var buildItem:BuildItem
-                buildItem = { title: v.name , lastBuildRecords:undefined }
+                buildItem = { id:v.id, title: v.name , lastBuildRecords:undefined }
                 if (v.taskid) {
                     buildItem.lastBuildRecords = { success:false,status:'completed', action:'管理员: 手动触发', time:'30分钟', task:v.taskid   } 
                     if (v.status == 1) {
@@ -94,9 +95,23 @@ const AppBuildList : React.FC<Props> = (props) => {
                         <Card hoverable bordered  
                                 title={  <Tooltip title={item.title}>{item.title}</Tooltip>  } 
                                 actions={[ 
-                                <Tooltip title="开始构建"> <PlayCircleFilled key="building" style={{ fontSize:23}} twoToneColor="#52c41a" /></Tooltip>,
-                                <Tooltip title="设置"><SettingOutlined key="setting" style={{ fontSize:23}} /></Tooltip>,
-                                <Tooltip title="more"><EllipsisOutlined key="ellipsis" style={{ fontSize:23}} /></Tooltip>,
+                                <Tooltip title="开始构建">
+                                    <PlayCircleFilled  key="building" style={{ fontSize:23}} twoToneColor="#52c41a" 
+                                     onClick={()=>{ 
+
+                                        console.log('action build') 
+
+                                     }} /></Tooltip>,
+                                <Tooltip title="设置"><SettingOutlined onClick={()=>{ 
+
+                                    history.push(`/devops/pipeline?id=${item.id}&name=${item.title}&appid=${props.AppId}&appname=${props.AppName}`)
+                                
+                                }} key="setting" style={{ fontSize:23}}  /></Tooltip>,
+                                <Tooltip title="more"><EllipsisOutlined onClick={()=>{ 
+
+                                    console.log('more')  
+
+                                }} key="ellipsis" style={{ fontSize:23}} /></Tooltip>,
                             ]}> 
                             
                             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}  style={{ height:30, display: !item.lastBuildRecords?'block':'none' }}>
