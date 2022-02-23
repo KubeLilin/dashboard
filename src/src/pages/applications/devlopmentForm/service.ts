@@ -1,12 +1,8 @@
-import { ClusterItem ,K8sNamespcae} from "@/pages/resources/clusters/cluster_data";
+import { ClusterItem } from "@/pages/resources/clusters/cluster_data";
 import { ApiResponse } from "@/services/public/service";
-import { method } from "@umijs/deps/compiled/lodash";
-import { Label } from "bizcharts";
-import request from "umi-request";
+import {request} from "umi";
 import { DeploymentStep } from "./devlopment_data";
-export async function BindNamespace() {
-    
-}
+
 
 export async function BindCluster() :Promise<any>{
     let resData = await request<ApiResponse<ClusterItem[]>>("/v1/cluster/list", {
@@ -55,3 +51,4 @@ export async function GetDeploymentFormInfo(id?:number) {
     })
     return req
 }
+

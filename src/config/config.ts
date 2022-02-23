@@ -152,6 +152,17 @@ export default defineConfig({
       ]
     },
     {
+      name:'devops',
+      path:'/devops',
+      routes:[
+        {
+          name: "pipeline",
+          path: "/devops/pipeline",
+          component:"./devops/pipeline"
+        },
+      ]
+    },
+    {
       name: 'account',
       icon: 'user',
       path: '/account',

@@ -4,7 +4,7 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm, { ModalForm, ProFormInstance } from '@ant-design/pro-form';
 import { history, Link,useModel } from 'umi';
 import { PodItem, ContainerItem, podLogsRequest } from './data';
-import { Tabs, Button, Space, Tooltip, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, Input, notification, Radio } from 'antd'
+import { Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, Input, notification, Radio } from 'antd'
 import { getPodList, getNamespaceList, setReplicasByDeployId, GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml } from './service'
 import React, { useState, useRef, useEffect } from 'react';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined ,SearchOutlined } from '@ant-design/icons';
@@ -21,6 +21,7 @@ import ExecDeployment from '@/pages/applications/execDeployment';
 
 const { TabPane } = Tabs;
 const { Option } = Select;
+const { Content } = Layout;
 
 const Pods: React.FC = (props) => {
     const { initialState } = useModel('@@initialState');
@@ -247,7 +248,7 @@ const Pods: React.FC = (props) => {
     }, [selectedPodName, selectedContainerName, selectedLines, autoLogs])
 
     return (
-        <PageContainer title={pageTitle} style={{ background: 'white' }}
+        <PageContainer title={pageTitle}
             header={{
                 breadcrumb: { routes: breadcrumb },
                 extra: [<Button key="1" onClick={() => {
@@ -255,7 +256,8 @@ const Pods: React.FC = (props) => {
                 }}>返回上一级</Button>,],
             }}
         >
-            <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background: 'white' }}
+            <Content style={{ background:'white' }} > 
+            <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }}
                 onChange={(e) => {
                     switch(e){
                         case "2":
@@ -385,7 +387,7 @@ const Pods: React.FC = (props) => {
                     </div>
                 </TabPane>
             </Tabs>
-
+            </Content>
             <ModalForm<{ replicas: number; }>
                 title="实例伸缩"
                 formRef={formScaleModalRef}
@@ -433,7 +435,7 @@ const Pods: React.FC = (props) => {
                  <p><Radio checked>/bin/bash</Radio></p>
             </Modal>
 
-            <Modal title={`Web Console for SGR --  Pod:${selectedPodName}, Container:${selectedContainerName}` } centered visible={visibleTerminal} width={1920}  destroyOnClose footer={[]} onCancel={()=>{ setVisibleTerminal(false) } } >
+            <Modal title={`Web Console for KubeLilin --  Pod:${selectedPodName}, Container:${selectedContainerName}` } centered visible={visibleTerminal} width={1920}  destroyOnClose footer={[]} onCancel={()=>{ setVisibleTerminal(false) } } >
                 <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} 
                         namespace={selectedNamespace} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
             </Modal>

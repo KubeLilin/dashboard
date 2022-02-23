@@ -4,12 +4,12 @@ import React, { useState, useRef } from 'react';
 import { PageContainer, FooterToolbar } from '@ant-design/pro-layout';
 import type { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProTable from '@ant-design/pro-table';
-import ProForm, { ModalForm, ProFormText } from '@ant-design/pro-form';
+import ProForm, { DrawerForm , ModalForm, ProFormText,ProFormSelect } from '@ant-design/pro-form';
 import type { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
 import ProDescriptions from '@ant-design/pro-descriptions';
 import type { FormValueType } from './components/UpdateForm';
 import UpdateForm from './components/UpdateForm';
-import { query, addUser, setUserStatus, updateUser } from './service';
+import { query, addUser, setUserStatus, updateUser ,GetAllRoleList ,PostUserRoles} from './service';
 import type { TableListItem, TableListPagination } from './data';
 import { useModel } from 'umi';
 
@@ -62,13 +62,13 @@ const handleAdd = async (fields: TableListItem) => {
     var resMsg = await addUser(fields );
     if (resMsg.success) {
       message.success(resMsg.message);
-      return true;
+      return resMsg;
     } else {
       message.error('添加失败请重试！');
     }
     hide();
     
-    return false;
+    return resMsg;
 };
 /**
  * 更新用户信息
@@ -111,6 +111,7 @@ const Manage: React.FC = () => {
   const [currentRow, setCurrentRow] = useState<TableListItem>();
   const [selectedRowsState, setSelectedRows] = useState<TableListItem[]>([]);
   /** 国际化配置 */
+  const [userId, setUserId] = useState<number>(0);
 
   const columns: ProColumns<TableListItem>[] = [
     {
@@ -194,6 +195,7 @@ const Manage: React.FC = () => {
         </a>,
         <a key="updateUser" 
           onClick={ async() => {
+            setUserId(record.id)
             setCurrentRow(record)
             handleUpdateModalVisible(true)
           }}
@@ -261,48 +263,62 @@ const Manage: React.FC = () => {
           </Button>
         </FooterToolbar>
       )}
-      <ModalForm<TableListItem>
-        title="新建用户"
-        width={450}
-        visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
-        onFinish={async (value) => {
-          value.tenantId = tenantId
-          const success = await handleAdd(value as TableListItem);
-          if (success) {
-            handleModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
+      <DrawerForm<TableListItem> 
+          title="新建用户"
+          width={600}
+          visible={createModalVisible}
+          onVisibleChange={handleModalVisible}
+          onFinish={async (value) => {
+            value.tenantId = tenantId
+            const res1 = await handleAdd(value as TableListItem);
+            if (res1.success) {
+              const roles: number[] =  value.roles
+              console.log(roles)
+              const rolelist = roles.map(r=> { return  {userId:res1.data.id, roleId:r } })
+              const res = await PostUserRoles({
+                userRoleList:rolelist
+              })
+              handleModalVisible(false);
+              if (actionRef.current) {
+                actionRef.current.reload();
+              }
             }
-          }
-        }}
+          }}
       >
-     
-          <ProFormText  width="md" name="userName" label="用户名" tooltip="英文名" placeholder="请输入名称" 
+          <ProFormText  name="userName" label="用户名" tooltip="英文名" placeholder="请输入名称" 
               rules={[ {  required: true, message: '用户名为必填项',  }, { max:10 , message:'超过最大输入长度 > 10'}  ]}  />
 
-          <ProFormText.Password  width="md" name="password" label="密码" tooltip="密码" placeholder="请输入密码" 
+          <ProFormText.Password name="password" label="密码" tooltip="密码" placeholder="请输入密码" 
               rules={[ {  required: true, message: '密码为必填项',  },{ max:13 , message:'超过最大输入长度 > 10'}  ]}  />
 
-          <ProFormText width="md" name="account" label="姓名" placeholder="请输入姓名" 
+          <ProFormText  name="account" label="姓名" placeholder="请输入姓名" 
               rules={[  { required: true, message: '姓名为必填项'}, { max:10 , message:'超过最大输入长度 > 10'}  ]}  />
 
-          <ProFormText width="md" name="mobile" label="手机号" placeholder="请输入手机号"  
+          <ProFormText name="mobile" label="手机号" placeholder="请输入手机号"  
               rules={[ { required: true, message: '手机号为必填项', }, { pattern: /^1\d{10}$/, message: '不合法的手机号格式!',  }, ]} />
 
-          <ProFormText width="md" name="email" label="邮箱" placeholder="请输入邮箱地址"  
+          <ProFormText  name="email" label="邮箱" placeholder="请输入邮箱地址"  
               rules={[ { required: true, message: '邮箱地址为必填项', }, { max:20 , message:'超过最大输入长度 > 20'}  ]} />
-      </ModalForm>
+      
+          <ProFormSelect name="roles"  label="角色"  mode="multiple"  request={GetAllRoleList}
+            placeholder="请选择至少一个角色" rules={[{ required: true, message: '请选择至少一个角色!' }]} />
+      </DrawerForm>
 
       <UpdateForm
         onSubmit={async (value) => {
           console.log(value)
           const success = await handleUpdate(value);
-
           if (success) {
+            const roles: number[] =  value.roles
+            const rolelist = roles.map(r=> { return  {userId:userId, roleId:r } })
+           
+            const res = await PostUserRoles({
+              userRoleList:rolelist
+            })
+
             handleUpdateModalVisible(false);
             setCurrentRow(undefined);
-
+            setUserId(0)
             if (actionRef.current) {
               actionRef.current.reload();
             }
@@ -311,9 +327,10 @@ const Manage: React.FC = () => {
         onCancel={() => {
           handleUpdateModalVisible(false);
           setCurrentRow(undefined);
+          setUserId(0)
         }}
         updateModalVisible={updateModalVisible}
-        values={currentRow || {}}
+        values={currentRow || {}} userId={userId}
       />
 
       <Drawer

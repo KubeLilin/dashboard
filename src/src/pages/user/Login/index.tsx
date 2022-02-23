@@ -99,12 +99,12 @@ const Login: React.FC = () => {
         <div className={styles.top}>
           <div className={styles.header}>
             <Link to="/">
-              <img alt="logo" className={styles.logo} src="/logo.svg" />
-              <span className={styles.title}>SGR Platform</span>
+              <img alt="logo" className={styles.logo} src="/icon.svg" />
+              <span className={styles.title}>KubeLilin</span>
             </Link>
           </div>
           <div className={styles.desc}>
-            SGR Dashboard is An Cloud-Native application platform for Kubernetes.
+            KubeLilin is An Cloud-Native application platform for Kubernetes.
           </div>
         </div>
 

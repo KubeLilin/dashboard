@@ -7,17 +7,17 @@ export default () => {
 
   return (
     <DefaultFooter
-      copyright={`${currentYear} SGR技术团队出品`}
+      copyright={`${currentYear} KubeLilin 技术团队出品`}
       links={[
         {
           key: 'platform-ui',
-          title: 'SGR Platform Dashboard',
+          title: 'KubeLilin Dashboard',
           href: 'https://github.com/yoyofxteam/sgr-platform-ui',
           blankTarget: true,
         },
         {
           key: 'platform-api',
-          title: 'SGR Platform API',
+          title: 'KubeLilin API Server',
           href: 'https://github.com/yoyofxteam/sgr-platform-api',
           blankTarget: true,
         },

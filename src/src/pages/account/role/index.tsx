@@ -152,16 +152,17 @@ const Role: React.FC = () => {
                     headerTitle="菜单-角色权限分配"
                     rowSelection={{
                         selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT],
-                        checkStrictly: false,
+                        checkStrictly: true,
                         selectedRowKeys: selectedMenuIds,
                         onChange: async (keys,selectedRows) => {
                             var d:number[] = []
                             keys.forEach((k)=>{
                                 d.push(Number(k))
                             })
-                           
+       
                             setSelectedMenuIds(d)
                             console.log(d)
+                            //console.log(selectedRows)
                         }
                     }}
                     bordered={true}

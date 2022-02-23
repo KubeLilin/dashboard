@@ -1,28 +1,22 @@
-import success from '@/pages/result/success';
-import { ApiResponse } from '@/services/public/service';
+import { ApiResponse,PageResponse ,PageInfo } from '@/services/public/service';
 import { request } from 'umi';
-import { DeploymentItem ,PodItem } from './data';
+import { DeploymentItem ,PodItem,PipelineInfo } from './data';
 
-export const getDeploymentList = async (
+export async function getDeploymentList(
     params: {
         pageIndex?: number;
         current?: number;
         pageSize?: number;
         appid?: number;
         name?: string;
-    }, 
-    sort: Record<string, any>,
-    options?: { [key: string]: any },)=> {
-        let resData=await request< ApiResponse<DeploymentItem[]>>("/v1/deployment/list",{
+    }, ):Promise<PageInfo<DeploymentItem[]>> {
+
+        let resData=await request< PageResponse<DeploymentItem[]>>("/v1/deployment/list",{
             method:'GET',
             params:params
         })
         
-        return {
-            data: resData.data,
-            success: resData.success,
-            total:  resData.data.length
-        }
+    return new Promise(x=>x( resData.data ))
     
 }
 
@@ -46,3 +40,70 @@ export const getPodList = async (appName:string , clusterId:number , index :numb
         }  
         return { index:index, data: resData.data }
     }
+
+export async function GetApplicationInfo(appid:number) {
+    let resData = await request<ApiResponse<any>>("/v1/application/info",{
+        method:'GET',
+        params:{ appid: appid }
+    })
+    return resData
+}
+
+
+export async function GetAppGitBranches(appid:number) {
+    let resData = await request<ApiResponse<string[]>>("/v1/application/gitbranches",{
+        method:'GET',
+        params:{ appid: appid }
+    })
+    return resData
+}
+
+
+export async function GetBuildScripts() {
+    let resData = await request<ApiResponse<any>>("/v1/application/buildscripts",{
+        method:'GET',
+    })
+    return resData
+}
+
+export async function NewPipeline(appid:number , name:string) {
+    let resData = await request<ApiResponse<number>>("/v1/application/newpipeline",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: {
+            appid: appid,
+            name: name,
+        }
+    })
+    return resData
+}
+
+export async function GetPipelineList(appid:number) {
+    let resData = await request<ApiResponse<PipelineInfo[]>>("/v1/application/pipelines",{
+        method:'GET',
+        params:{ appid: appid }
+    })
+    return resData
+} 
+
+
+export async function SavePipeline(formdata:any) {
+    let resData = await request<ApiResponse<boolean>>("/v1/application/editpipeline",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: formdata
+    })
+    return resData
+}
+
+export async function GetPipelineById(id:number) {
+    let resData = await request<ApiResponse<PipelineInfo>>("/v1/application/pipeline",{
+        method:'GET',
+        params:{ id: id }
+    })
+    return resData
+} 

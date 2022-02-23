@@ -5,16 +5,16 @@ const Settings: LayoutSettings & {
   logo?: string;
 } = {
   navTheme: 'light',
-  // 拂晓蓝
-  primaryColor: '#2F54EB',
-  layout: 'side',
+  primaryColor: '#722ED1',
+  layout: 'mix',
   contentWidth: 'Fluid',
-  fixedHeader: false,
+  fixedHeader: true,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'SGR Platform',
+  headerHeight:48,
+  title: 'KubeLilin',
   pwa: false,
-  logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
+  logo: '/icon.svg',
   iconfontUrl: '',
   menu: {
     locale: false,
