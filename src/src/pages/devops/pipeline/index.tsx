@@ -302,10 +302,15 @@ const Pipeline : React.FC = () => {
                                 <div id="git_pull" style={{ display:allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="git_pull"?"block":"none" :"none" }}  >
                                     <ProForm onValuesChange={onFormValuesChanged} formRef={gitForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }}
                                      onFinish={onFormSave} >
+                                        <ProForm.Item name="git" >
+                                            <ProFormText label="git" width="md" disabled></ProFormText>
+                                        </ProForm.Item>
+
                                         <ProForm.Item name="branch" rules={[{ required: true, message: '请选择代码分支' }]}>
                                         <ProFormSelect label="代码分支" width="md"  request={async()=>{
                                             const namesRes = await GetAppGitBranches(Number(appId))
-                                            return namesRes.data.map((item)=> ({label: item ,value:item}) )
+                                            gitForm.current?.setFieldsValue({ git: namesRes.data.git })
+                                            return namesRes.data.branches.map((item)=> ({label: item ,value:item}) )
                                         }} ></ProFormSelect>
                                         </ProForm.Item>
                                     </ProForm>  
