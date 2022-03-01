@@ -42,6 +42,9 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
 
     const [appbuildOnloaded, setAppbuildOnloaded] = useState(false);
 
+    const [autoLoadPipelineData, setAutoLoadPipelineData] = useState<boolean>(false)
+
+
     const columns: ProColumns<DeploymentItem>[] = [
         {
             title: 'ID',
@@ -157,7 +160,15 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
                     <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
             <Content style={{ background:'white' }} > 
-            <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }}  >
+            <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} 
+                onChange={(key)=>{
+                    if(key=="3") {
+                        setAutoLoadPipelineData(true)
+                    } else {
+                        setAutoLoadPipelineData(false)
+                    }
+                }}
+            >
                 <TabPane tab="部署环境" key="1" >
                     <ProTable  columns={columns} rowKey="id" dataSource={tableListDataSource}
                         actionRef={actionRef} headerTitle="部署列表"
@@ -217,8 +228,8 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
                             { title: '应用状态', dataIndex: 'status',valueEnum:{ 1: "生效",0:"失效" } }
                         ]}/>
                 </TabPane>
-                <TabPane tab="应用流水线" key="3" >
-                    <AppBuildList AppId={Number(appId)} AppName={String(appName)} />
+                <TabPane tab="应用流水线" key="3">
+                    <AppBuildList AppId={Number(appId)} AppName={String(appName)} AutoLoad={autoLoadPipelineData} />
                 </TabPane>
                 <TabPane tab="发布记录" key="4" >
                    <ReleaseRecord></ReleaseRecord>
