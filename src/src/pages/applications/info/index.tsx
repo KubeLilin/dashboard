@@ -14,6 +14,7 @@ import {  getDeploymentList, getPodList ,GetApplicationInfo } from './deployment
 import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
+import ReleaseRecord from '../releaseRecord';
 
 
 const { TabPane } = Tabs;
@@ -32,7 +33,7 @@ const AppInfo: React.FC = () => {
 
     const actionRef = useRef<ActionType>();
 
-    const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
+const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
     const [execFormVisible, setExecFormVisible] = useState(false);
     const [stepFormEdit, setStepFormEdit] = useState(false);
@@ -220,7 +221,7 @@ const AppInfo: React.FC = () => {
                     <AppBuildList AppId={Number(appId)} AppName={String(appName)} />
                 </TabPane>
                 <TabPane tab="发布记录" key="4" >
-                    Content of Tab Pane 4
+                   <ReleaseRecord></ReleaseRecord>
                 </TabPane>
                 <TabPane tab="应用配置" key="5" disabled>
                     Content of Tab Pane 5
