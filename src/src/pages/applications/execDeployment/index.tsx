@@ -40,6 +40,7 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
                 console.log(props.deploymentId)
                 x.dpId=props.deploymentId
                 x.isDiv=enableDivImage
+                x.opsType='manual'
                 console.log(x)
                 let res=await RequestDeployment(x)
                 if(res.success){
