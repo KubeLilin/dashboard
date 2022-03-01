@@ -158,7 +158,7 @@ const Pipeline : React.FC = () => {
         const key = 'onSaveForm';
         message.loading({ content: '保存中...', key });
         setTimeout(() => {
-          message.success({ content: '保存成功!', key, duration: 0.5 });
+          message.success({ content: '保存成功!', key, duration: 3 });
         }, 1000);
 
         return true
@@ -175,7 +175,7 @@ const Pipeline : React.FC = () => {
         })
 
         if (res && res.success){
-            message.success({ content: '保存成功!', key, duration: 0.5 , style: { marginTop: '20vh' } });
+            message.success({ content: '保存成功!', key, duration: 3 , style: { marginTop: '20vh' } });
         } else {
             message.error({content:'保存失败！',key ,  style: { marginTop: '20vh' }})
         }
@@ -310,7 +310,11 @@ const Pipeline : React.FC = () => {
                                         <ProFormSelect label="代码分支" width="md"  request={async()=>{
                                             const namesRes = await GetAppGitBranches(Number(appId))
                                             gitForm.current?.setFieldsValue({ git: namesRes.data.git })
-                                            return namesRes.data.branches.map((item)=> ({label: item ,value:item}) )
+                                            if (namesRes.data.branches){
+                                                return namesRes.data.branches.map((item)=> ({label: item ,value:item}) )
+                                            } else {
+                                                return [{label: 'master' ,value:'master'}]
+                                            }
                                         }} ></ProFormSelect>
                                         </ProForm.Item>
                                     </ProForm>  
