@@ -13,9 +13,8 @@ const { confirm } = Modal;
 import ProDescriptions from '@ant-design/pro-descriptions';
 
 
-import { NewPipeline,GetPipelineList,RunPipeline,GetPipelineDetails } from '../info/deployment.service'
-
-
+import { NewPipeline,GetPipelineList,RunPipeline,
+        GetPipelineDetails,GetPipelineLogs } from '../info/deployment.service'
 
 
 interface Props{
@@ -35,6 +34,7 @@ type BuildItem = {
         action: string
         time: string
         task: string
+        start: string
     }
 }
 
@@ -50,6 +50,9 @@ const AppBuildList : React.FC<Props> = (props) => {
     const [buildList, setBuildList] = useState<BuildItem[]>([]);
 
     const [currentBuildItem,setCurrentBuildItem] = useState<BuildItem|undefined>(undefined)
+    const [autoLogs, setAutoLogs] = useState(false);
+
+    const [currentLogs,setCurrentLogs] = useState<string>("")
 
     const LoadData = (appId:number )=> {
         GetPipelineList(appId).then((res)=>{
@@ -61,7 +64,7 @@ const AppBuildList : React.FC<Props> = (props) => {
             console.log(appBuildList)
             //setBuildList(appBuildList)
         }).then(()=>{
-            const cpBuildList = [...appBuildList]
+            const cpBuildList:any = [...appBuildList]
             cpBuildList.forEach(async (v,i)=>{
                 if(v.taskId > 0){
                    const res = await GetPipelineDetails(props.AppId,v.id,v.taskId)
@@ -71,6 +74,9 @@ const AppBuildList : React.FC<Props> = (props) => {
                         const hh =  Math.round(seconds/3600)
                         const mm = Math.round((seconds%3600)/60)
                         const ss = Math.round(seconds%60)
+                        var date = new Date(res.data.startTimeMillis);
+                        cpBuildList[i].lastBuildRecords.start = date.toString()      
+                        
                         cpBuildList[i].lastBuildRecords.time = `${hh}小时${mm}分${ss}秒`
                         if(res.data.status == "IN_PROGRESS"){
                                 cpBuildList[i].lastBuildRecords.status = 'running'
@@ -89,9 +95,6 @@ const AppBuildList : React.FC<Props> = (props) => {
             })
         })
     }
-
-    
-
 
     useEffect(()=>{
         console.log("page loaded")
@@ -117,8 +120,25 @@ const AppBuildList : React.FC<Props> = (props) => {
     },[onLoaded,props.AutoLoad])
 
 
+    useEffect(()=>{
+        var id: NodeJS.Timeout
+        if (autoLogs) {
+            id =  setInterval(()=>{
+                GetPipelineLogs(props.AppId,Number(currentBuildItem?.id),
+                            Number(currentBuildItem?.lastBuildRecords?.task))
+                .then((res)=>{
+                    if(res&&res.data){
+                        setCurrentLogs( res.data)
+                    }
+                })
+            },1500)
+        }
+        return () => { clearInterval(id) }
+    } ,[autoLogs])
+
+
     return (<div>
-            <div  style={{   marginRight: 55, textAlign:"right" }}> 
+            <div  style={{ marginRight: 55, textAlign:"right" }}> 
             <Space>
                 <Button icon={<ReloadOutlined />}
                 onClick={()=> {
@@ -137,15 +157,29 @@ const AppBuildList : React.FC<Props> = (props) => {
                     renderItem={item => (
                         <List.Item>
                         <Card hoverable bordered 
-                                onClick={()=>{
+                                onClick={ async()=>{
                                     setCurrentBuildItem(item)
                                     setVisablePipelineLogForm(true)
+                                    if(item.lastBuildRecords?.status=='completed'){
+                                        GetPipelineLogs(props.AppId,Number(item.id),
+                                            Number(item.lastBuildRecords?.task))
+                                        .then((res)=>{
+                                            if(res&&res.data){
+                                                setCurrentLogs( res.data)
+                                            }
+                                        })
+                                    } else {
+                                        setAutoLogs(true)
+                                    }
+
                                 }}
                                 title={  <Tooltip title={item.title}>{item.title}</Tooltip>  } 
                                 actions={[ 
                                 <Tooltip title="开始构建">
                                     <PlayCircleFilled  key="building" style={{ fontSize:23}} twoToneColor="#52c41a" 
-                                     onClick={()=>{  confirm({
+                                     onClick={(e)=>{  
+                                                    e.stopPropagation()
+                                                    confirm({
                                                     title: '要构建此任务吗?',
                                                     icon: <ExclamationCircleOutlined />,
                                                     content: '构建时间较长，请耐心等待',
@@ -206,13 +240,25 @@ const AppBuildList : React.FC<Props> = (props) => {
              </ProForm>
             </Drawer>
             
-            <Drawer title="流水线日志" width={820} visible={visablePipelineLogForm} destroyOnClose  onClose={() => { setVisablePipelineLogForm(false) }} > 
+            <Drawer title="流水线日志" width={820} visible={visablePipelineLogForm} destroyOnClose  
+                onClose={() => { 
+                    setVisablePipelineLogForm(false)
+                    setAutoLogs(false)
+                }} > 
             <ProDescriptions dataSource={currentBuildItem} column={2}  bordered	
                         columns={[
                             { title: '流水线ID', dataIndex: 'id' },
                             { title: '流水线名称', dataIndex: 'title' },
-                            { title: '任务ID', dataIndex: 'taskId'},  ]}/>
-            
+                            { title: '任务ID', dataIndex: 'taskId'},
+                            { title: "任务开始时间",dataIndex: ['lastBuildRecords','start'] }
+                            ]}/>
+            <div style={{ marginBottom: 10 }}></div>
+            <textarea value={currentLogs} ref={(text) => { if (text) { text.scrollTop = Number(text?.scrollHeight) } }}
+                        rows={40} readOnly style={{
+                            background: 'black', width: '100%', 
+                            border: '1px solid rgb(221,221,221)', fontSize: '15px', color: 'whitesmoke'
+                        }}>
+            </textarea>
             </Drawer>
         </div>
         

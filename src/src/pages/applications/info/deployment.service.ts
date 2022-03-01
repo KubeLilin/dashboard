@@ -134,3 +134,16 @@ export async function GetPipelineDetails(appId:number,pipelineId:number,taskId:n
     })
     return resData
 }
+
+
+export async function GetPipelineLogs(appId:number,pipelineId:number,taskId:number) {
+    let resData = await request<ApiResponse<string>>("/v1/application/pipelinelogs",{
+        method:'GET',
+        params: {
+            id: pipelineId,
+            appId:appId,
+            taskId:taskId
+        }
+    })
+    return resData
+}
