@@ -4,5 +4,6 @@ export type ExecDeploymentData={
     imageTag:string,
     wholeImage:string,
     isDiv:boolean,
-    opsType:string
+    opsType:string,
+    tenantId:number,
 }

@@ -80,6 +80,10 @@ export const getPodList = async (
             method:'GET',
             params:req
         })
+        if (!resData){
+            return []
+        }
+
         return resData.data
     }
 

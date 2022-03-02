@@ -370,7 +370,7 @@ const Pipeline : React.FC = () => {
                                   onFinish={onFormSave} >
                                     <ProForm.Item name="depolyment" rules={[{ required: true, message: '请选择部署环境' }]}>
                                         <ProFormSelect label="部署环境" width="md" request={async()=>{
-                                                            const deployPage = await getDeploymentList({appid:1,current:1,pageSize:50})
+                                                            const deployPage = await getDeploymentList({appid:Number(appId),current:1,pageSize:50})
                                                             return deployPage.data.map((item)=> ({label: item.name ,value:item.id}) )
                                          }} ></ProFormSelect>
                                     </ProForm.Item>

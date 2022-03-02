@@ -98,6 +98,8 @@ const AppBuildList : React.FC<Props> = (props) => {
                     }
                 }
             })
+        }).catch(()=>{
+            setBuildList(appBuildList)
         })
     }
 

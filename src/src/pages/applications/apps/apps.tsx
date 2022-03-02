@@ -159,7 +159,7 @@ const Apps: React.FC = () => {
                         }}
                     />
                 </ProForm.Item>
-                <ProForm.Item name='level' label="应用等级" >
+                <ProForm.Item name='level' label="应用等级" rules={[{ required: true, message: '请选择应用级别!' }]}>
                     <ProFormSelect
                         request={getAppLevel}
                     ></ProFormSelect>
