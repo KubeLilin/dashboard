@@ -232,7 +232,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
                     <AppBuildList AppId={Number(appId)} AppName={String(appName)} AutoLoad={autoLoadPipelineData} />
                 </TabPane>
                 <TabPane tab="发布记录" key="4" >
-                   <ReleaseRecord></ReleaseRecord>
+                   <ReleaseRecord AppId={Number(appId)}></ReleaseRecord>
                 </TabPane>
                 <TabPane tab="应用配置" key="5" disabled>
                     Content of Tab Pane 5
