@@ -2,8 +2,9 @@ import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'r
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ReleaseRecordItem } from './releaseRecord_data';
 import { GetReleaseRecord } from './service';
+import { history, Link } from 'umi';
 const ReleaseRecord: React.FC = () => {
-
+    var appId = history.location.query?.id
     const columns: ProColumns<ReleaseRecordItem>[] = [
         {
             title: 'ID',
@@ -54,6 +55,7 @@ const ReleaseRecord: React.FC = () => {
     return (
         <ProTable columns={columns}
             request={async (params, sort) => {
+                params.appId=appId;
                 let data = await GetReleaseRecord(params)
                 return data.data
             }}
