@@ -56,14 +56,19 @@ const AppBuildList : React.FC<Props> = (props) => {
 
     const LoadData = (appId:number )=> {
         GetPipelineList(appId).then((res)=>{
-            appBuildList = res.data.map((v,i)=>{
-                var buildItem:BuildItem
-                buildItem = { id:v.id, title: v.name ,taskId:Number(v.taskid) , lastBuildRecords:undefined }
-                return buildItem
-            })
-            console.log(appBuildList)
+            if(res) {
+                appBuildList = res.data.map((v,i)=>{
+                    var buildItem:BuildItem
+                    buildItem = { id:v.id, title: v.name ,taskId:Number(v.taskid) , lastBuildRecords:undefined }
+                    return buildItem
+                })
+                console.log(appBuildList)
+            }
             //setBuildList(appBuildList)
         }).then(()=>{
+            if(!appBuildList) {
+                return 
+            }
             const cpBuildList:any = [...appBuildList]
             cpBuildList.forEach(async (v,i)=>{
                 if(v.taskId > 0){
@@ -93,6 +98,8 @@ const AppBuildList : React.FC<Props> = (props) => {
                     }
                 }
             })
+        }).catch(()=>{
+            setBuildList(appBuildList)
         })
     }
 

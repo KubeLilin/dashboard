@@ -2,17 +2,12 @@ import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'r
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ReleaseRecordItem } from './releaseRecord_data';
 import { GetReleaseRecord } from './service';
-import { history, Link } from 'umi';
-const ReleaseRecord: React.FC = () => {
-    var appId = history.location.query?.id
+import { getDeploymentList } from '../info/deployment.service'
+interface Props{
+    AppId:number,
+}
+const ReleaseRecord: React.FC<Props> = (props) => {
     const columns: ProColumns<ReleaseRecordItem>[] = [
-        {
-            title: 'ID',
-            dataIndex: 'id',
-            width: 48,
-            hideInForm: true,
-            hideInSearch: true
-        },
         {
             title: 'appId',
             dataIndex: 'appId',
@@ -28,10 +23,16 @@ const ReleaseRecord: React.FC = () => {
         {
             title: '部署环境名称',
             dataIndex: 'deploymentName',
+            hideInSearch:true,
         },
         {
-            title: '镜像名称',
-            dataIndex: 'applyImage',
+            title:'部署环境',
+            dataIndex:'dpId',
+            hideInTable:true,
+            request: async(p)=>{
+                const deployPage = await getDeploymentList({appid:props.AppId,current:1,pageSize:50})
+                return deployPage.data.map((item)=> ({label: item.name ,value:item.id}) )
+            }
         },
         {
             title: '触发类型',
@@ -42,20 +43,25 @@ const ReleaseRecord: React.FC = () => {
             }
         },
         {
+            title: '镜像名称',
+            dataIndex: 'applyImage',
+        },
+        {
             title: '触发人',
             dataIndex: 'operatorName',
             hideInSearch: true
         },
         {
             title: '触发时间',
-            dataIndex: 'creationTime'
+            dataIndex: 'creationTime',
+            hideInSearch:true,
         }
     ];
 
     return (
         <ProTable columns={columns}
             request={async (params, sort) => {
-                params.appId=appId;
+                params.appId = props.AppId
                 let data = await GetReleaseRecord(params)
                 return data.data
             }}
