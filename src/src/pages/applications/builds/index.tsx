@@ -64,7 +64,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                 })
                 console.log(appBuildList)
             }
-            //setBuildList(appBuildList)
+            // setBuildList(appBuildList)
         }).then(()=>{
             if(!appBuildList) {
                 return 
@@ -96,6 +96,8 @@ const AppBuildList : React.FC<Props> = (props) => {
                         }
                         setBuildList(cpBuildList)
                     }
+                } else {
+                    setBuildList(appBuildList)
                 }
             })
         }).catch(()=>{
