@@ -214,14 +214,8 @@ const errorHandler = (error:ResponseError) => {
         })
     }
   } else {
-    var message = ""
-    if(error.data.message != ""){
-      const intl = getIntl()
-      message = intl.formatMessage({id:error.data.message})
-     
-    } else {
-      message = "操作失败"
-    }
+    var message = "操作失败"
+  
     notification.error({
       description:'提示',
       message: message
