@@ -66,9 +66,6 @@ const AppBuildList : React.FC<Props> = (props) => {
             }
             // setBuildList(appBuildList)
         }).then(()=>{
-            if(!appBuildList) {
-                return 
-            }
             const cpBuildList:any = [...appBuildList]
             cpBuildList.forEach(async (v,i)=>{
                 if(v.taskId > 0){
@@ -95,6 +92,8 @@ const AppBuildList : React.FC<Props> = (props) => {
                                 cpBuildList[i].lastBuildRecords = undefined
                         }
                         setBuildList(cpBuildList)
+                    } else {
+                        setBuildList(appBuildList)
                     }
                 } else {
                     setBuildList(appBuildList)
