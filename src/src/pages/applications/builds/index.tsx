@@ -248,7 +248,7 @@ const AppBuildList : React.FC<Props> = (props) => {
              </ProForm>
             </Drawer>
             
-            <Drawer title="流水线日志" width={820} visible={visablePipelineLogForm} destroyOnClose  
+            <Drawer title="流水线日志" width={1280} visible={visablePipelineLogForm} destroyOnClose  
                 onClose={() => { 
                     setVisablePipelineLogForm(false)
                     setAutoLogs(false)
@@ -262,7 +262,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                             ]}/>
             <div style={{ marginBottom: 10 }}></div>
             <textarea value={currentLogs} ref={(text) => { if (text) { text.scrollTop = Number(text?.scrollHeight) } }}
-                        rows={40} readOnly style={{
+                        rows={35} readOnly style={{
                             background: 'black', width: '100%', 
                             border: '1px solid rgb(221,221,221)', fontSize: '15px', color: 'whitesmoke'
                         }}>
