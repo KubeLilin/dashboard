@@ -11,6 +11,7 @@ import { ExecDeploymentData } from './execDeployment_data';
 import { RequestDeployment } from './execDeployment_service';
 import { ActionType } from '@ant-design/pro-table';
 import { SmileOutlined } from '@ant-design/icons';
+import { useModel } from 'umi';
 
 export interface Props{
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>],
@@ -20,6 +21,9 @@ export interface Props{
 }
 
 const ExecDeployment: React.FC<Props> = (props:Props) => {
+    const { initialState } = useModel('@@initialState');
+    const tenantId = Number(initialState?.currentUser?.group)
+
     const[enableDivImage,setEnableDivImage]=useState<boolean>(false)
     const actionRef =  useRef<ProFormInstance>();
     const [form] = Form.useForm();
@@ -40,6 +44,8 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
                 console.log(props.deploymentId)
                 x.dpId=props.deploymentId
                 x.isDiv=enableDivImage
+                x.opsType='manual'
+                x.tenantId = tenantId
                 console.log(x)
                 let res=await RequestDeployment(x)
                 if(res.success){

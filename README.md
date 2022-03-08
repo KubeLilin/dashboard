@@ -47,8 +47,11 @@ npm run lint:fix
 ```bash
 npm test
 ```
+export NODE_OPTIONS=--max_old_space_size=4096
 
 ## Docker 
-docker build -t yoyofx/sgr-ui:dev1.0 -f .\Dockerfile_Prod .
 
-docker run -p 8092:8092 yoyofx/sgr-ui:dev1.0
+docker build -f ./src/Dockerfile . -t yoyofx/kubelilin:v0.1
+
+
+docker run -p 8092:8092 yoyofx/kubelilin:v0.1

@@ -158,7 +158,7 @@ const Pipeline : React.FC = () => {
         const key = 'onSaveForm';
         message.loading({ content: '保存中...', key });
         setTimeout(() => {
-          message.success({ content: '保存成功!', key, duration: 0.5 });
+          message.success({ content: '保存成功!', key, duration: 3 });
         }, 1000);
 
         return true
@@ -175,7 +175,7 @@ const Pipeline : React.FC = () => {
         })
 
         if (res && res.success){
-            message.success({ content: '保存成功!', key, duration: 0.5 , style: { marginTop: '20vh' } });
+            message.success({ content: '保存成功!', key, duration: 3 , style: { marginTop: '20vh' } });
         } else {
             message.error({content:'保存失败！',key ,  style: { marginTop: '20vh' }})
         }
@@ -302,10 +302,19 @@ const Pipeline : React.FC = () => {
                                 <div id="git_pull" style={{ display:allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="git_pull"?"block":"none" :"none" }}  >
                                     <ProForm onValuesChange={onFormValuesChanged} formRef={gitForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }}
                                      onFinish={onFormSave} >
+                                        <ProForm.Item name="git" >
+                                            <ProFormText label="git" width="md" disabled></ProFormText>
+                                        </ProForm.Item>
+
                                         <ProForm.Item name="branch" rules={[{ required: true, message: '请选择代码分支' }]}>
                                         <ProFormSelect label="代码分支" width="md"  request={async()=>{
                                             const namesRes = await GetAppGitBranches(Number(appId))
-                                            return namesRes.data.map((item)=> ({label: item ,value:item}) )
+                                            gitForm.current?.setFieldsValue({ git: namesRes.data.git })
+                                            if (namesRes.data.branches){
+                                                return namesRes.data.branches.map((item)=> ({label: item ,value:item}) )
+                                            } else {
+                                                return [{label: 'master' ,value:'master'}]
+                                            }
                                         }} ></ProFormSelect>
                                         </ProForm.Item>
                                     </ProForm>  
@@ -319,14 +328,20 @@ const Pipeline : React.FC = () => {
                                             var script = buildScriptList[String(val)]
                                             buildForm.current?.setFieldsValue({buildScript: script})
                                         }}>
-                                            <CheckCard  title="Spring Boot" avatar={  <Avatar src="https://gw.alipayobjects.com/zos/bmw-prod/2dd637c7-5f50-4d89-a819-33b3d6da73b6.svg"
+                                            <CheckCard  title="Spring Boot" avatar={  <Avatar src="../spring.svg"
                                                 size="large" /> } description="通过业界流行的技术栈来快速构建 Java 后端应用" value="java" />
                                             <CheckCard title="Golang" avatar={ <Avatar
-                                                src="https://gw.alipayobjects.com/zos/bmw-prod/6935b98e-96f6-464f-9d4f-215b917c6548.svg"
+                                                src="../golang.svg"
                                                 size="large" /> } description="使用Golang来快速构建分布式后端应用" value="golang" />
+                                            
+                                            <CheckCard title=".NET" avatar={ <Avatar
+                                                src="../dotnet.svg"
+                                                size="large" /> } description="通过业界流行的技术栈来快速构建 .NET 后端应用" value="dotnet" />
+                                            
                                             <CheckCard title="Node JS" avatar={ <Avatar
-                                                src="https://gw.alipayobjects.com/zos/bmw-prod/d12c3392-61fa-489e-a82c-71de0f888a8e.svg"
+                                                src="../nodejs.svg"
                                                 size="large" /> } description="使用前后端统一的语言方案快速构建后端应用" value="nodejs" />
+                                            
                                         </CheckCard.Group>
                                     </ProForm.Item>
 
@@ -355,7 +370,7 @@ const Pipeline : React.FC = () => {
                                   onFinish={onFormSave} >
                                     <ProForm.Item name="depolyment" rules={[{ required: true, message: '请选择部署环境' }]}>
                                         <ProFormSelect label="部署环境" width="md" request={async()=>{
-                                                            const deployPage = await getDeploymentList({appid:1,current:1,pageSize:50})
+                                                            const deployPage = await getDeploymentList({appid:Number(appId),current:1,pageSize:50})
                                                             return deployPage.data.map((item)=> ({label: item.name ,value:item.id}) )
                                          }} ></ProFormSelect>
                                     </ProForm.Item>

@@ -14,6 +14,7 @@ import {  getDeploymentList, getPodList ,GetApplicationInfo } from './deployment
 import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
+import ReleaseRecord from '../releaseRecord';
 
 
 const { TabPane } = Tabs;
@@ -32,7 +33,7 @@ const AppInfo: React.FC = () => {
 
     const actionRef = useRef<ActionType>();
 
-    const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
+const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
     const [execFormVisible, setExecFormVisible] = useState(false);
     const [stepFormEdit, setStepFormEdit] = useState(false);
@@ -40,6 +41,9 @@ const AppInfo: React.FC = () => {
     const [deployImage, setDeployImage] = useState<string|undefined>(undefined);
 
     const [appbuildOnloaded, setAppbuildOnloaded] = useState(false);
+
+    const [autoLoadPipelineData, setAutoLoadPipelineData] = useState<boolean>(false)
+
 
     const columns: ProColumns<DeploymentItem>[] = [
         {
@@ -156,7 +160,15 @@ const AppInfo: React.FC = () => {
                     <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
             <Content style={{ background:'white' }} > 
-            <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }}  >
+            <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} 
+                onChange={(key)=>{
+                    if(key=="3") {
+                        setAutoLoadPipelineData(true)
+                    } else {
+                        setAutoLoadPipelineData(false)
+                    }
+                }}
+            >
                 <TabPane tab="部署环境" key="1" >
                     <ProTable  columns={columns} rowKey="id" dataSource={tableListDataSource}
                         actionRef={actionRef} headerTitle="部署列表"
@@ -216,11 +228,11 @@ const AppInfo: React.FC = () => {
                             { title: '应用状态', dataIndex: 'status',valueEnum:{ 1: "生效",0:"失效" } }
                         ]}/>
                 </TabPane>
-                <TabPane tab="应用流水线" key="3" >
-                    <AppBuildList AppId={Number(appId)} AppName={String(appName)} />
+                <TabPane tab="应用流水线" key="3">
+                    <AppBuildList AppId={Number(appId)} AppName={String(appName)} AutoLoad={autoLoadPipelineData} />
                 </TabPane>
                 <TabPane tab="发布记录" key="4" >
-                    Content of Tab Pane 4
+                   <ReleaseRecord AppId={Number(appId)}></ReleaseRecord>
                 </TabPane>
                 <TabPane tab="应用配置" key="5" disabled>
                     Content of Tab Pane 5

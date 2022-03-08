@@ -5,11 +5,12 @@ import ProForm, {
     ProFormInstance
 } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { Select, Input, Checkbox, Modal, InputNumber, Space, Alert, notification ,Drawer } from 'antd';
+import { Select, Input, Checkbox, Modal, InputNumber, Space, Alert, notification, Drawer,
+    Form,  Button } from 'antd';
 import ProFormItem from '@ant-design/pro-form/lib/components/FormItem';
 import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, GetDeploymentFormInfo } from './service';
 import { DeploymentStep } from './devlopment_data';
-import { CloseCircleTwoTone, SmileOutlined } from '@ant-design/icons';
+import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 
 export interface Props {
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>],
@@ -46,7 +47,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
     const [clusterName, clusterNameHandler] = useState<string>("")
     const [deployment, deploymentHandler] = useState<DeploymentStep>()
     const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([]);
-   
+
     function BindClusterSelect() {
         let req = BindCluster()
         req.then(x => { clusterHandler(x) })
@@ -74,12 +75,12 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
         } else {
             openScvHandler(true)
             formMapRef.current.forEach((formInstanceRef) => {
-               
-                formInstanceRef.current?.setFieldsValue({  
+
+                formInstanceRef.current?.setFieldsValue({
                     level: 'dev',
                     serviceEnable: 'true',
                     serviceAway: 'ClusterPort',
-                    servicePort: '8080' ,
+                    servicePort: '8080',
                     replicas: 1,
                     requestCpu: 0.25,
                     requestMemory: 128,
@@ -181,14 +182,14 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         >
                         </Select>
                     </ProForm.Item>
-                    <ProForm.Item label="命名空间" name='namespaceId'  rules={[{ required: true, message: '请选择命名空间' }]} >
+                    <ProForm.Item label="命名空间" name='namespaceId' rules={[{ required: true, message: '请选择命名空间' }]} >
                         <Select
                             disabled={props.isEdit}
                             options={namespace}
                         >
                         </Select>
                     </ProForm.Item>
-                    < ProForm.Item  name='serviceEnable'>
+                    < ProForm.Item name='serviceEnable'>
                         <Checkbox onChange={(value) => { openScvHandler(value.target.checked) }} checked={openScv}>开启服务访问</Checkbox>
                     </ProForm.Item>
 
@@ -229,9 +230,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                     </ProForm.Group>
                     <ProForm.Group label="内存限制(MB) 0为不限制">
                         <ProFormItem name='requestMemory' label='Request' rules={[{ required: true, message: "requestMemory不可为空" }]}>
-
                             <InputNumber min={0}></InputNumber>
-
                         </ProFormItem>
                         <Space>
                             -
@@ -240,6 +239,40 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                             <InputNumber min={0} ></InputNumber>
                         </ProFormItem>
                     </ProForm.Group>
+
+                    <ProForm.Group label="环境变量">
+                        <Form.List name="environments">
+                            {(fields, { add, remove }) => (
+                                <>
+                                    {fields.map(({ key, name, ...restField }) => (
+                                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'key']}
+                                                rules={[{ required: true, message: 'key 不可为空' }]}
+                                            >
+                                                <Input placeholder="key" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'value']}
+                                                rules={[{ required: true, message: 'value 不可为空' }]}
+                                            >
+                                                <Input placeholder="value" />
+                                            </Form.Item>
+                                            <MinusCircleOutlined onClick={() => remove(name)} />
+                                        </Space>
+                                    ))}
+                                    <Form.Item>
+                                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                            Add ENV
+                                        </Button>
+                                    </Form.Item>
+                                </>
+                            )}
+                        </Form.List>
+                    </ProForm.Group>
+
                 </StepsForm.StepForm>
             </StepsForm>
         </ProCard>

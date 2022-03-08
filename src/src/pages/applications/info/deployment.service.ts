@@ -51,7 +51,7 @@ export async function GetApplicationInfo(appid:number) {
 
 
 export async function GetAppGitBranches(appid:number) {
-    let resData = await request<ApiResponse<string[]>>("/v1/application/gitbranches",{
+    let resData = await request<ApiResponse< {git:string,branches:string[]}  >>("/v1/application/gitbranches",{
         method:'GET',
         params:{ appid: appid }
     })
@@ -107,3 +107,43 @@ export async function GetPipelineById(id:number) {
     })
     return resData
 } 
+
+
+export async function RunPipeline(pipelineId:number, appId:number) {
+    let resData = await request<ApiResponse<number>>("/v1/application/runpipeline",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: {
+            id: pipelineId,
+            appid: appId
+        }
+    })
+    return resData
+}
+
+export async function GetPipelineDetails(appId:number,pipelineId:number,taskId:number) {
+    let resData = await request<ApiResponse<any>>("/v1/application/pipelinedetails",{
+        method:'GET',
+        params: {
+            id: pipelineId,
+            appId:appId,
+            taskId:taskId
+        }
+    })
+    return resData
+}
+
+
+export async function GetPipelineLogs(appId:number,pipelineId:number,taskId:number) {
+    let resData = await request<ApiResponse<string>>("/v1/application/pipelinelogs",{
+        method:'GET',
+        params: {
+            id: pipelineId,
+            appId:appId,
+            taskId:taskId
+        }
+    })
+    return resData
+}
