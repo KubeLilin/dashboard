@@ -59,17 +59,13 @@ const WebTerminal: React.FC<TerminalProps> = props => {
                 terminal.write("error: "+error.eventPhase.toString());
                 terminal.dispose()
         };
-       const webLinksAddon = new WebLinksAddon();
+        const webLinksAddon = new WebLinksAddon();
         const fitAddon = new FitAddon();
-        //const attachAddon = new AttachAddon(socket);
         terminal.loadAddon(webLinksAddon);
         terminal.loadAddon(fitAddon);
-        //terminal.loadAddon(attachAddon);
         terminal.open(divRef.current);
         fitAddon.fit();
-
-        const pod ='yoyogo-867678b49b-ldtr5'
-        terminal.write("connecting to pod "+ pod + "...\r\n")
+        terminal.write("connecting to pod "+ pod_Name + "...\r\n")
 		// term.toggleFullScreen(true);
         terminal.onData(function (data) {
             console.log(data)
