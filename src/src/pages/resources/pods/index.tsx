@@ -327,6 +327,10 @@ const Pods: React.FC = (props) => {
                                         message.error('清空实例失败！');
                                     }
                                 }}> <Button key='button' danger style={{ display: did > 0 ? 'block' : 'none' }}>清空实例</Button></Popconfirm>,
+                                <Popconfirm title="确定要删除部署吗?删除后元数据将保留！"
+                                onConfirm={async () => {
+                                   
+                                }}> <Button key='button' type="primary" danger style={{ display: did > 0 ? 'block' : 'none' }}>删除部署环境</Button></Popconfirm>,
                             <Button key="3"
                                 onClick={() => { if (polling) { setPolling(undefined); return; } setPolling(2000); }} >
                                 {polling ? <LoadingOutlined /> : <ReloadOutlined />}
