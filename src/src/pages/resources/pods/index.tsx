@@ -5,7 +5,8 @@ import ProForm, { ModalForm, ProFormInstance } from '@ant-design/pro-form';
 import { history, Link,useModel } from 'umi';
 import { PodItem, ContainerItem, podLogsRequest } from './data';
 import { Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, Input, notification, Radio } from 'antd'
-import { getPodList, getNamespaceList, setReplicasByDeployId, GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml } from './service'
+import { getPodList, getNamespaceList, setReplicasByDeployId, 
+    GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , DeleteDeployment } from './service'
 import React, { useState, useRef, useEffect } from 'react';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined ,SearchOutlined } from '@ant-design/icons';
 import moment from 'moment'; 
@@ -297,9 +298,10 @@ const Pods: React.FC = (props) => {
                         polling={polling || undefined}
                         toolBarRender={() => [
                             <Button key='button' type="primary" icon={<CloudUploadOutlined />} style={{ display: did > 0 ? 'block' : 'none' }}
-                                onClick={() => { setPolling(1000); 
+                                onClick={() => { 
                                     stepDpId(Number(deployId)) 
-                                    ;setExecFormVisible(true) }}>部署应用</Button>,
+                                    setExecFormVisible(true) 
+                                }}>部署应用</Button>,
                             <Button key='button' type="primary" icon={<ExpandAltOutlined />} style={{ display: did > 0 ? 'block' : 'none' }}
                                 onClick={async () => {
                                     const hide = message.loading('正在加载部署信息...', 0);
@@ -327,9 +329,15 @@ const Pods: React.FC = (props) => {
                                         message.error('清空实例失败！');
                                     }
                                 }}> <Button key='button' danger style={{ display: did > 0 ? 'block' : 'none' }}>清空实例</Button></Popconfirm>,
-                                <Popconfirm title="确定要删除部署吗?删除后元数据将保留！"
+                                <Popconfirm title="确定要删除部署吗? 删除后实例将全部清空，但元数据将保留！"
                                 onConfirm={async () => {
-                                   
+                                    console.log(deploymentInfo)
+                                    const resp = await DeleteDeployment(did)
+                                    if (resp.success) {
+                                            message.success('删除部署成功');
+                                    } else {
+                                            message.error('删除部署失败！');
+                                    }
                                 }}> <Button key='button' type="primary" danger style={{ display: did > 0 ? 'block' : 'none' }}>删除部署环境</Button></Popconfirm>,
                             <Button key="3"
                                 onClick={() => { if (polling) { setPolling(undefined); return; } setPolling(2000); }} >
@@ -443,7 +451,7 @@ const Pods: React.FC = (props) => {
                 <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} 
                         namespace={selectedNamespace} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
             </Modal>
-            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]}deploymentId={dpId} ></ExecDeployment>
+            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} deployImage={deploymentInfo.lastImage} ></ExecDeployment>
         </PageContainer>)
 
 }
