@@ -451,7 +451,7 @@ const Pods: React.FC = (props) => {
                 <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} 
                         namespace={selectedNamespace} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
             </Modal>
-            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} deployImage={deploymentInfo.lastImage} ></ExecDeployment>
+            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} deployImage={deploymentInfo?.lastImage} ></ExecDeployment>
         </PageContainer>)
 
 }
