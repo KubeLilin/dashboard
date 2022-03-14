@@ -49,6 +49,7 @@ export default defineConfig({
         },
         {
           name: 'monitor',
+          icon: 'smile',
           path: '/dashboard/monitor',
           component: './dashboard/monitor',
         }
@@ -191,7 +192,7 @@ export default defineConfig({
     },
     {
       path: '/',
-      redirect: '/dashboard/analysis',
+      redirect: '/dashboard/monitor',
     },
     {
       component: '404',
