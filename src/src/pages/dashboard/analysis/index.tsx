@@ -1,162 +1,243 @@
 import type { FC } from 'react';
-import { Suspense, useState } from 'react';
-import { EllipsisOutlined } from '@ant-design/icons';
-import { Col, Dropdown, Menu, Row } from 'antd';
+import React, { useState, useEffect} from 'react';
+
+import { Avatar, Card, Col, List,Grid, Skeleton, Row, Statistic,Progress,Space } from 'antd';
+import { Link, useRequest } from 'umi';
+import { PageContainer } from '@ant-design/pro-layout';
+import {  Liquid,Radar } from '@ant-design/charts';
 import { GridContent } from '@ant-design/pro-layout';
-import type { RadioChangeEvent } from 'antd/es/radio';
-import type { RangePickerProps } from 'antd/es/date-picker/generatePicker';
-import type moment from 'moment';
-import IntroduceRow from './components/IntroduceRow';
-import SalesCard from './components/SalesCard';
-import TopSearch from './components/TopSearch';
-import ProportionSales from './components/ProportionSales';
-import OfflineData from './components/OfflineData';
-import { useRequest } from 'umi';
-
-import { fakeChartData } from './service';
-import PageLoading from './components/PageLoading';
-import type { TimeType } from './components/SalesCard';
-import { getTimeDistance } from './utils/utils';
-import type { AnalysisData } from './data.d';
+import {ProFormSelect } from '@ant-design/pro-form';
 import styles from './style.less';
+import type { CurrentUser } from './data';
+import { BindCluster} from './service'
 
-type RangePickerValue = RangePickerProps<moment.Moment>['value'];
 
-type AnalysisProps = {
-  dashboardAndanalysis: AnalysisData;
-  loading: boolean;
-};
 
-type SalesType = 'all' | 'online' | 'stores';
 
-const Analysis: FC<AnalysisProps> = () => {
-  const [salesType, setSalesType] = useState<SalesType>('all');
-  const [currentTabKey, setCurrentTabKey] = useState<string>('');
-  const [rangePickerValue, setRangePickerValue] = useState<RangePickerValue>(
-    getTimeDistance('year'),
+const Workplace: FC = () => {
+  const [cluster, clusterHandler] = useState<string|undefined>(undefined);
+  const [clusterId, clusterIdHandler] = useState<string|undefined>(undefined);
+
+  const PageHeaderContent: FC<{ currentUser: Partial<CurrentUser> }> = ({ currentUser }) => {
+    const loading = currentUser && Object.keys(currentUser).length;
+    if (!loading) {
+      return <Skeleton avatar paragraph={{ rows: 1 }} active />;
+    }
+    return (
+      <div className={styles.pageHeaderContent}>
+        <div className={styles.avatar}>
+          <Avatar size="large" src="/icon.svg" />
+        </div>
+        <div className={styles.content}>
+          <div className={styles.contentTitle}>
+            KubeLilin
+          </div>
+          <div>
+            An Cloud-Native application platform for Kubernetes.
+          </div>
+          <div>
+          <ProFormSelect name="clusters" label="集群列表:" width={270}
+                    fieldProps={{ labelInValue:true,
+                      value: clusterId,
+                      onChange:(val)=>{
+                        clusterIdHandler(val.value)
+                        clusterHandler(val.label)
+                      }
+                    }} 
+                  request={async()=>{
+                     const res = await BindCluster()
+                     if(!cluster) {
+                      clusterHandler(res[0].label)
+                      clusterIdHandler(res[0].value)
+                     } 
+                     return res
+                  }} />     
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ExtraContent: FC<Record<string, any>> = () => (
+    <div className={styles.extraContent}>
+      <div className={styles.statItem}>
+        <Statistic title="项目数" value={0} />
+      </div>
+      <div className={styles.statItem}>
+        <Statistic title="团队内排名" value={"-"} suffix="/ -" />
+      </div>
+      <div className={styles.statItem}>
+        <Statistic title="项目访问" value={0} />
+      </div>
+    </div>
   );
 
-  const { loading, data } = useRequest(fakeChartData);
 
-  const selectDate = (type: TimeType) => {
-    setRangePickerValue(getTimeDistance(type));
-  };
-
-  const handleRangePickerChange = (value: RangePickerValue) => {
-    setRangePickerValue(value);
-  };
-
-  const isActive = (type: TimeType) => {
-    if (!rangePickerValue) {
-      return '';
-    }
-    const value = getTimeDistance(type);
-    if (!value) {
-      return '';
-    }
-    if (!rangePickerValue[0] || !rangePickerValue[1]) {
-      return '';
-    }
-    if (
-      rangePickerValue[0].isSame(value[0] as moment.Moment, 'day') &&
-      rangePickerValue[1].isSame(value[1] as moment.Moment, 'day')
-    ) {
-      return styles.currentDate;
-    }
-    return '';
-  };
-
-  let salesPieData;
-  if (salesType === 'all') {
-    salesPieData = data?.salesTypeData;
-  } else {
-    salesPieData = salesType === 'online' ? data?.salesTypeDataOnline : data?.salesTypeDataOffline;
-  }
-
-  const menu = (
-    <Menu>
-      <Menu.Item>操作一</Menu.Item>
-      <Menu.Item>操作二</Menu.Item>
-    </Menu>
-  );
-
-  const dropdownGroup = (
-    <span className={styles.iconGroup}>
-      <Dropdown overlay={menu} placement="bottomRight">
-        <EllipsisOutlined />
-      </Dropdown>
-    </span>
-  );
-
-  const handleChangeSalesType = (e: RadioChangeEvent) => {
-    setSalesType(e.target.value);
-  };
-
-  const handleTabChange = (key: string) => {
-    setCurrentTabKey(key);
-  };
-
-  const activeKey = currentTabKey || (data?.offlineData[0] && data?.offlineData[0].name) || '';
 
   return (
+    <PageContainer
+      content={ <PageHeaderContent currentUser={{userid: '00000001', }} /> }
+      extraContent={<ExtraContent />}
+    >
+    
     <GridContent>
-      <>
-        <Suspense fallback={<PageLoading />}>
-          <IntroduceRow loading={loading} visitData={data?.visitData || []} />
-        </Suspense>
-
-        <Suspense fallback={null}>
-          <SalesCard
-            rangePickerValue={rangePickerValue}
-            salesData={data?.salesData || []}
-            isActive={isActive}
-            handleRangePickerChange={handleRangePickerChange}
-            loading={loading}
-            selectDate={selectDate}
-          />
-        </Suspense>
-
-        <Row
-          gutter={24}
-          style={{
-            marginTop: 24,
-          }}
-        >
-          <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-            <Suspense fallback={null}>
-              <TopSearch
-                loading={loading}
-                visitData2={data?.visitData2 || []}
-                searchData={data?.searchData || []}
-                dropdownGroup={dropdownGroup}
-              />
-            </Suspense>
+        <Row gutter={[16, 16]}>
+          <Col  span={4}>
+            <Card title="集群信息"  hoverable 
+                bodyStyle={{ textAlign: 'left',height:170 }} bordered={false} >
+                  <Space direction="vertical">  
+                  <div>集群标识: {cluster}</div>
+                  <div>集群版本	: v1.18.4 ++	</div>
+                  </Space>
+            </Card>
           </Col>
-          <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-            <Suspense fallback={null}>
-              <ProportionSales
-                dropdownGroup={dropdownGroup}
-                salesType={salesType}
-                loading={loading}
-                salesPieData={salesPieData || []}
-                handleChangeSalesType={handleChangeSalesType}
-              />
-            </Suspense>
+          <Col span={4} >
+            <Card title="节点信息"  hoverable
+                bodyStyle={{ textAlign: 'left',height:170 }} bordered={false} >
+                  <Space>
+                    <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={() => '4/4'}   />
+                    <Space direction="vertical" style={{ marginLeft:20 }}>
+                      <div>  On Realy: 4</div>
+                      <div>  All Nodes: 4</div>
+                    </Space>
+                  </Space>
+               </Card>
+          </Col>
+          <Col span={4}  style={{ marginBottom: 12 }}>
+          <Card title="容器组" hoverable
+              bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }}
+              bordered={false}
+            >
+               <Space>
+                  <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={() => '4/20'}   />
+                    <Space direction="vertical">
+                      <div>Usage: 4</div>
+                      <div>Capacity: 20</div>
+                    </Space>
+                </Space>
+            </Card>
+          </Col>
+          <Col span={4}  >
+          <Card title="CPU Core" hoverable
+              bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }} bordered={false} 
+            >
+                <Space>
+                  <Liquid height={130} width={130} min={0} max={10000} value={5639} forceFit padding={[0, 0, 0, 0]}
+                  statistic={{
+                    formatter: (value) => `${((100 * value) / 10000).toFixed(1)}%`,
+                  }} />
+                    <Space direction="vertical">
+                      <div>Usage: 0.31</div>
+                      <div>Allocatable: 20.00</div>
+                      <div>Capacity: 20.00</div>
+                    </Space>
+                </Space>
+            </Card>
+          
+          </Col>
+
+          <Col span={4}>
+          <Card title="内存 GiB" hoverable
+              bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }}
+              bordered={false}
+            >
+                       <Space>
+                  <Liquid height={130} width={130} min={0} max={10000}
+                  value={5639} forceFit padding={[0, 0, 0, 0]}
+                  statistic={{
+                    formatter: (value) => `${((100 * value) / 10000).toFixed(1)}%`,
+                  }} />
+                    <Space direction="vertical">
+                      <div>Usage: 0.31</div>
+                      <div>Allocatable: 20.00</div>
+                      <div>Capacity: 20.00</div>
+                    </Space>
+                </Space>
+            </Card>
+          
+          </Col>
+
+          <Col span={4}  style={{ marginBottom: 12 }}>
+          <Card title="本地存储 GB" hoverable
+              bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }}
+              bordered={false}
+            >
+               <Space>
+                  <Liquid height={130} width={130} min={0} max={10000}
+                  value={5639} forceFit padding={[0, 0, 0, 0]}
+                  statistic={{
+                    formatter: (value) => `${((100 * value) / 10000).toFixed(1)}%`,
+                  }} />
+                    <Space direction="vertical">
+                      <div>Usage: 0.31</div>
+                      <div>Allocatable: 20.00</div> 
+                      <div>Capacity: 20.00</div>
+                    </Space>
+                </Space>
+            </Card>
+          </Col>
+      
+        </Row>
+        <Row gutter={[16, 16]}>
+          <Col span={16}  style={{ marginBottom: 12 }}>
+            <Card title="工作负载情况" bordered={true} hoverable >
+              <Row >
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>Deployment</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />
+                </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>StatefulSet</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />
+                </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>DaemonSet</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />             </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>CronJob</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />              </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>Job </span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />              
+                </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>ReplicaSet</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />           
+                </Col>
+                
+              </Row>
+            </Card>
           </Col>
         </Row>
-
-        <Suspense fallback={null}>
-          <OfflineData
-            activeKey={activeKey}
-            loading={loading}
-            offlineData={data?.offlineData || []}
-            offlineChartData={data?.offlineChartData || []}
-            handleTabChange={handleTabChange}
-          />
-        </Suspense>
-      </>
     </GridContent>
+
+
+    </PageContainer>
   );
 };
 
-export default Analysis;
+export default Workplace;

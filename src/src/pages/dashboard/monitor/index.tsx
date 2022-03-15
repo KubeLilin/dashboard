@@ -16,16 +16,14 @@ const Monitor: FC = () => {
 
   return (
     <GridContent>
-        <Row gutter={12}>
-          <Col  xl={6} lg={24} md={24} sm={24} xs={25}>
-            <Card title="集群信息"  hoverable
+        <Row gutter={[16, 16]}>
+          <Col  span={4}>
+            <Card title="集群信息"  hoverable 
                 bodyStyle={{ textAlign: 'left',height:170 }} bordered={false} >
                   <Space direction="vertical">
                   <ProFormSelect name="clusters" initialValue={clusterId}  label="集群列表" 
-                    fieldProps={{
-                      labelInValue:true,
+                    fieldProps={{ labelInValue:true,
                       onSelect:(val)=>{
-                        console.log(val)
                         clusterIdHandler(val.value)
                         clusterHandler(val.label)
                       }
@@ -41,7 +39,20 @@ const Monitor: FC = () => {
                   </Space>
             </Card>
           </Col>
-          <Col xl={6} lg={24} md={24} sm={24} xs={24}  >
+          <Col span={4} >
+            <Card title="节点信息"  hoverable
+                bodyStyle={{ textAlign: 'left',height:170 }} bordered={false} >
+                  <Space>
+                    <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={() => '4/4'}   />
+                    <Space direction="vertical" style={{ marginLeft:20 }}>
+                      <div>Node Status:</div>
+                      <div>  Online: 4</div>
+                      <div>  All Nodes: 4</div>
+                    </Space>
+                  </Space>
+               </Card>
+          </Col>
+          <Col span={4}  >
           <Card title="CPU Core" hoverable
               bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }} bordered={false} 
             >
@@ -60,7 +71,7 @@ const Monitor: FC = () => {
           
           </Col>
 
-          <Col xl={6} lg={24} md={24} sm={24} xs={24}>
+          <Col span={4}>
           <Card title="内存 GiB" hoverable
               bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }}
               bordered={false}
@@ -81,7 +92,7 @@ const Monitor: FC = () => {
           
           </Col>
 
-          <Col xl={6} lg={24} md={24} sm={24} xs={24}  style={{ marginBottom: 12 }}>
+          <Col span={4}  style={{ marginBottom: 12 }}>
           <Card title="本地存储 GB" hoverable
               bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }}
               bordered={false}
@@ -101,24 +112,7 @@ const Monitor: FC = () => {
             </Card>
           
           </Col>
-
-     
-        </Row>
-        <Row gutter={12}>
-        <Col  xl={6} lg={24} md={24} sm={24} xs={25}>
-            <Card title="节点信息"  hoverable
-                bodyStyle={{ textAlign: 'left',height:170 }} bordered={false} >
-                  <Space>
-                    <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={() => '4/4'}   />
-                    <Space direction="vertical" style={{ marginLeft:20 }}>
-                      <div>Node Status:</div>
-                      <div>  Online: 4</div>
-                      <div>  All Nodes: 4</div>
-                    </Space>
-                  </Space>
-               </Card>
-          </Col>
-          <Col xl={6} lg={24} md={24} sm={24} xs={24}  style={{ marginBottom: 12 }}>
+          <Col span={4}  style={{ marginBottom: 12 }}>
           <Card title="容器组" hoverable
               bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }}
               bordered={false}
@@ -126,15 +120,17 @@ const Monitor: FC = () => {
                <Space>
                   <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={() => '4/20'}   />
                     <Space direction="vertical">
-                      <div>Usage: 0.31</div>
-                      <div>Capacity: 20.00</div>
+                      <div>Usage: 4</div>
+                      <div>Capacity: 20</div>
                     </Space>
                 </Space>
             </Card>
           
           </Col>
-
-          <Col span="2" xl={12} lg={24} sm={24} xs={24} style={{ marginBottom: 12 }}>
+     
+        </Row>
+        <Row gutter={[16, 16]}>
+          <Col span={16}  style={{ marginBottom: 12 }}>
             <Card title="工作负载情况" bordered={true} hoverable >
               <Row >
                 <Col span={4}>
