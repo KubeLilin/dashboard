@@ -192,7 +192,7 @@ export default defineConfig({
     },
     {
       path: '/',
-      redirect: '/dashboard/monitor',
+      redirect: '/dashboard/analysis',
     },
     {
       component: '404',

@@ -1,17 +1,6 @@
 import { request } from 'umi';
-import type { NoticeType, ActivitiesType, AnalysisData } from './data';
-
-export async function queryProjectNotice(): Promise<{ data: NoticeType[] }> {
-  return request('/api/project/notice');
-}
-
-export async function queryActivities(): Promise<{ data: ActivitiesType[] }> {
-  return request('/api/activities');
-}
-
-export async function fakeChartData(): Promise<{ data: AnalysisData }> {
-  return request('/api/fake_workplace_chart_data');
-}
+import { ApiResponse } from '@/services/public/service';
+import { ClusterMetricsInfo,WorkloadsMetricsInfo,ProjectsMetricsInfo  } from './data';
 
 
 export async function BindCluster() :Promise<{label: string,value: string}[]> {
@@ -20,4 +9,29 @@ export async function BindCluster() :Promise<{label: string,value: string}[]> {
   })
   let data=  resData.data.map(x=>{return  {value:x.id,label:x.name}})
   return new Promise(x=>x(data))
+}
+
+
+export async function GetClusterMetrics(clusterId:number)  {
+  let resData = await request<ApiResponse<ClusterMetricsInfo>>("/v1/metrics/statistics", {
+      method: 'GET',
+      params: { cid: clusterId }
+  })
+  return resData
+}
+
+export async function GetWorkloadsMetrics(clusterId:number)  {
+  let resData = await request<ApiResponse<WorkloadsMetricsInfo>>("/v1/metrics/workloads", {
+      method: 'GET',
+      params: { cid: clusterId }
+  })
+  return resData
+}
+
+
+export async function GetProjectsMetrics( )  {
+  let resData = await request<ApiResponse<ProjectsMetricsInfo>>("/v1/metrics/projects", {
+      method: 'GET',
+  })
+  return resData
 }
