@@ -167,7 +167,7 @@ const Namespaces: React.FC = () => {
                     if (!visible) {   // on closed
                         quotaEditSet(false)
                     } else {         // on loaded
-                        if(selectNsRow) {
+                        if(selectNsRow && !quotaEdit) {
                             const res = await GetResourceQuota(selectNsRow.clusterId,selectNsRow.namespace)
                             console.log(res.data)
                             quotaInfoSet(res.data)
@@ -180,10 +180,18 @@ const Namespaces: React.FC = () => {
                     }
                 }} 
                 onFinish={async (values) => {
-                    console.log(values)
+                    console.log(selectNsRow)
                     if(selectNsRow) {
+                        if (selectNsRow.tenantId == 0) {
+                            message.error("必须选择租户！")
+                            return false
+                        }
+
                         values.namespace = selectNsRow.namespace
-                        const res = await PostResourceQuota(selectNsRow.clusterId, values)
+                        var postData = values
+                        postData.clusterId = selectNsRow.clusterId
+                        postData.tenantId  = selectNsRow.tenantId
+                        const res = await PostResourceQuota(postData)
                         if (res.success) {
                             message.success("配额已生效")
                         }

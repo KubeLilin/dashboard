@@ -99,13 +99,13 @@ export async function GetResourceQuota(clusterId:number,namespace:string ) :Prom
 
 
 
-export async function PostResourceQuota(clusterId:number,postData:NewQuota ) :Promise<ApiResponse<any>>{
+export async function PostResourceQuota(postData:NewQuota ) :Promise<ApiResponse<any>>{
     let resData = await request<ApiResponse<any>>("/v1/cluster/resourcequota", {
         headers: {
             'Content-Type': 'application/json',
         },
         method: 'POST',
-        params:{'cid':clusterId },
+        //params:{clusterId:clusterId,tenantId: tenantId},
         data: postData
 
     })

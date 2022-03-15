@@ -1,150 +1,189 @@
-import { Card, Col, Row, Statistic } from 'antd';
-import { useRequest } from 'umi';
+import { Card, Col, Row, Space,Grid, Statistic,Progress,Select } from 'antd';
 import type { FC } from 'react';
-import { Gauge, WordCloud, Liquid, RingProgress } from '@ant-design/charts';
-import type { WordCloudData } from '@antv/g2plot/esm/plots/word-cloud/layer';
+import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
 
+import {  Liquid, Radar } from '@ant-design/charts';
 import { GridContent } from '@ant-design/pro-layout';
-import numeral from 'numeral';
-import Map from './components/Map';
-import ActiveChart from './components/ActiveChart';
-import { queryTags } from './service';
-import styles from './style.less';
+import {ProFormSelect } from '@ant-design/pro-form';
 
-const { Countdown } = Statistic;
+import { BindCluster} from './service'
 
-const deadline = Date.now() + 1000 * 60 * 60 * 24 * 2 + 1000 * 30; // Moment is also OK
 
 const Monitor: FC = () => {
-  const { loading, data } = useRequest(queryTags);
+  const [cluster, clusterHandler] = useState<string>();
+  const [clusterId, clusterIdHandler] = useState<string>();
 
-  const wordCloudData: WordCloudData[] = (data?.list || []).map((item) => {
-    return {
-      id: +Date.now(),
-      word: item.name,
-      weight: item.value,
-    };
-  });
 
   return (
     <GridContent>
-      <>
-        <Row gutter={24}>
-          <Col xl={18} lg={24} md={24} sm={24} xs={24} style={{ marginBottom: 24 }}>
-            <Card title="活动实时交易情况" bordered={false}>
-              <Row>
-                <Col md={6} sm={12} xs={24}>
-                  <Statistic
-                    title="今日交易总额"
-                    suffix="元"
-                    value={numeral(124543233).format('0,0')}
-                  />
-                </Col>
-                <Col md={6} sm={12} xs={24}>
-                  <Statistic title="销售目标完成率" value="92%" />
-                </Col>
-                <Col md={6} sm={12} xs={24}>
-                  <Countdown title="活动剩余时间" value={deadline} format="HH:mm:ss:SSS" />
-                </Col>
-                <Col md={6} sm={12} xs={24}>
-                  <Statistic title="每秒交易总额" suffix="元" value={numeral(234).format('0,0')} />
-                </Col>
-              </Row>
-              <div className={styles.mapChart}>
-                <Map />
-              </div>
+        <Row gutter={[16, 16]}>
+          <Col  span={4}>
+            <Card title="集群信息"  hoverable 
+                bodyStyle={{ textAlign: 'left',height:170 }} bordered={false} >
+                  <Space direction="vertical">
+                  <ProFormSelect name="clusters" initialValue={clusterId}  label="集群列表" 
+                    fieldProps={{ labelInValue:true,
+                      onSelect:(val)=>{
+                        clusterIdHandler(val.value)
+                        clusterHandler(val.label)
+                      }
+                    }} 
+                  request={async()=>{
+                     const res = await BindCluster()
+                     clusterHandler(res[0].label)
+                     clusterIdHandler(res[0].value)
+                     return res
+                  }}    width={230} />                      
+                  <div>集群标识: {cluster}</div>
+                  <div>集群版本	: v1.18.4 ++	</div>
+                  </Space>
             </Card>
           </Col>
-          <Col xl={6} lg={24} md={24} sm={24} xs={24}>
-            <Card title="活动情况预测" style={{ marginBottom: 24 }} bordered={false}>
-              <ActiveChart />
+          <Col span={4} >
+            <Card title="节点信息"  hoverable
+                bodyStyle={{ textAlign: 'left',height:170 }} bordered={false} >
+                  <Space>
+                    <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={() => '4/4'}   />
+                    <Space direction="vertical" style={{ marginLeft:20 }}>
+                      <div>Node Status:</div>
+                      <div>  Online: 4</div>
+                      <div>  All Nodes: 4</div>
+                    </Space>
+                  </Space>
+               </Card>
+          </Col>
+          <Col span={4}  >
+          <Card title="CPU Core" hoverable
+              bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }} bordered={false} 
+            >
+                <Space>
+                  <Liquid height={130} width={130} min={0} max={10000} value={5639} forceFit padding={[0, 0, 0, 0]}
+                  statistic={{
+                    formatter: (value) => `${((100 * value) / 10000).toFixed(1)}%`,
+                  }} />
+                    <Space direction="vertical">
+                      <div>Usage: 0.31</div>
+                      <div>Allocatable: 20.00</div>
+                      <div>Capacity: 20.00</div>
+                    </Space>
+                </Space>
             </Card>
-            <Card
-              title="券核效率"
-              style={{ marginBottom: 24 }}
-              bodyStyle={{ textAlign: 'center' }}
+          
+          </Col>
+
+          <Col span={4}>
+          <Card title="内存 GiB" hoverable
+              bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }}
               bordered={false}
             >
-              <Gauge
-                height={180}
-                min={0}
-                max={100}
-                forceFit
-                value={87}
-                range={[0, 25, 50, 75, 100]}
-                statistic={{
-                  visible: true,
-                  text: '优',
-                  color: '#30bf78',
-                }}
-              />
+                       <Space>
+                  <Liquid height={130} width={130} min={0} max={10000}
+                  value={5639} forceFit padding={[0, 0, 0, 0]}
+                  statistic={{
+                    formatter: (value) => `${((100 * value) / 10000).toFixed(1)}%`,
+                  }} />
+                    <Space direction="vertical">
+                      <div>Usage: 0.31</div>
+                      <div>Allocatable: 20.00</div>
+                      <div>Capacity: 20.00</div>
+                    </Space>
+                </Space>
+            </Card>
+          
+          </Col>
+
+          <Col span={4}  style={{ marginBottom: 12 }}>
+          <Card title="本地存储 GB" hoverable
+              bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }}
+              bordered={false}
+            >
+               <Space>
+                  <Liquid height={130} width={130} min={0} max={10000}
+                  value={5639} forceFit padding={[0, 0, 0, 0]}
+                  statistic={{
+                    formatter: (value) => `${((100 * value) / 10000).toFixed(1)}%`,
+                  }} />
+                    <Space direction="vertical">
+                      <div>Usage: 0.31</div>
+                      <div>Allocatable: 20.00</div> 
+                      <div>Capacity: 20.00</div>
+                    </Space>
+                </Space>
+            </Card>
+          
+          </Col>
+          <Col span={4}  style={{ marginBottom: 12 }}>
+          <Card title="容器组" hoverable
+              bodyStyle={{ textAlign: 'left',height:170,marginTop:0  }}
+              bordered={false}
+            >
+               <Space>
+                  <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={() => '4/20'}   />
+                    <Space direction="vertical">
+                      <div>Usage: 4</div>
+                      <div>Capacity: 20</div>
+                    </Space>
+                </Space>
+            </Card>
+          
+          </Col>
+     
+        </Row>
+        <Row gutter={[16, 16]}>
+          <Col span={16}  style={{ marginBottom: 12 }}>
+            <Card title="工作负载情况" bordered={true} hoverable >
+              <Row >
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>Deployment</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />
+                </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>StatefulSet</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />
+                </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>DaemonSet</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />             </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>CronJob</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />              </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>Job </span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />              
+                </Col>
+                <Col span={4}>
+                <Progress  type="dashboard" percent={100}  success={{ percent: 30 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18}}>
+                        <span>ReplicaSet</span> 
+                        <span>{"4/4"}</span> 
+                    </Space>
+                } />           
+                </Col>
+                
+              </Row>
             </Card>
           </Col>
         </Row>
-        <Row gutter={24}>
-          <Col xl={12} lg={24} sm={24} xs={24} style={{ marginBottom: 24 }}>
-            <Card title="各品类占比" bordered={false} className={styles.pieCard}>
-              <Row style={{ padding: '16px 0' }}>
-                <Col span={8}>
-                  <RingProgress forceFit height={128} percent={0.28} />
-                  {/* <Pie
-                    animate={false}
-                    percent={28}
-                    title="中式快餐"
-                    total="28%"
-                    height={128}
-                    lineWidth={2}
-                  /> */}
-                </Col>
-                <Col span={8}>
-                  <RingProgress color="#5DDECF" forceFit height={128} percent={0.22} />
-                </Col>
-                <Col span={8}>
-                  <RingProgress color="#2FC25B" forceFit height={128} percent={0.32} />
-                </Col>
-              </Row>
-            </Card>
-          </Col>
-          <Col xl={6} lg={12} sm={24} xs={24} style={{ marginBottom: 24 }}>
-            <Card
-              title="热门搜索"
-              loading={loading}
-              bordered={false}
-              bodyStyle={{ overflow: 'hidden' }}
-            >
-              <WordCloud
-                data={wordCloudData}
-                forceFit
-                height={162}
-                wordStyle={{
-                  fontSize: [10, 20],
-                }}
-                shape="triangle"
-              />
-              {/* <TagCloud data={data?.list || []} height={161} /> */}
-            </Card>
-          </Col>
-          <Col xl={6} lg={12} sm={24} xs={24} style={{ marginBottom: 24 }}>
-            <Card
-              title="资源剩余"
-              bodyStyle={{ textAlign: 'center', fontSize: 0 }}
-              bordered={false}
-            >
-              <Liquid
-                height={161}
-                min={0}
-                max={10000}
-                value={5639}
-                forceFit
-                padding={[0, 0, 0, 0]}
-                statistic={{
-                  formatter: (value) => `${((100 * value) / 10000).toFixed(1)}%`,
-                }}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </>
     </GridContent>
   );
 };

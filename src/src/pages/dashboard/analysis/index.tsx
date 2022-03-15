@@ -1,162 +1,303 @@
 import type { FC } from 'react';
-import { Suspense, useState } from 'react';
-import { EllipsisOutlined } from '@ant-design/icons';
-import { Col, Dropdown, Menu, Row } from 'antd';
+import React, { useState, useEffect} from 'react';
+
+import { Avatar, Card, Col, List,Grid, Skeleton, Row, Statistic,Progress,Space,Button} from 'antd';
+import { Link, useRequest } from 'umi';
+import { PageContainer } from '@ant-design/pro-layout';
+import {  Liquid,Radar } from '@ant-design/charts';
 import { GridContent } from '@ant-design/pro-layout';
-import type { RadioChangeEvent } from 'antd/es/radio';
-import type { RangePickerProps } from 'antd/es/date-picker/generatePicker';
-import type moment from 'moment';
-import IntroduceRow from './components/IntroduceRow';
-import SalesCard from './components/SalesCard';
-import TopSearch from './components/TopSearch';
-import ProportionSales from './components/ProportionSales';
-import OfflineData from './components/OfflineData';
-import { useRequest } from 'umi';
-
-import { fakeChartData } from './service';
-import PageLoading from './components/PageLoading';
-import type { TimeType } from './components/SalesCard';
-import { getTimeDistance } from './utils/utils';
-import type { AnalysisData } from './data.d';
+import {ProFormSelect } from '@ant-design/pro-form';
 import styles from './style.less';
+import { ClusterMetricsInfo,WorkloadsMetricsInfo,ProjectsMetricsInfo  } from './data';
+import { BindCluster , GetClusterMetrics ,GetWorkloadsMetrics ,GetProjectsMetrics} from './service'
 
-type RangePickerValue = RangePickerProps<moment.Moment>['value'];
 
-type AnalysisProps = {
-  dashboardAndanalysis: AnalysisData;
-  loading: boolean;
-};
 
-type SalesType = 'all' | 'online' | 'stores';
 
-const Analysis: FC<AnalysisProps> = () => {
-  const [salesType, setSalesType] = useState<SalesType>('all');
-  const [currentTabKey, setCurrentTabKey] = useState<string>('');
-  const [rangePickerValue, setRangePickerValue] = useState<RangePickerValue>(
-    getTimeDistance('year'),
-  );
+const Workplace: FC = () => {
+  const [cluster, clusterHandler] = useState<string|undefined>(undefined);
+  const [clusterId, clusterIdHandler] = useState<string|undefined>(undefined);
+  const [clusterMetrics,clusterMetricsHandler] = useState<ClusterMetricsInfo|undefined>(undefined);
+  const [workloadsMetrics,workloadsMetricsHandler] = useState<WorkloadsMetricsInfo|undefined>(undefined);
+  const [projectMetrics,projectMetricsHandler] = useState<ProjectsMetricsInfo|undefined>(undefined);
 
-  const { loading, data } = useRequest(fakeChartData);
+  
+  const [clusterList,clusterListHandler] = useState<any>()
+  const [onLoaded,_] = useState<boolean>(false)
+  var timer: NodeJS.Timeout
 
-  const selectDate = (type: TimeType) => {
-    setRangePickerValue(getTimeDistance(type));
-  };
 
-  const handleRangePickerChange = (value: RangePickerValue) => {
-    setRangePickerValue(value);
-  };
+  useEffect(()=>{
+    BindCluster().then((res)=>{
+      clusterListHandler(res)
+      clusterHandler(res[0].label)
+      clusterIdHandler(res[0].value)
+    })
 
-  const isActive = (type: TimeType) => {
-    if (!rangePickerValue) {
-      return '';
+    GetProjectsMetrics().then((res)=>{
+      projectMetricsHandler(res.data)
+    })
+
+  },[onLoaded])
+
+  useEffect(()=>{
+    loadMetrics( clusterId)
+  },[clusterId])
+
+
+  const loadMetrics = (cid:any) =>{
+    if (cid){
+        GetClusterMetrics(cid).then((resm)=>{
+            clusterMetricsHandler(resm.data)
+        })
+        GetWorkloadsMetrics(cid).then((res)=>{
+            workloadsMetricsHandler(res.data)
+        })
     }
-    const value = getTimeDistance(type);
-    if (!value) {
-      return '';
-    }
-    if (!rangePickerValue[0] || !rangePickerValue[1]) {
-      return '';
-    }
-    if (
-      rangePickerValue[0].isSame(value[0] as moment.Moment, 'day') &&
-      rangePickerValue[1].isSame(value[1] as moment.Moment, 'day')
-    ) {
-      return styles.currentDate;
-    }
-    return '';
-  };
-
-  let salesPieData;
-  if (salesType === 'all') {
-    salesPieData = data?.salesTypeData;
-  } else {
-    salesPieData = salesType === 'online' ? data?.salesTypeDataOnline : data?.salesTypeDataOffline;
   }
 
-  const menu = (
-    <Menu>
-      <Menu.Item>操作一</Menu.Item>
-      <Menu.Item>操作二</Menu.Item>
-    </Menu>
-  );
-
-  const dropdownGroup = (
-    <span className={styles.iconGroup}>
-      <Dropdown overlay={menu} placement="bottomRight">
-        <EllipsisOutlined />
-      </Dropdown>
-    </span>
-  );
-
-  const handleChangeSalesType = (e: RadioChangeEvent) => {
-    setSalesType(e.target.value);
+  const PageHeaderContent: FC<{ currentUser: Partial<any> }> = ({ currentUser }) => {
+    const loading = currentUser && Object.keys(currentUser).length;
+    if (!loading) {
+      return <Skeleton avatar paragraph={{ rows: 1 }} active />;
+    }
+    return (
+      <div className={styles.pageHeaderContent}>
+        <div className={styles.avatar}>
+          <Avatar size="large" src="/icon.svg" />
+        </div>
+        <div className={styles.content}>
+          <div className={styles.contentTitle}>
+            KubeLilin
+          </div>
+          <div>
+            An Cloud-Native application platform for Kubernetes.
+          </div>
+          <div>
+          <Space direction="horizontal"  style={{   textAlign:"start"}}>
+          <ProFormSelect name="clusters" label="集群列表:" width={270}
+            options={clusterList}
+            fieldProps={{ labelInValue:true,
+              value: clusterId,
+              onChange:async(val:any)=>{
+                clusterHandler(val.label)
+                clusterIdHandler(val.value)
+              }
+            }}   />  
+           
+            </Space> 
+          </div>
+        </div>
+      </div>
+    );
   };
 
-  const handleTabChange = (key: string) => {
-    setCurrentTabKey(key);
-  };
+  const ExtraContent: FC<Record<string, any>> = () => (
+    <div className={styles.extraContent}>
+      <div className={styles.statItem}>
+        <Statistic title="应用数量" value={projectMetrics?.applications} />
+      </div>
+      <div className={styles.statItem}>
+        <Statistic title="部署数量" value={projectMetrics?.deploys}  />
+      </div>
+      <div className={styles.statItem}>
+        <Statistic title="发布数量" value={projectMetrics?.publish} />
+      </div>
+    </div>
+  );
 
-  const activeKey = currentTabKey || (data?.offlineData[0] && data?.offlineData[0].name) || '';
+
 
   return (
+    <PageContainer
+      content={ <PageHeaderContent currentUser={{userid: '00000001', }} /> }
+      extraContent={<ExtraContent />}
+    >
+    
     <GridContent>
-      <>
-        <Suspense fallback={<PageLoading />}>
-          <IntroduceRow loading={loading} visitData={data?.visitData || []} />
-        </Suspense>
-
-        <Suspense fallback={null}>
-          <SalesCard
-            rangePickerValue={rangePickerValue}
-            salesData={data?.salesData || []}
-            isActive={isActive}
-            handleRangePickerChange={handleRangePickerChange}
-            loading={loading}
-            selectDate={selectDate}
-          />
-        </Suspense>
-
-        <Row
-          gutter={24}
-          style={{
-            marginTop: 24,
-          }}
-        >
-          <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-            <Suspense fallback={null}>
-              <TopSearch
-                loading={loading}
-                visitData2={data?.visitData2 || []}
-                searchData={data?.searchData || []}
-                dropdownGroup={dropdownGroup}
-              />
-            </Suspense>
+        <Row gutter={[16, 16]}>
+          <Col  span={4}>
+            <Card title="Cluster Information"  hoverable 
+                bodyStyle={{ textAlign: 'center',height:170 }} bordered={false} >
+                  <Space direction="vertical">  
+                  <div>Cluster ID: {cluster}</div>
+                  <div>Cluster Version: v1.18.4 ++	</div>
+                  </Space>
+            </Card>
           </Col>
-          <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-            <Suspense fallback={null}>
-              <ProportionSales
-                dropdownGroup={dropdownGroup}
-                salesType={salesType}
-                loading={loading}
-                salesPieData={salesPieData || []}
-                handleChangeSalesType={handleChangeSalesType}
-              />
-            </Suspense>
+          <Col span={4} >
+            <Card title="Node Information"  hoverable
+                bodyStyle={{ textAlign: 'center',height:170 }} bordered={false} >
+                  <Space>
+                    <Progress  type="dashboard" percent={100}  success={{ percent: (Number(clusterMetrics?.nodes.available)/ Number(clusterMetrics?.nodes.count)) *100 }}  format={() => clusterMetrics?.nodes.available +'/'+  clusterMetrics?.nodes.count }   />
+                    <Space direction="vertical" style={{ marginLeft:20 }}>
+                      <div>  On Realy: {clusterMetrics?.nodes.available}</div>
+                      <div>  All Nodes: {clusterMetrics?.nodes.count}</div>
+                    </Space>
+                  </Space>
+               </Card>
+          </Col>
+          <Col span={4}  >
+          <Card title="Total CPU (Core)" hoverable
+              bodyStyle={{ textAlign: 'center',height:170,marginTop:0  }} bordered={false} 
+            >
+                <Space>
+                  <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.cpu)} value={Number(clusterMetrics?.usage.cpu)} forceFit padding={[0, 0, 0, 0]}
+                  statistic={{
+                    formatter: (value) => `${((Number(clusterMetrics?.usage.cpu)/Number(clusterMetrics?.capacity.cpu))*100).toFixed(2)}%`,
+                  }} />
+                    <Space direction="vertical">
+                      <div>Usage: { clusterMetrics?.usage.cpu.toFixed(2)} core</div>
+                      <div>Allocatable: {clusterMetrics?.allocatable.cpu.toFixed(2)} core</div>
+                      <div>Capacity: {clusterMetrics?.capacity.cpu.toFixed(2)} core</div>
+                    </Space>
+                </Space>
+            </Card>
+          
+          </Col>
+
+          <Col span={4}>
+          <Card title="Total Memory (GiB)" hoverable
+              bodyStyle={{ textAlign: 'center',height:170,marginTop:0  }}
+              bordered={false} >
+                <Space>
+                  <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.memory)}
+                  value={Number(clusterMetrics?.usage.memory)} forceFit padding={[0, 0, 0, 0]}
+                  statistic={{
+                    formatter: (value) => `${((Number(clusterMetrics?.usage.memory)/Number(clusterMetrics?.capacity.memory))*100).toFixed(2)}%`,
+                  }} />
+                    <Space direction="vertical" >
+                      <div>Usage: { (Number(clusterMetrics?.usage.memory)/1024/1024/1024).toFixed(2)} GiB</div>
+                      <div>Allocatable: {(Number(clusterMetrics?.allocatable.memory)/1024/1024/1024).toFixed(2)} GiB</div>
+                      <div>Capacity: {(Number(clusterMetrics?.capacity.memory)/1024/1024/1024).toFixed(2)} GiB</div>
+                    </Space>
+                </Space>
+            </Card>
+          
+          </Col>
+
+          <Col span={4}  style={{ marginBottom: 12 }}>
+          <Card title="Local Storage (GB)" hoverable
+              bodyStyle={{ textAlign: 'center',height:170,marginTop:0  }}
+              bordered={false}
+            >
+               <Space>
+                  <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.storage)}
+                  value={Number(clusterMetrics?.usage.storage)} forceFit padding={[0, 0, 0, 0]}
+                  statistic={{
+                    formatter: (value) => Number(clusterMetrics?.usage.storage)>0?`${((Number(clusterMetrics?.usage.storage)/Number(clusterMetrics?.capacity.storage))*100).toFixed(2)}%`:'0.00%',
+                  }} />
+                    <Space direction="vertical">
+                    <div>Usage: { (Number(clusterMetrics?.usage.storage)/1024/1024/1024).toFixed(2)} GB</div>
+                      <div>Allocatable: {(Number(clusterMetrics?.allocatable.storage)/1024/1024/1024).toFixed(2)} GB</div>
+                      <div>Capacity: {(Number(clusterMetrics?.capacity.storage)/1024/1024/1024).toFixed(2)} GB</div>
+                    </Space>
+                </Space>
+            </Card>
+          </Col>
+          <Col span={4}  style={{ marginBottom: 12 }}>
+          <Card title="Container Group (Default Limit)" hoverable
+              bodyStyle={{ textAlign: 'center',height:170,marginTop:0  }}
+              bordered={false}
+            >
+               <Space>
+                  <Progress  type="dashboard" percent={100}  success={{ percent: (Number(clusterMetrics?.usage.pods)/Number(clusterMetrics?.capacity.pods))*100 }} 
+                     format={() =>  clusterMetrics?.capacity.pods}   />
+                    <Space direction="vertical">
+                      <div>Capacity: {clusterMetrics?.capacity.pods}</div>
+                    </Space>
+                </Space>
+            </Card>
+          </Col>
+      
+        </Row>
+        <Row gutter={[18, 18]}>
+          <Col span={24}  style={{ marginBottom: 12 }}>
+            <Card title="Workloads Information" bordered={true}  >
+              <Row >
+                <Col span={3}>
+                <Card hoverable bodyStyle={{ textAlign: 'center' }} >
+                <Space>
+                  <Progress  type="dashboard" percent={100}  success={{ percent: (Number(workloadsMetrics?.podsRunning)/Number(workloadsMetrics?.podsCount))*100 }} 
+                    format={(percent) => 
+                      <Space direction="vertical" style={{fontSize:18}}>
+                          <span>Pods</span> 
+                          <span>{ workloadsMetrics?.podsRunning + '/' + workloadsMetrics?.podsCount  }</span> 
+                      </Space> }
+                    />
+                 </Space>  
+                 </Card>
+                </Col>
+                <Col span={3}>
+                <Card hoverable bodyStyle={{ textAlign: 'center' }} >
+                <Progress  type="circle" percent={100}   format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                        <span>Deployment</span> 
+                        <span>{workloadsMetrics?.deployment + '/' +workloadsMetrics?.deployment  }</span> 
+                    </Space>
+                } />
+                </Card>
+                </Col>
+                <Col span={3}>
+                <Card hoverable bodyStyle={{ textAlign: 'center' }} >
+                <Progress  type="circle" percent={100}    format={(percent) => 
+                  <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                  <span>StatefulSets</span> 
+                  <span>{workloadsMetrics?.statefulSets + '/' +workloadsMetrics?.statefulSets  }</span> 
+              </Space>
+                } />
+                </Card>
+                </Col>
+                <Col span={3}>
+                <Card hoverable bodyStyle={{ textAlign: 'center' }} >
+                <Progress  type="circle" percent={100}   format={(percent) => 
+                  <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                    <span>DaemonSets</span> 
+                    <span>{workloadsMetrics?.daemonSets + '/' +workloadsMetrics?.daemonSets  }</span> 
+                  </Space>
+                } />
+                </Card>             
+                </Col>
+                <Col span={3}>
+                <Card hoverable bodyStyle={{ textAlign: 'center' }} >
+                <Progress  type="circle" percent={100}  format={(percent) => 
+                  <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                    <span>CronJob</span> 
+                    <span>{workloadsMetrics?.cronJobs + '/' +workloadsMetrics?.cronJobs  }</span> 
+                  </Space>
+                } />              
+                </Card>
+                </Col>
+                <Col span={3}>
+                <Card hoverable bodyStyle={{ textAlign: 'center' }} >
+                <Progress  type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
+                  <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                    <span>Job</span> 
+                    <span>{workloadsMetrics?.jobs + '/' +workloadsMetrics?.jobs  }</span> 
+                  </Space>
+                } />            
+                </Card>  
+                </Col>
+                <Col span={3}>
+                <Card hoverable bodyStyle={{ textAlign: 'center' }} >
+                <Progress  type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
+                    <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                      <span>ReplicaSet</span> 
+                      <span>{workloadsMetrics?.replicaSets + '/' +workloadsMetrics?.replicaSets  }</span> 
+                    </Space>
+                } />    
+                </Card>       
+                </Col>
+              
+              </Row>
+            </Card>
           </Col>
         </Row>
-
-        <Suspense fallback={null}>
-          <OfflineData
-            activeKey={activeKey}
-            loading={loading}
-            offlineData={data?.offlineData || []}
-            offlineChartData={data?.offlineChartData || []}
-            handleTabChange={handleTabChange}
-          />
-        </Suspense>
-      </>
     </GridContent>
+
+
+    </PageContainer>
   );
 };
 
-export default Analysis;
+export default Workplace;
