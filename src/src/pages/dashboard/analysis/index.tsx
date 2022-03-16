@@ -6,7 +6,8 @@ const { Text } = Typography;
 const { TabPane } = Tabs;
 import { Link, useRequest } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
-import {  Liquid,Radar } from '@ant-design/charts';
+import {  Liquid } from '@ant-design/charts';
+import {RadialBar} from '@ant-design/plots'
 import { GridContent } from '@ant-design/pro-layout';
 import {ProFormSelect } from '@ant-design/pro-form';
 import styles from './style.less';
@@ -140,11 +141,72 @@ const Analysis: FC = () => {
   };
 
 
+ 
+  const data = [
+    {
+      name:'Nodes',
+      star: clusterMetrics?.nodes.count
+    },
+    {
+      name: 'ReplicaSets',
+      star:  workloadsMetrics?.replicaSets,
+    },
+    {
+      name: 'StatefulSets',
+      star:  workloadsMetrics?.statefulSets,
+    },
+    {
+      name: 'DaemonSets',
+      star:  workloadsMetrics?.daemonSets,
+    },
+    {
+      name: 'Deployment',
+      star: workloadsMetrics?.deployment,
+    },
+    {
+      name: 'Pods running',
+      star: workloadsMetrics?.podsRunning,
+    },
+    {
+      name: 'Pods',
+      star: workloadsMetrics?.podsCount,
+    },
 
+  ];
+  const config = {
+    data,
+    width:260, 
+    height:260,
+    xField: 'name',
+    yField: 'star',
+    maxAngle: 270,
+    radius: 0.8,
+    innerRadius: 0.2,
+    colorField: 'star',
+    color: ({ star }) => {
+      if (star > 20) {
+        return '#6349ec';
+      } else if (star > 10) {
+        return '#ff9300';
+      }
+      return '#ff93a7';
+    },
+    barBackground: {},
+    barStyle: {
+      lineCap: 'round',
+    },
+    label: {
+      style: {
+        fill: 'black',
+        opacity: 0.6,
+        fontSize: 12
+      },
+      rotate: true
+    },
+    shadowBlur: 10,
 
-
-
-
+  };
+  
   return (
     <PageContainer 
       header={{ title:'Welcome ', subTitle:"kubernetes base",extra:
@@ -160,17 +222,17 @@ const Analysis: FC = () => {
     <GridContent>
         <Row gutter={[16, 16]}>
           <Col  span={4}>
-            <Card title="Cluster Information"  hoverable 
-                bodyStyle={{ textAlign: 'center',height:270 }} bordered={false} >
-                  <Space direction="vertical">  
-                  <div>Cluster ID: {cluster}</div>
-                  <div>Cluster Version: v1.18.4 ++	</div>
-                  </Space>
+            <Card hoverable 
+                bodyStyle={{ textAlign: 'center',height:328 }} bordered={false} >
+              <Space direction="vertical">  
+              <RadialBar {...config} />
+              <div>Cluster ID: {cluster}</div>
+              </Space>
             </Card>
           </Col>
           <Col span={4} >
             <Card title="Node Information"  hoverable
-                bodyStyle={{ textAlign: 'center',height:270 }} bordered={false} >
+                bodyStyle={{ textAlign: 'center', height:270 }} bordered={false} >
                   <Space direction="vertical">
                     <Progress  type="dashboard" percent={100}  success={{ percent: (Number(clusterMetrics?.nodes.available)/ Number(clusterMetrics?.nodes.count)) *100 }}  format={() => clusterMetrics?.nodes.available +'/'+  clusterMetrics?.nodes.count }   />
                     <Space direction="vertical" >
