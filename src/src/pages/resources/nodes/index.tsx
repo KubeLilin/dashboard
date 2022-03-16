@@ -83,7 +83,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         render:(dom,row)=>(
             <Space direction="vertical" style={{ marginRight:30 }}>
             <Progress  percent={ Number(((row.usage.cpu /row.capacity.cpu)*100).toFixed(2))  } status="active" />
-            <Paragraph>CPU: { (row.allocatable.cpu).toFixed(2)} / {row.capacity.cpu.toFixed(2)} 核</Paragraph>
+            <Paragraph>CPU: { (row.usage.cpu).toFixed(2)} / {row.capacity.cpu.toFixed(2)} 核</Paragraph>
             </Space>
         ),
     },
