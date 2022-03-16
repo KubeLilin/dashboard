@@ -7,6 +7,7 @@ export type NodeItem = {
     containerRuntimeVersion: string,
     operatingSystem: string,
     architecture: string,
+    usage: NodeStatus,
     capacity: NodeStatus,
     allocatable: NodeStatus,
     addresses : NodeAddress[],
@@ -16,7 +17,8 @@ export type NodeItem = {
 export type NodeStatus  = {
     cpu : number,
     memory: number,
-    pods: number
+    pods: number,
+    storage:number
 }
 
 export type NodeAddress = {

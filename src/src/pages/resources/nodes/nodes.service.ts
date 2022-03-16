@@ -12,7 +12,7 @@ params: {
 }, 
 sort: Record<string, any>,
 options?: { [key: string]: any },)=> {
-    let resData=await request< ApiResponse<NodeItem[]>>("/v1/cluster/nodes",{
+    let resData=await request< ApiResponse<NodeItem[]>>("/v1/metrics/nodes",{
         method:'GET',
         params:params
     })

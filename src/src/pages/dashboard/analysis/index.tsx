@@ -1,8 +1,9 @@
 import type { FC } from 'react';
 import React, { useState, useEffect} from 'react';
 
-import { Avatar, Card, Col, List,Grid, Skeleton, Row, Statistic,Progress,Space,Button,Typography} from 'antd';
+import { Avatar, Card, Col, List,Grid, Skeleton, Row, Statistic,Progress,Space,Button,Typography,Tabs} from 'antd';
 const { Text } = Typography;
+const { TabPane } = Tabs;
 import { Link, useRequest } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import {  Liquid,Radar } from '@ant-design/charts';
@@ -12,7 +13,7 @@ import styles from './style.less';
 import { ClusterMetricsInfo,WorkloadsMetricsInfo,ProjectsMetricsInfo  } from './data';
 import { BindCluster , GetClusterMetrics ,GetWorkloadsMetrics ,GetProjectsMetrics} from './service'
 
-
+import Nodes from '../../resources/nodes'
 
 
 const Analysis: FC = () => {
@@ -69,24 +70,21 @@ const Analysis: FC = () => {
         </div>
         <div className={styles.content}>
           <div className={styles.contentTitle}>
-            KubeLilin
+            KubeLilin Dashbroad
           </div>
           <div>
-            An Cloud-Native application platform for Kubernetes.
+            KubeLilin is an PaaS Platform, An Cloud-Native Application Platform for Kubernetes.
           </div>
           <div>
-          <Space direction="horizontal"  style={{   textAlign:"start"}}>
-          <ProFormSelect name="clusters" label="集群列表:" width={270}
-            options={clusterList}
-            fieldProps={{ labelInValue:true,
-              value: clusterId,
-              onChange:async(val:any)=>{
-                clusterHandler(val.label)
-                clusterIdHandler(val.value)
-              }
-            }}   />  
-           
-            </Space> 
+              <ProFormSelect name="clusters" label="Cluster List:" width={270}
+                options={clusterList}
+                fieldProps={{ labelInValue:true,
+                  value: clusterId,
+                  onChange:async(val:any)=>{
+                    clusterHandler(val.label)
+                    clusterIdHandler(val.value)
+                  }
+                }} />  
           </div>
         </div>
       </div>
@@ -107,10 +105,54 @@ const Analysis: FC = () => {
     </div>
   );
 
+  const TableListContent: FC<Record<string, any>> = () => {
+  const [activeTabKey, setActiveTabKey] = useState('tab1');
+
+    const tabList = [
+      {
+        key: 'tab1',
+        tab: 'Node Usage Top',
+      },
+      {
+        key: 'tab2',
+        tab: 'Namespace Usage Top',
+      },
+    ];
+  
+    const TabContentList = {
+      tab1: <Nodes ClusterId={Number(clusterId)} />,
+      tab2: <p>content2</p>,
+    };
+
+
+     return ( 
+     <Card style={{ width: '100%' }}
+      title="Rsource Usage"
+      extra={<a href="#">Refresh</a>}
+      tabList={tabList}
+      activeTabKey={activeTabKey}
+      onTabChange={key => {
+        setActiveTabKey(key);
+      }}
+    >
+      {TabContentList[activeTabKey]}
+    </Card>)
+  };
+
+
+
+
+
 
 
   return (
-    <PageContainer
+    <PageContainer 
+      header={{ title:'Welcome ', subTitle:"kubernetes base",extra:
+        [<Button key="1" type="primary" onClick={()=>{
+          loadMetrics(clusterId)
+        }}>刷新</Button>,]
+      
+    }}
       content={ <PageHeaderContent currentUser={{userid: '00000001', }} /> }
       extraContent={<ExtraContent />}
     >
@@ -295,6 +337,9 @@ const Analysis: FC = () => {
               </Row>
             </Card>
           </Col>
+        </Row>
+        <Row>
+          <TableListContent/>
         </Row>
     </GridContent>
 
