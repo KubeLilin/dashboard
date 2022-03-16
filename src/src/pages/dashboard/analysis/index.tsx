@@ -1,7 +1,8 @@
 import type { FC } from 'react';
 import React, { useState, useEffect} from 'react';
 
-import { Avatar, Card, Col, List,Grid, Skeleton, Row, Statistic,Progress,Space,Button} from 'antd';
+import { Avatar, Card, Col, List,Grid, Skeleton, Row, Statistic,Progress,Space,Button,Typography} from 'antd';
+const { Text } = Typography;
 import { Link, useRequest } from 'umi';
 import { PageContainer } from '@ant-design/pro-layout';
 import {  Liquid,Radar } from '@ant-design/charts';
@@ -118,7 +119,7 @@ const Workplace: FC = () => {
         <Row gutter={[16, 16]}>
           <Col  span={4}>
             <Card title="Cluster Information"  hoverable 
-                bodyStyle={{ textAlign: 'center',height:170 }} bordered={false} >
+                bodyStyle={{ textAlign: 'center',height:270 }} bordered={false} >
                   <Space direction="vertical">  
                   <div>Cluster ID: {cluster}</div>
                   <div>Cluster Version: v1.18.4 ++	</div>
@@ -127,29 +128,45 @@ const Workplace: FC = () => {
           </Col>
           <Col span={4} >
             <Card title="Node Information"  hoverable
-                bodyStyle={{ textAlign: 'center',height:170 }} bordered={false} >
-                  <Space>
+                bodyStyle={{ textAlign: 'center',height:270 }} bordered={false} >
+                  <Space direction="vertical">
                     <Progress  type="dashboard" percent={100}  success={{ percent: (Number(clusterMetrics?.nodes.available)/ Number(clusterMetrics?.nodes.count)) *100 }}  format={() => clusterMetrics?.nodes.available +'/'+  clusterMetrics?.nodes.count }   />
-                    <Space direction="vertical" style={{ marginLeft:20 }}>
-                      <div>  On Realy: {clusterMetrics?.nodes.available}</div>
-                      <div>  All Nodes: {clusterMetrics?.nodes.count}</div>
+                    <Space direction="vertical" >
+                      <Text>Ready: {clusterMetrics?.nodes.available}</Text>
+                      <Text>All Nodes: {clusterMetrics?.nodes.count}</Text>
+                      <Text>Usage: - / - </Text>
                     </Space>
                   </Space>
                </Card>
           </Col>
+          <Col span={4}  style={{ marginBottom: 12 }}>
+          <Card title="Pods Limit" hoverable
+              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
+              bordered={false} >
+               <Space direction="vertical">
+                  <Progress  type="dashboard" percent={100}  success={{ percent: (Number(clusterMetrics?.usage.pods)/Number(clusterMetrics?.capacity.pods))*100 }} 
+                     format={() =>  clusterMetrics?.capacity.pods}   />
+                    <Space direction="vertical">
+                      <div>Capacity: {clusterMetrics?.capacity.pods}</div>
+                      <div>Limit: {clusterMetrics?.capacity.pods}</div>
+                      <div>Usage: - / - </div>
+                    </Space>
+                </Space>
+            </Card>
+          </Col>
           <Col span={4}  >
           <Card title="Total CPU (Core)" hoverable
-              bodyStyle={{ textAlign: 'center',height:170,marginTop:0  }} bordered={false} 
+              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }} bordered={false} 
             >
-                <Space>
+                <Space  direction="vertical">
                   <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.cpu)} value={Number(clusterMetrics?.usage.cpu)} forceFit padding={[0, 0, 0, 0]}
                   statistic={{
                     formatter: (value) => `${((Number(clusterMetrics?.usage.cpu)/Number(clusterMetrics?.capacity.cpu))*100).toFixed(2)}%`,
                   }} />
                     <Space direction="vertical">
-                      <div>Usage: { clusterMetrics?.usage.cpu.toFixed(2)} core</div>
-                      <div>Allocatable: {clusterMetrics?.allocatable.cpu.toFixed(2)} core</div>
-                      <div>Capacity: {clusterMetrics?.capacity.cpu.toFixed(2)} core</div>
+                      <div>Usage: { clusterMetrics?.usage.cpu.toFixed(2)}</div>
+                      <div>Allocatable: {clusterMetrics?.allocatable.cpu.toFixed(2)}</div>
+                      <div>Capacity: {clusterMetrics?.capacity.cpu.toFixed(2)}</div>
                     </Space>
                 </Space>
             </Card>
@@ -158,9 +175,9 @@ const Workplace: FC = () => {
 
           <Col span={4}>
           <Card title="Total Memory (GiB)" hoverable
-              bodyStyle={{ textAlign: 'center',height:170,marginTop:0  }}
+              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
               bordered={false} >
-                <Space>
+                <Space direction="vertical">
                   <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.memory)}
                   value={Number(clusterMetrics?.usage.memory)} forceFit padding={[0, 0, 0, 0]}
                   statistic={{
@@ -178,10 +195,10 @@ const Workplace: FC = () => {
 
           <Col span={4}  style={{ marginBottom: 12 }}>
           <Card title="Local Storage (GB)" hoverable
-              bodyStyle={{ textAlign: 'center',height:170,marginTop:0  }}
+              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
               bordered={false}
             >
-               <Space>
+               <Space direction="vertical">
                   <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.storage)}
                   value={Number(clusterMetrics?.usage.storage)} forceFit padding={[0, 0, 0, 0]}
                   statistic={{
@@ -195,32 +212,18 @@ const Workplace: FC = () => {
                 </Space>
             </Card>
           </Col>
-          <Col span={4}  style={{ marginBottom: 12 }}>
-          <Card title="Container Group (Default Limit)" hoverable
-              bodyStyle={{ textAlign: 'center',height:170,marginTop:0  }}
-              bordered={false}
-            >
-               <Space>
-                  <Progress  type="dashboard" percent={100}  success={{ percent: (Number(clusterMetrics?.usage.pods)/Number(clusterMetrics?.capacity.pods))*100 }} 
-                     format={() =>  clusterMetrics?.capacity.pods}   />
-                    <Space direction="vertical">
-                      <div>Capacity: {clusterMetrics?.capacity.pods}</div>
-                    </Space>
-                </Space>
-            </Card>
-          </Col>
-      
+ 
         </Row>
         <Row gutter={[18, 18]}>
           <Col span={24}  style={{ marginBottom: 12 }}>
             <Card title="Workloads Information" bordered={true}  >
               <Row >
-                <Col span={3}>
-                <Card hoverable bodyStyle={{ textAlign: 'center' }} >
+                <Col span={3} style={{marginLeft:12}}>
+                <Card hoverable bodyStyle={{ textAlign: 'center' }}  >
                 <Space>
                   <Progress  type="dashboard" percent={100}  success={{ percent: (Number(workloadsMetrics?.podsRunning)/Number(workloadsMetrics?.podsCount))*100 }} 
                     format={(percent) => 
-                      <Space direction="vertical" style={{fontSize:18}}>
+                      <Space direction="vertical" style={{fontSize:16}}>
                           <span>Pods</span> 
                           <span>{ workloadsMetrics?.podsRunning + '/' + workloadsMetrics?.podsCount  }</span> 
                       </Space> }
@@ -228,60 +231,60 @@ const Workplace: FC = () => {
                  </Space>  
                  </Card>
                 </Col>
-                <Col span={3}>
+                <Col span={3} style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}   format={(percent) => 
-                    <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                    <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
                         <span>Deployment</span> 
                         <span>{workloadsMetrics?.deployment + '/' +workloadsMetrics?.deployment  }</span> 
                     </Space>
                 } />
                 </Card>
                 </Col>
-                <Col span={3}>
+                <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}    format={(percent) => 
-                  <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                  <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
                   <span>StatefulSets</span> 
                   <span>{workloadsMetrics?.statefulSets + '/' +workloadsMetrics?.statefulSets  }</span> 
               </Space>
                 } />
                 </Card>
                 </Col>
-                <Col span={3}>
+                <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}   format={(percent) => 
-                  <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                  <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
                     <span>DaemonSets</span> 
                     <span>{workloadsMetrics?.daemonSets + '/' +workloadsMetrics?.daemonSets  }</span> 
                   </Space>
                 } />
                 </Card>             
                 </Col>
-                <Col span={3}>
+                <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}  format={(percent) => 
-                  <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                  <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
                     <span>CronJob</span> 
                     <span>{workloadsMetrics?.cronJobs + '/' +workloadsMetrics?.cronJobs  }</span> 
                   </Space>
                 } />              
                 </Card>
                 </Col>
-                <Col span={3}>
+                <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
-                  <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                  <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
                     <span>Job</span> 
                     <span>{workloadsMetrics?.jobs + '/' +workloadsMetrics?.jobs  }</span> 
                   </Space>
                 } />            
                 </Card>  
                 </Col>
-                <Col span={3}>
+                <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
-                    <Space direction="vertical" style={{fontSize:18,color:'ButtonText'}}>
+                    <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
                       <span>ReplicaSet</span> 
                       <span>{workloadsMetrics?.replicaSets + '/' +workloadsMetrics?.replicaSets  }</span> 
                     </Space>
