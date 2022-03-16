@@ -103,7 +103,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         render:(dom,row)=>(
             <Space direction="vertical" style={{ marginRight:30 }}>
             <Progress percent={ Number(((row.usage.storage /row.capacity.storage)*100).toFixed(2))  } status="active" />
-            <Paragraph>Storage: { (row.usage.storage/1024/1024/1024).toFixed(2)} / {(row.capacity.storage/1024/1024/1024).toFixed(2)} GB</Paragraph>
+            <Paragraph>存储: { (row.usage.storage/1024/1024/1024).toFixed(2)} / {(row.capacity.storage/1024/1024/1024).toFixed(2)} GB</Paragraph>
             </Space>
         ),
     },
