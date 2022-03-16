@@ -15,7 +15,7 @@ import { BindCluster , GetClusterMetrics ,GetWorkloadsMetrics ,GetProjectsMetric
 
 
 
-const Workplace: FC = () => {
+const Analysis: FC = () => {
   const [cluster, clusterHandler] = useState<string|undefined>(undefined);
   const [clusterId, clusterIdHandler] = useState<string|undefined>(undefined);
   const [clusterMetrics,clusterMetricsHandler] = useState<ClusterMetricsInfo|undefined>(undefined);
@@ -303,4 +303,4 @@ const Workplace: FC = () => {
   );
 };
 
-export default Workplace;
+export default Analysis;
