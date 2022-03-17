@@ -141,7 +141,7 @@ const Analysis: FC = () => {
       { name: 'Pods', star: workloadsMetrics?.podsCount },
     ], 
     xField: 'name', yField: 'star',
-    width:200,  height:200, autoFit:false,label: { style: { fill: 'black', opacity: 0.6, fontSize: 12 }, rotate: true },
+    width:165,  height:165, autoFit:false,label: { style: { fill: 'black', opacity: 0.6, fontSize: 12 }, rotate: true },
     maxAngle: 270, radius: 0.8, innerRadius: 0.2, colorField: 'star',barBackground: {}, barStyle: { lineCap: 'round', },
     color: ({star}) => {
       if (star > 20) { return '#6349ec' } else if (star > 10) { return '#ff9300' } return '#ff93a7';
@@ -235,8 +235,7 @@ const Analysis: FC = () => {
           <Col span={4}  style={{ marginBottom: 12 }}>
           <Card title="Local Storage (GB)" hoverable
               bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
-              bordered={false}
-            >
+              bordered={false} >
                <Space direction="vertical">
                   <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.storage)}
                   value={Number(clusterMetrics?.usage.storage)} forceFit padding={[0, 0, 0, 0]}
