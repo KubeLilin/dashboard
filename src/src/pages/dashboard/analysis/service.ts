@@ -1,6 +1,6 @@
 import { request } from 'umi';
 import { ApiResponse } from '@/services/public/service';
-import { ClusterMetricsInfo,WorkloadsMetricsInfo,ProjectsMetricsInfo  } from './data';
+import { ClusterMetricsInfo,WorkloadsMetricsInfo,ProjectsMetricsInfo,NamespcaeInfo  } from './data';
 
 
 export async function BindCluster() :Promise<{label: string,value: string}[]> {
@@ -34,4 +34,18 @@ export async function GetProjectsMetrics( )  {
       method: 'GET',
   })
   return resData
+}
+
+
+
+export async function GetNameSpaceList(clusterId:number,tentantName:string,pageIndex:number,pageSize:number) {
+  let resData = await request<any>("/v1/cluster/namespacelist", {
+      method: 'GET',
+      params:{'cid':clusterId , 'tenant': tentantName , 'current': pageIndex, 'pageSize':pageSize }
+  })
+  return { 
+      data: resData.data.data,
+      success : resData.success,
+      total : resData.data.total,
+  }
 }

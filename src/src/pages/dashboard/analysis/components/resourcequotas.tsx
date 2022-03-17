@@ -1,0 +1,77 @@
+import React, { useState, useEffect} from 'react';
+import { Progress,Space,Typography } from 'antd';
+const { Paragraph } = Typography;
+
+import ProTable, { ProColumns } from '@ant-design/pro-table';
+import { GetNameSpaceList } from '../service'
+import { NamespcaeInfo } from '../data'
+
+interface Props{
+    ClusterId:number,
+}
+
+const ResourceQuotas:React.FC<Props> = (props:Props) => { 
+    const NamespcaeColumns: ProColumns<NamespcaeInfo>[] = [
+        {
+            width:300,
+            title: '租户',
+            dataIndex: 'tenantName',
+            search:false
+        },
+        {
+            width:300,
+            title: '命名空间',
+            dataIndex: 'namespace',
+            search:false
+        },
+        {
+            width:300,
+            title: 'CPU配额',
+            render:(_,row)=>(
+                <Space direction="vertical" style={{ marginRight:30 ,width:300}}>
+                    <Progress   percent={Number(((row.quotasSpec[0].usedValue / row.quotasSpec[0].limitValue) * 100).toFixed(1)) } status="active" />
+                    <Paragraph style={{ marginRight:5 }}>CPU: { row.quotasSpec[0].displayUsedValue} / {row.quotasSpec[0].displayValue} 核</Paragraph>
+                </Space>
+            )
+        },
+        {
+            width:300,
+            title: '内存配额',
+            render:(_,row)=>(
+                <Space direction="vertical" style={{ marginRight:30 ,width:300}}>
+                <Progress percent={Number(((row.quotasSpec[1].usedValue / row.quotasSpec[1].limitValue) * 100).toFixed(1)) } status="active" />
+                <Paragraph style={{ marginRight:5 }}>{ row.quotasSpec[1].displayUsedValue} / {row.quotasSpec[1].displayValue} </Paragraph>
+                </Space>
+            )
+        },
+        {
+            width:300,
+            title: 'Pods配额',
+            render:(_,row)=>(
+                <Space direction="vertical" style={{ marginRight:30 ,width:300}}>
+                <Progress percent={Number(((row.quotasSpec[2].usedValue / row.quotasSpec[2].limitValue) * 100).toFixed(1)) } status="active" />
+                <Paragraph style={{ marginRight:5 }}>{ row.quotasSpec[2].displayUsedValue} / {row.quotasSpec[2].displayValue} </Paragraph>
+                </Space>
+            )
+        },
+    ]
+    
+
+
+
+    return(
+        <ProTable<NamespcaeInfo>
+            columns={NamespcaeColumns}
+            toolBarRender={false}
+            rowKey="id"
+            search={false}
+            request={async (params, sort) => { 
+                return await GetNameSpaceList(props.ClusterId,params.tenantName,Number(params.current),Number(params.pageSize))
+            }} >
+
+        </ProTable>
+    )
+}
+
+
+export default ResourceQuotas;

@@ -13,9 +13,8 @@ import {ProFormSelect } from '@ant-design/pro-form';
 import styles from './style.less';
 import { ClusterMetricsInfo,WorkloadsMetricsInfo,ProjectsMetricsInfo  } from './data';
 import { BindCluster , GetClusterMetrics ,GetWorkloadsMetrics ,GetProjectsMetrics} from './service'
-
 import Nodes from '../../resources/nodes'
-
+import ResourceQuotas from './components/resourcequotas'
 
 const Analysis: FC = () => {
   const [cluster, clusterHandler] = useState<string|undefined>(undefined);
@@ -81,7 +80,7 @@ const Analysis: FC = () => {
                 options={clusterList}
                 fieldProps={{ labelInValue:true,
                   value: clusterId,
-                  onChange:async(val:any)=>{
+                    onChange:async(val:any)=>{
                     clusterHandler(val.label)
                     clusterIdHandler(val.value)
                   }
@@ -107,104 +106,46 @@ const Analysis: FC = () => {
   );
 
   const TableListContent: FC<Record<string, any>> = () => {
-  const [activeTabKey, setActiveTabKey] = useState('tab1');
+      const [activeTabKey, setActiveTabKey] = useState('tab1')
 
-    const tabList = [
-      {
-        key: 'tab1',
-        tab: 'Node Usage Top',
-      },
-      {
-        key: 'tab2',
-        tab: 'Namespace Usage Top',
-      },
-    ];
-  
-    const TabContentList = {
-      tab1: <Nodes ClusterId={Number(clusterId)} />,
-      tab2: <p>content2</p>,
-    };
-
-
-     return ( 
-     <Card style={{ width: '100%' }}
-      title="Rsource Usage"
-      extra={<a href="#">Refresh</a>}
-      tabList={tabList}
-      activeTabKey={activeTabKey}
-      onTabChange={key => {
-        setActiveTabKey(key);
-      }}
-    >
-      {TabContentList[activeTabKey]}
-    </Card>)
-  };
-
-
- 
-  const data = [
-    {
-      name:'Nodes',
-      star: clusterMetrics?.nodes.count
-    },
-    {
-      name: 'ReplicaSets',
-      star:  workloadsMetrics?.replicaSets,
-    },
-    {
-      name: 'StatefulSets',
-      star:  workloadsMetrics?.statefulSets,
-    },
-    {
-      name: 'DaemonSets',
-      star:  workloadsMetrics?.daemonSets,
-    },
-    {
-      name: 'Deployment',
-      star: workloadsMetrics?.deployment,
-    },
-    {
-      name: 'Pods running',
-      star: workloadsMetrics?.podsRunning,
-    },
-    {
-      name: 'Pods',
-      star: workloadsMetrics?.podsCount,
-    },
-
-  ];
-  const config = {
-    data,
-    width:260, 
-    height:260,
-    xField: 'name',
-    yField: 'star',
-    maxAngle: 270,
-    radius: 0.8,
-    innerRadius: 0.2,
-    colorField: 'star',
-    color: ({ star }) => {
-      if (star > 20) {
-        return '#6349ec';
-      } else if (star > 10) {
-        return '#ff9300';
+      const tabList = [ { key: 'tab1', tab: 'Node Usage Top'  },
+          { key: 'tab2', tab: 'Namespace Usage Top' }, ]
+      
+      const TabContentList = {
+        tab1: <Nodes ClusterId={Number(clusterId)} />,
+        tab2: <ResourceQuotas ClusterId={Number(clusterId)} />,
       }
-      return '#ff93a7';
-    },
-    barBackground: {},
-    barStyle: {
-      lineCap: 'round',
-    },
-    label: {
-      style: {
-        fill: 'black',
-        opacity: 0.6,
-        fontSize: 12
-      },
-      rotate: true
-    },
-    shadowBlur: 10,
 
+      return ( 
+        <Card style={{ width: '100%' }}
+          title="Rsource Usage"
+          extra={<a href="#">Refresh</a>}
+          tabList={tabList}
+          activeTabKey={activeTabKey}
+          onTabChange={key => {
+            setActiveTabKey(key);
+          }}
+        >
+          {TabContentList[activeTabKey]}
+        </Card>)
+  };
+  
+  const radialBarConfig = {
+    data:[
+      { name:'Nodes', star: clusterMetrics?.nodes.count },
+      { name: 'ReplicaSets', star:  workloadsMetrics?.replicaSets },
+      { name: 'StatefulSets',star:  workloadsMetrics?.statefulSets },
+      { name: 'DaemonSets', star:  workloadsMetrics?.daemonSets },
+      { name: 'Deployment', star: workloadsMetrics?.deployment },
+      { name: 'Pods running', star: workloadsMetrics?.podsRunning },
+      { name: 'Pods', star: workloadsMetrics?.podsCount },
+    ], 
+    xField: 'name', yField: 'star',
+    width:200,  height:200, autoFit:false,label: { style: { fill: 'black', opacity: 0.6, fontSize: 12 }, rotate: true },
+    maxAngle: 270, radius: 0.8, innerRadius: 0.2, colorField: 'star',barBackground: {}, barStyle: { lineCap: 'round', },
+    color: ({star}) => {
+      if (star > 20) { return '#6349ec' } else if (star > 10) { return '#ff9300' } return '#ff93a7';
+    },
   };
   
   return (
@@ -212,21 +153,17 @@ const Analysis: FC = () => {
       header={{ title:'Welcome ', subTitle:"kubernetes base",extra:
         [<Button key="1" type="primary" onClick={()=>{
           loadMetrics(clusterId)
-        }}>刷新</Button>,]
-      
-    }}
+        }}>刷新</Button>,] }}
       content={ <PageHeaderContent currentUser={{userid: '00000001', }} /> }
-      extraContent={<ExtraContent />}
-    >
-    
+      extraContent={<ExtraContent />} >
     <GridContent>
         <Row gutter={[16, 16]}>
-          <Col  span={4}>
-            <Card hoverable 
-                bodyStyle={{ textAlign: 'center',height:328 }} bordered={false} >
-              <Space direction="vertical">  
-              <RadialBar {...config} />
-              <div>Cluster ID: {cluster}</div>
+          <Col span={4}>
+            <Card hoverable title="Overview" 
+                bodyStyle={{ textAlign: 'center',height:270 }} bordered={true} >
+              <Space direction="vertical" style={{ marginTop:0 }}>  
+                <RadialBar {...radialBarConfig} />
+                <div>Cluster ID: {cluster}</div>
               </Space>
             </Card>
           </Col>
@@ -260,8 +197,7 @@ const Analysis: FC = () => {
           </Col>
           <Col span={4}  >
           <Card title="Total CPU (Core)" hoverable
-              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }} bordered={false} 
-            >
+              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }} bordered={false}  >
                 <Space  direction="vertical">
                   <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.cpu)} value={Number(clusterMetrics?.usage.cpu)} forceFit padding={[0, 0, 0, 0]}
                   statistic={{
@@ -274,7 +210,6 @@ const Analysis: FC = () => {
                     </Space>
                 </Space>
             </Card>
-          
           </Col>
 
           <Col span={4}>
