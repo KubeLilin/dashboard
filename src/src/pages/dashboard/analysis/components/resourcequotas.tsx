@@ -13,13 +13,13 @@ interface Props{
 const ResourceQuotas:React.FC<Props> = (props:Props) => { 
     const NamespcaeColumns: ProColumns<NamespcaeInfo>[] = [
         {
-            width:300,
+            width:240,
             title: '租户',
             dataIndex: 'tenantName',
             search:false
         },
         {
-            width:300,
+            width:240,
             title: '命名空间',
             dataIndex: 'namespace',
             search:false
@@ -40,7 +40,7 @@ const ResourceQuotas:React.FC<Props> = (props:Props) => {
             render:(_,row)=>(
                 <Space direction="vertical" style={{ marginRight:30 ,width:300}}>
                 <Progress percent={Number(((row.quotasSpec[1].usedValue / row.quotasSpec[1].limitValue) * 100).toFixed(1)) } status="active" />
-                <Paragraph style={{ marginRight:5 }}>{ row.quotasSpec[1].displayUsedValue} / {row.quotasSpec[1].displayValue} </Paragraph>
+                <Paragraph style={{ marginRight:5 }}>内存: { row.quotasSpec[1].displayUsedValue} / {row.quotasSpec[1].displayValue} </Paragraph>
                 </Space>
             )
         },
@@ -50,7 +50,7 @@ const ResourceQuotas:React.FC<Props> = (props:Props) => {
             render:(_,row)=>(
                 <Space direction="vertical" style={{ marginRight:30 ,width:300}}>
                 <Progress percent={Number(((row.quotasSpec[2].usedValue / row.quotasSpec[2].limitValue) * 100).toFixed(1)) } status="active" />
-                <Paragraph style={{ marginRight:5 }}>{ row.quotasSpec[2].displayUsedValue} / {row.quotasSpec[2].displayValue} </Paragraph>
+                <Paragraph style={{ marginRight:5 }}>Pods数量: { row.quotasSpec[2].displayUsedValue} / {row.quotasSpec[2].displayValue} </Paragraph>
                 </Space>
             )
         },
