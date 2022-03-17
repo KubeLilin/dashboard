@@ -4,7 +4,7 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm, { ModalForm, ProFormInstance } from '@ant-design/pro-form';
 import { history, Link,useModel } from 'umi';
 import { PodItem, ContainerItem, podLogsRequest } from './data';
-import { Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, Input, notification, Radio } from 'antd'
+import { Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, notification, Radio } from 'antd'
 import { getPodList, getNamespaceList, setReplicasByDeployId, 
     GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , DeleteDeployment } from './service'
 import React, { useState, useRef, useEffect } from 'react';
@@ -137,9 +137,23 @@ const Pods: React.FC = (props) => {
             }
         },
         {
-            title: '创建时间',
-            dataIndex: 'startTime',
+            title: '性能',
             search: false,
+            render: (_, row) => {
+                return <span style={{color:'green'}}>CPU:{(row.usage.cpu * 1000).toFixed(1)}m / 内存:{(row.usage.memory / 1024/1024).toFixed(1)} Mi</span>
+            }
+        },
+        {
+            title: '创建时间',
+            search: false,
+            render:(_,row)=>{
+                const seconds = Math.round(Number(row.age) / 1000/1000/1000)
+                var hh =  Math.round(seconds/3600)
+                if (hh >1) { hh = hh-1 }
+                const mm = Math.round((seconds%3600)/60)
+                const ss = Math.round(seconds%60)
+                return <Tooltip title={  (hh>0?hh+'小时':'') +  (mm>0?mm+'分钟':'') + (ss>0?ss+'秒':'0s')}><a href='#'>{row.startTime}</a> </Tooltip> 
+            },
         },
         {
             title: '操作',
