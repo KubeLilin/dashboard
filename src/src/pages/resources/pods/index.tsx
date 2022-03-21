@@ -137,7 +137,7 @@ const Pods: React.FC = (props) => {
             }
         },
         {
-            title: '性能',
+            title: '性能(使用率)',
             search: false,
             render: (_, row) => {
                 return <span style={{color:'green'}}>CPU:{(row.usage.cpu * 1000).toFixed(1)}m / 内存:{(row.usage.memory / 1024/1024).toFixed(1)} Mi</span>
