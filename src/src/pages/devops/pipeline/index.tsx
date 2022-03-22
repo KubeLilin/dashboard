@@ -42,6 +42,7 @@ const Pipeline : React.FC = () => {
         { name:'编译构建',key:'code_build' ,save:false},
         { name:'命令执行',key:'cmd_shell' ,save:false},
         { name:'应用部署',key:'app_deploy' ,save:false},
+        { name:'发布通知',key:'publish_notify' ,save:false},
     ]
 
     if (!initStages) {
@@ -68,7 +69,7 @@ const Pipeline : React.FC = () => {
             {
                 name: '通知',
                 steps:[
-                    { name:'命令执行',key:'cmd_shell',save:false },            ]
+                    { name:'命令执行',key:'publish_notify',save:false },            ]
             }
         ]
     }
@@ -89,6 +90,7 @@ const Pipeline : React.FC = () => {
     const buildForm =  useRef<ProFormInstance>();
     const shellForm =  useRef<ProFormInstance>();
     const deployForm =  useRef<ProFormInstance>();
+    const notifyForm = useRef<ProFormInstance>();
 
     useEffect(()=>{
         console.log("page loaded: pipeline id="+ PipelineId)
@@ -203,6 +205,9 @@ const Pipeline : React.FC = () => {
                 case "app_deploy":
                     currentForm = deployForm    
                     break
+                case "publish_notify":
+                    currentForm = notifyForm
+                    break
                 }
                 currentForm?.current?.resetFields()
                 currentForm?.current.setFieldsValue(currentSetpItem.content)
@@ -299,7 +304,7 @@ const Pipeline : React.FC = () => {
                                 <span style={{fontSize:16}}>步骤: { getCurrentStep(currentStageSetpIndex)?.name }  (每个步骤必须保存才能生效) </span>
                                 <Divider />
 
-                                <div id="git_pull" style={{ display:allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="git_pull"?"block":"none" :"none" }}  >
+                                <div id="git_pull" style={{ display:allStages.length>0&&allStages[currentStageIndex].steps.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="git_pull"?"block":"none" :"none" }}  >
                                     <ProForm onValuesChange={onFormValuesChanged} formRef={gitForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }}
                                      onFinish={onFormSave} >
                                         <ProForm.Item name="git" >
@@ -319,7 +324,7 @@ const Pipeline : React.FC = () => {
                                         </ProForm.Item>
                                     </ProForm>  
                                 </div>
-                                <div id="code_build" style={{ display: allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="code_build"?"block":"none" :"none"}}>
+                                <div id="code_build" style={{ display: allStages.length>0&&allStages[currentStageIndex].steps.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="code_build"?"block":"none" :"none"}}>
                                     <ProForm onValuesChange={onFormValuesChanged} formRef={buildForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                         onFinish={onFormSave} >
                                     <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"} rules={[{ required: true, message: '请选择构建环境' }]}>
@@ -355,7 +360,7 @@ const Pipeline : React.FC = () => {
                                     </ProForm>  
                                     
                                 </div>
-                                <div id="cmd_shell" style={{ display: allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="cmd_shell"?"block":"none":"none" }}>
+                                <div id="cmd_shell" style={{ display: allStages.length>0&&allStages[currentStageIndex].steps.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="cmd_shell"?"block":"none":"none" }}>
                                 <ProForm onValuesChange={onFormValuesChanged} formRef={shellForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                   onFinish={onFormSave} >
                                     <ProForm.Item name="shell" initialValue={"# bash"} rules={[{ required: true, message: '请填写命令行' }]}  >
@@ -365,7 +370,7 @@ const Pipeline : React.FC = () => {
                                 </ProForm>
                                 </div>
                    
-                                <div id="app_deploy" style={{ display: allStages.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="app_deploy"?"block":"none":"none" }}>
+                                <div id="app_deploy" style={{ display: allStages.length>0&&allStages[currentStageIndex].steps.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="app_deploy"?"block":"none":"none" }}>
                                 <ProForm onValuesChange={onFormValuesChanged} formRef={deployForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                   onFinish={onFormSave} >
                                     <ProForm.Item name="depolyment" rules={[{ required: true, message: '请选择部署环境' }]}>
@@ -376,6 +381,19 @@ const Pipeline : React.FC = () => {
                                     </ProForm.Item>
                                 </ProForm>                                
                                 </div>
+
+                                <div id="publish_notify" style={{ display: allStages.length>0&&allStages[currentStageIndex].steps.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="publish_notify"?"block":"none":"none" }}>
+                                <ProForm onValuesChange={onFormValuesChanged} formRef={notifyForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
+                                  onFinish={onFormSave} >
+                                    <ProForm.Item name="notifyType" rules={[{ required: true, message: '请选择通知类型' }]}>
+                                        <ProFormSelect label="通知类型" width="md" options={[{label:'企业微信机器人',value:'wechat'},{label:'钉钉机器人',value:'dingtalk'}]}  ></ProFormSelect>
+                                    </ProForm.Item>
+                                    <ProForm.Item  name="notifyKey" rules={[{ required: true, message: '请填写通知标示' }]}>
+                                         <ProFormText label="通知标示" width="md" ></ProFormText>
+                                    </ProForm.Item>
+                                </ProForm>                                
+                                </div>
+
                             </ProCard>
                         </ProCard>
                     </ProCard>
