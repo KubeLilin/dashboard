@@ -147,3 +147,10 @@ export async function GetPipelineLogs(appId:number,pipelineId:number,taskId:numb
     })
     return resData
 }
+
+export async function GetNotifications() {
+    let resData = await request<ApiResponse<{label:string,value:string}[]>>("/v1/deployment/notifications",{
+        method:'GET'
+    })
+    return resData
+}
