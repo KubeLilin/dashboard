@@ -57,7 +57,6 @@ const Pipeline : React.FC = () => {
                name: '编译构建',
                steps:[
                    { name:'编译命令',key:'code_build',save:false },
-                   { name:'命令执行',key:'cmd_shell' ,save:false},
                ]
             },
             {
@@ -69,7 +68,7 @@ const Pipeline : React.FC = () => {
             {
                 name: '通知',
                 steps:[
-                    { name:'命令执行',key:'publish_notify',save:false },            ]
+                    { name:'通知',key:'publish_notify',save:false },            ]
             }
         ]
     }

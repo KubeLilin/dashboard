@@ -123,6 +123,22 @@ export async function RunPipeline(pipelineId:number, appId:number) {
     return resData
 }
 
+export async function AbortPipeline(pipelineId:number, appId:number,taskId:number) {
+    let resData = await request<ApiResponse<number>>("/v1/application/abortpipeline",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: {
+            id: pipelineId,
+            appid: appId,
+            taskId: taskId
+        }
+    })
+    return resData
+}
+
+
 export async function GetPipelineDetails(appId:number,pipelineId:number,taskId:number) {
     let resData = await request<ApiResponse<any>>("/v1/application/pipelinedetails",{
         method:'GET',
