@@ -13,7 +13,7 @@ const { confirm } = Modal;
 import ProDescriptions from '@ant-design/pro-descriptions';
 
 
-import { NewPipeline,GetPipelineList,RunPipeline,AbortPipeline,
+import { NewPipeline,GetPipelineList,RunPipeline,AbortPipeline,DeletePipeline,
         GetPipelineDetails,GetPipelineLogs } from '../info/deployment.service'
 
 
@@ -203,20 +203,26 @@ const AppBuildList : React.FC<Props> = (props) => {
                                 <Tooltip title="more"> <Dropdown.Button overlay={
                                     <Menu onClick={async(e)=>{
                                         if (e.key == 'stop') {
-                                            confirm({
-                                                title:'确定要停止正在运行的任务吗？',
-                                                onOk(){
-                                                    if(item.lastBuildRecords?.task){
-                                                        AbortPipeline(item.id,props.AppId,Number(item.lastBuildRecords?.task))
-                                                        .then((res)=>{
-                                                            if(res.data) {
-                                                                message.success('已停止！')
-                                                            }
-                                                        })
-                                                       
+                                            confirm({ title:'确定要停止正在运行的任务吗？',
+                                                    onOk(){
+                                                        if(item.lastBuildRecords?.task){
+                                                            AbortPipeline(item.id,props.AppId,Number(item.lastBuildRecords?.task))
+                                                            .then((res)=>{
+                                                                if(res.data) {
+                                                                    message.success('已停止！')
+                                                                }
+                                                            })
+                                                        }
+                                                    } })
+                                        } else if (e.key == 'delete') {
+                                            confirm({ title:`确定删除${item.title}流水线吗？`, onOk(){
+                                                DeletePipeline(item.id)
+                                                .then((res)=>{
+                                                    if(res.data) {
+                                                        message.success(item.title+'已删除！')
                                                     }
-                                                }
-                                            })
+                                                })
+                                            }})
                                         }
 
                                         e.domEvent.stopPropagation()

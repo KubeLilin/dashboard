@@ -138,6 +138,14 @@ export async function AbortPipeline(pipelineId:number, appId:number,taskId:numbe
     return resData
 }
 
+export async function DeletePipeline(pipelineId:number) {
+    let resData = await request<ApiResponse<any>>("/v1/application/pipeline",{
+        method:'DELETE',
+        params:{ id: pipelineId } 
+    })
+    return resData
+}
+
 
 export async function GetPipelineDetails(appId:number,pipelineId:number,taskId:number) {
     let resData = await request<ApiResponse<any>>("/v1/application/pipelinedetails",{
