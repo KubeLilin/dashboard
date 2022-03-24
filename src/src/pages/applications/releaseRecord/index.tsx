@@ -32,6 +32,11 @@ const ReleaseRecord: React.FC<Props> = (props) => {
             hideInSearch: true,
         },
         {
+            title: '环境级别',
+            dataIndex: 'level',
+            hideInSearch: true,
+        },
+        {
             title: '部署环境',
             dataIndex: 'dpId',
             hideInTable: true,
@@ -46,7 +51,8 @@ const ReleaseRecord: React.FC<Props> = (props) => {
             valueEnum: {
                 manual: '手动触发',
                 githook: 'GIT触发',
-                rollback:'人为回滚'
+                rollback:'人为回滚',
+                undefined:'自动触发',
             }
         },
         {
@@ -108,7 +114,6 @@ const ReleaseRecord: React.FC<Props> = (props) => {
     }
 
     return (
-        <PageContainer>
             <ProTable columns={columns}
                 request={async (params, sort) => {
                     params.appId = props.AppId
@@ -118,7 +123,6 @@ const ReleaseRecord: React.FC<Props> = (props) => {
                 actionRef={ref}
             >
             </ProTable>
-        </PageContainer>
 
 
     )
