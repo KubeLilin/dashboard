@@ -62,7 +62,6 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         {
             title: '环境名称',
             dataIndex: 'nickname',
-            width: 250,
             render: (_, row) => {
                 return <span>
                     <Paragraph><Link to={{ pathname:'/resources/pods' ,  search: '?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId + '&ns=' + row.namespace ,  state:row } }  >{row.name}</Link></Paragraph>
@@ -97,7 +96,6 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         {
             title: '镜像(last)',
             dataIndex: 'lastImage',
-            width: 450,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
@@ -117,7 +115,6 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         {
             title: '服务名/IP',
             dataIndex: 'serviceIP',
-            width: 350,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
@@ -131,6 +128,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         },
         {
             title: '操作',
+            width: 200,
             valueType: 'option',
             render: (dom, record, _, action) => [
                 <Button key="depoly"   icon={<CloudUploadOutlined />} onClick={() => {

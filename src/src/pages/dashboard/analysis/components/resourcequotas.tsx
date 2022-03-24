@@ -4,14 +4,14 @@ const { Paragraph } = Typography;
 
 import ProTable, { ProColumns } from '@ant-design/pro-table';
 import { GetNameSpaceList } from '../service'
-import { NamespcaeInfo } from '../data'
+import { NamespaceInfo } from '../data'
 
 interface Props{
     ClusterId:number,
 }
 
 const ResourceQuotas:React.FC<Props> = (props:Props) => { 
-    const NamespcaeColumns: ProColumns<NamespcaeInfo>[] = [
+    const NamespaceColumns: ProColumns<NamespaceInfo>[] = [
         {
             width:240,
             title: '租户',
@@ -60,8 +60,8 @@ const ResourceQuotas:React.FC<Props> = (props:Props) => {
 
 
     return(
-        <ProTable<NamespcaeInfo>
-            columns={NamespcaeColumns}
+        <ProTable<NamespaceInfo>
+            columns={NamespaceColumns}
             toolBarRender={false}
             rowKey="id"
             search={false}

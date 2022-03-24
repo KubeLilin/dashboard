@@ -11,7 +11,7 @@ export type TenantTableListPagination = {
     pageIndex: number;
   };
 
-export type NamespcaeInfo={
+export type NamespaceInfo={
   id : number,
   tenantId:number,
 	clusterId: number,
@@ -19,8 +19,16 @@ export type NamespcaeInfo={
 	clusterName :string,
 	namespace :string,
 	tenantName:string,
+  quotasSpec: QuotasSpec[]
 }
 
+export type QuotasSpec = {
+	name:string ,
+	displayValue:string  ,
+	displayUsedValue:string  ,
+	limitValue:number   ,
+	usedValue:number   ,
+}
 
 export type NewQuota = {
   namespace: string,
