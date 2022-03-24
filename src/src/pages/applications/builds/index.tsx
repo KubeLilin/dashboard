@@ -1,5 +1,5 @@
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
-import {List,Card ,Tooltip,Button,Space,Empty,Tag,Modal } from 'antd'
+import {List,Card ,Tooltip,Button,Space,Empty,Tag,Modal,Dropdown,Menu, message } from 'antd'
 import { SettingOutlined,EditOutlined ,CloseCircleTwoTone,SyncOutlined,CheckCircleOutlined,CloseCircleOutlined,
     EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone,ReloadOutlined,ExclamationCircleOutlined} from '@ant-design/icons'
 
@@ -13,7 +13,7 @@ const { confirm } = Modal;
 import ProDescriptions from '@ant-design/pro-descriptions';
 
 
-import { NewPipeline,GetPipelineList,RunPipeline,
+import { NewPipeline,GetPipelineList,RunPipeline,AbortPipeline,DeletePipeline,
         GetPipelineDetails,GetPipelineLogs } from '../info/deployment.service'
 
 
@@ -200,9 +200,37 @@ const AppBuildList : React.FC<Props> = (props) => {
                                 <Tooltip title="设置"><SettingOutlined onClick={()=>{ 
                                     history.push(`/devops/pipeline?id=${item.id}&name=${item.title}&appid=${props.AppId}&appname=${props.AppName}`)
                                 }} key="setting" style={{ fontSize:23}}  /></Tooltip>,
-                                <Tooltip title="more"><EllipsisOutlined onClick={()=>{ 
-                                    console.log('more')  
-                                }} key="ellipsis" style={{ fontSize:23}} /></Tooltip>,
+                                <Tooltip title="more"> <Dropdown.Button overlay={
+                                    <Menu onClick={async(e)=>{
+                                        if (e.key == 'stop') {
+                                            confirm({ title:'确定要停止正在运行的任务吗？',
+                                                    onOk(){
+                                                        if(item.lastBuildRecords?.task){
+                                                            AbortPipeline(item.id,props.AppId,Number(item.lastBuildRecords?.task))
+                                                            .then((res)=>{
+                                                                if(res.data) {
+                                                                    message.success('已停止！')
+                                                                }
+                                                            })
+                                                        }
+                                                    } })
+                                        } else if (e.key == 'delete') {
+                                            confirm({ title:`确定删除${item.title}流水线吗？`, onOk(){
+                                                DeletePipeline(item.id)
+                                                .then((res)=>{
+                                                    if(res.data) {
+                                                        message.success(item.title+'已删除！')
+                                                    }
+                                                })
+                                            }})
+                                        }
+
+                                        e.domEvent.stopPropagation()
+                                    }}>
+                                        <Menu.Item key="stop"><span style={{color:'blue'}}>停止此任务</span></Menu.Item>
+                                        <Menu.Item key="delete"><span style={{color:'red'}}>删除流水线</span></Menu.Item>
+                                    </Menu>
+                                } ></Dropdown.Button> </Tooltip>,
                             ]}> 
                             
                             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}  style={{ height:30, display: !item.lastBuildRecords?'block':'none' }}>

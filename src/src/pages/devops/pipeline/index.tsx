@@ -15,7 +15,7 @@ import ProForm, {
 const { TabPane } = Tabs;
 const { Content } = Layout;
 
-import { getDeploymentList,GetAppGitBranches,GetBuildScripts, SavePipeline, GetPipelineById  } from '../../applications/info/deployment.service'
+import { getDeploymentList,GetAppGitBranches,GetBuildScripts, SavePipeline, GetPipelineById ,GetNotifications  } from '../../applications/info/deployment.service'
 import { StageItem, StepItem } from './data'
 
 var buildScriptList:any
@@ -57,7 +57,6 @@ const Pipeline : React.FC = () => {
                name: '编译构建',
                steps:[
                    { name:'编译命令',key:'code_build',save:false },
-                   { name:'命令执行',key:'cmd_shell' ,save:false},
                ]
             },
             {
@@ -69,7 +68,7 @@ const Pipeline : React.FC = () => {
             {
                 name: '通知',
                 steps:[
-                    { name:'命令执行',key:'publish_notify',save:false },            ]
+                    { name:'通知',key:'publish_notify',save:false },            ]
             }
         ]
     }
@@ -386,7 +385,9 @@ const Pipeline : React.FC = () => {
                                 <ProForm onValuesChange={onFormValuesChanged} formRef={notifyForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                   onFinish={onFormSave} >
                                     <ProForm.Item name="notifyType" rules={[{ required: true, message: '请选择通知类型' }]}>
-                                        <ProFormSelect label="通知类型" width="md" options={[{label:'企业微信机器人',value:'wechat'},{label:'钉钉机器人',value:'dingtalk'}]}  ></ProFormSelect>
+                                        <ProFormSelect label="通知类型" width="md"  
+                                            request={async()=>(await GetNotifications()).data }
+                                         ></ProFormSelect>
                                     </ProForm.Item>
                                     <ProForm.Item  name="notifyKey" rules={[{ required: true, message: '请填写通知标示' }]}>
                                          <ProFormText label="通知标示" width="md" ></ProFormText>
