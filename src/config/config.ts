@@ -161,6 +161,11 @@ export default defineConfig({
           path: "/devops/pipeline",
           component:"./devops/pipeline"
         },
+        {
+          name: "projects",
+          path: "/devops/projects",
+          component:"./devops/projects"
+        },
       ]
     },
     {

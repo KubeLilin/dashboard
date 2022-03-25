@@ -8,8 +8,8 @@ import ProCard from '@ant-design/pro-card';
 import { Select, Input, Checkbox, Modal, InputNumber, Space, Alert, notification, Drawer,
     Form,  Button } from 'antd';
 import ProFormItem from '@ant-design/pro-form/lib/components/FormItem';
-import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, GetDeploymentFormInfo } from './service';
-import { DeploymentStep } from './devlopment_data';
+import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, GetDeploymentFormInfo, GetDeploymentLevels } from './service';
+import { DeploymentStep,DeploymentLevel } from './devlopment_data';
 import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 
 export interface Props {
@@ -47,13 +47,17 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
     const [clusterName, clusterNameHandler] = useState<string>("")
     const [deployment, deploymentHandler] = useState<DeploymentStep>()
     const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([]);
-
+    const [deploymentLevels, deploymentLevelsHandler] = useState<any>()
+    
     function BindClusterSelect() {
         let req = BindCluster()
         req.then(x => { clusterHandler(x) })
     }
 
+    const BindDeploymentLevels = ()=> GetDeploymentLevels().then(res=> deploymentLevelsHandler(res))
+
     useEffect(() => {
+        BindDeploymentLevels()
         BindClusterSelect()
         if (props.isEdit) {
             let req = GetDeploymentFormInfo(props.id)
@@ -158,16 +162,16 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         <Input ></Input>
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level'>
-                        <Select
-                            disabled={props.isEdit}
-                            options={[
-                                {
-                                    value: 'dev',
-                                    label: 'dev',
-                                },
-                                { value: 'test', label: 'test' },
-                                { value: 'prod', label: 'prod' },
-                            ]}
+                        <Select options={deploymentLevels}  disabled={props.isEdit} 
+                            
+                            // options={[
+                            //     {
+                            //         value: 'dev',
+                            //         label: 'dev',
+                            //     },
+                            //     { value: 'test', label: 'test' },
+                            //     { value: 'prod', label: 'prod' },
+                            // ]}
                         ></Select>
                     </ProForm.Item>
                     <ProForm.Item label="集群" name='clusterId' rules={[{ required: true, message: '请选择集群' }]} >

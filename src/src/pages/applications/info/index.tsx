@@ -61,12 +61,26 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         },
         {
             title: '环境名称',
+            width: 320,
             dataIndex: 'nickname',
             render: (_, row) => {
                 return <span>
                     <Paragraph><Link to={{ pathname:'/resources/pods' ,  search: '?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId + '&ns=' + row.namespace ,  state:row } }  >{row.name}</Link></Paragraph>
                     <Paragraph>{row.nickname}</Paragraph>
                 </span>
+            }
+        },
+        {
+            title: '环境级别',
+            dataIndex: 'level',
+            hideInSearch: true,
+            width: 140,
+            valueEnum:{
+                '测试环境': { text: '测试环境', status: 'Warning' },
+                '开发环境': { text: '开发环境', status: 'Processing' },
+                '预发布环境': { text: '预发布环境', status: 'Default' },
+                '生产环境': { text: '生产环境', status: 'Success' },
+
             }
         },
         {
@@ -96,6 +110,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         {
             title: '镜像(last)',
             dataIndex: 'lastImage',
+            width: 330,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
@@ -103,9 +118,9 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
             }
         },
         {
-            title: '运行中/预期实例数',
+            title: '实例数',
             dataIndex: 'runningNumber',
-            width: 180,
+            width: 80,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
@@ -115,6 +130,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         {
             title: '服务名/IP',
             dataIndex: 'serviceIP',
+            width: 380,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
