@@ -220,7 +220,7 @@ const errorHandler = (error:ResponseError) => {
       description:'提示',
       message: message
     })
-    //console.log(error)
+   
   }
 
 }

@@ -32,13 +32,13 @@ export async function executeDeployment(dpId:any) {
 export const getPodList = async (appName:string , clusterId:number , index :number)=> {
         let resData=await request< ApiResponse<PodItem[]>>("/v1/cluster/pods",{
             method:'GET',
+            timeout:1500,
             params:{ app: appName , cid: clusterId }
         })
-        console.log(resData)
-        if (resData.data == null){
-            return { index:index, data: null }
+        if (resData ){
+            return { index:index, data: resData.data }
         }  
-        return { index:index, data: resData.data }
+        return { index:index, data: null }
     }
 
 export async function GetApplicationInfo(appid:number) {
