@@ -18,7 +18,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         }
     },
     {
-        width:120,
+        width:170,
         dataIndex:'name',
         title:'节点名',
         render: (dom,row) =>{
