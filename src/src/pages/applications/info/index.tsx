@@ -45,7 +45,10 @@ const AppInfo: React.FC = () => {
 
     useEffect(()=>{
         GetDeployLevelCounts(Number(appId)).then(res=>{
-            levelTabsHandler(res.data)
+            var allCount = 0
+            res.data.forEach(val=> allCount += val.count)
+            const data = [{label:'全部',value:'all',count:allCount}].concat(res.data)
+            levelTabsHandler(data)
         })
     },[onLoaded])
 
@@ -169,7 +172,7 @@ const AppInfo: React.FC = () => {
 
     const renderBadge = (count: number, active = false) =>   {
         return (<Badge count={count} showZero={true} 
-            style={{ marginTop: -2, marginLeft: 4, color: active ? '#1890FF' : '#999',
+            style={{ marginTop: -2, marginLeft: 4, color: active ? '#1890FF' : '#722ed1',
             backgroundColor: active ? '#722ed1' : '#eee',}} />) }
 
 
