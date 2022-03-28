@@ -8,6 +8,7 @@ import Form,{ DrawerForm ,ProFormInstance,ProFormSelect,ProFormText} from '@ant-
 import { TenantTableListItem, TenantTableListPagination,NamespaceInfo,NewQuota } from './data'
 import { GetClusterList,GetNameSpaceList,PutNewNameSpace ,
      queryTenant ,PutNewK8sNameSpace, GetResourceQuota,PostResourceQuota } from './service';
+import { Link } from 'umi';
 const { confirm } = Modal;
 const { Paragraph } = Typography;
 
@@ -68,7 +69,10 @@ const Namespaces: React.FC = () => {
         {
             title: '命名空间',
             dataIndex: 'namespace',
-            search:false
+            search:false,
+            render:(_,record)=>(
+                <Link to={`/resources/pods?cid=${record.clusterId}&ns=${record.namespace}`}>{record.namespace}</Link>
+            )
         },
         {
             title: '集群',
