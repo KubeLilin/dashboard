@@ -1,7 +1,7 @@
 import React, { useState, useEffect} from 'react';
 import { Progress,Space,Typography } from 'antd';
 const { Paragraph } = Typography;
-
+import { Link } from 'umi';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
 import { GetNameSpaceList } from '../service'
 import { NamespaceInfo } from '../data'
@@ -19,10 +19,12 @@ const ResourceQuotas:React.FC<Props> = (props:Props) => {
             search:false
         },
         {
-            width:240,
             title: '命名空间',
             dataIndex: 'namespace',
-            search:false
+            search:false,
+            render:(_,record)=>(
+                <Link to={`/resources/pods?cid=${record.clusterId}&ns=${record.namespace}`}>{record.namespace}</Link>
+            )
         },
         {
             width:300,
