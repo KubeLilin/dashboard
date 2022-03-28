@@ -179,3 +179,13 @@ export async function GetNotifications() {
     })
     return resData
 }
+
+export async function GetDeployLevelCounts(appId:number) {
+    let resData = await request<ApiResponse<{label:string,value:string,count:number}[]>>("/v1/application/deploylevelcounts",{
+        method:'GET',
+        params: {
+            appid:appId
+        }
+    })
+    return resData
+}

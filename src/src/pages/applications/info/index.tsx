@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Tabs,Layout } from 'antd';
+import { Tabs,Layout,Badge } from 'antd';
 import React, { useEffect } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProDescriptions from '@ant-design/pro-descriptions';
@@ -10,7 +10,7 @@ import { PlusOutlined, LoadingOutlined,CloudUploadOutlined } from '@ant-design/i
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
-import {  getDeploymentList, getPodList ,GetApplicationInfo } from './deployment.service'
+import {  getDeploymentList, getPodList ,GetApplicationInfo,GetDeployLevelCounts } from './deployment.service'
 import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
@@ -32,18 +32,22 @@ const AppInfo: React.FC = () => {
 
 
     const actionRef = useRef<ActionType>();
-
-const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
+    const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
     const [execFormVisible, setExecFormVisible] = useState(false);
     const [stepFormEdit, setStepFormEdit] = useState(false);
     const [dpId, stepDpId] = useState<number>(0);
     const [deployImage, setDeployImage] = useState<string|undefined>(undefined);
-
-    //const [appbuildOnloaded, setAppbuildOnloaded] = useState(false);
     const [activeKey, setActiveKey] = useState<string>('all');
-
     const [autoLoadPipelineData, setAutoLoadPipelineData] = useState<boolean>(false)
+    const [levelTabs,levelTabsHandler] = useState<{label:string,value:string,count:number}[]>()
+    const [onLoaded,_] = useState<boolean>()
+
+    useEffect(()=>{
+        GetDeployLevelCounts(Number(appId)).then(res=>{
+            levelTabsHandler(res.data)
+        })
+    },[onLoaded])
 
 
     const columns: ProColumns<DeploymentItem>[] = [
@@ -163,6 +167,11 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
             ]
         },]
 
+    const renderBadge = (count: number, active = false) =>   {
+        return (<Badge count={count} showZero={true} 
+            style={{ marginTop: -2, marginLeft: 4, color: active ? '#1890FF' : '#999',
+            backgroundColor: active ? '#722ed1' : '#eee',}} />) }
+
 
     return (
         <PageContainer title={'应用: ' + appName} 
@@ -192,8 +201,13 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
                             menu:{
                                 type:'tab',
                                 activeKey: activeKey,
-                                items:[{key:'all',label:'全部'},{key:'dev',label:'开发环境'},{key:'test',label:'测试环境'},
-                                {key:'prerelease',label:'预发布环境'},{key:'prod',label:'生产环境'}],
+                                items:
+                                    levelTabs?.map((v):{key:string,label:React.ReactNode}  =>{ 
+                                        console.log(v)
+                                        return ( { key:v.value,label: (<span>{v.label}{renderBadge(v.count,activeKey==v.label)}</span>) } )
+                                    }),
+                  
+                                
                                 onChange:(key) => { 
                                     setActiveKey(key as string)
                                     actionRef.current?.reload()
@@ -230,7 +244,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
                                 const list = [...datasource.data]
                                 console.log(asyncPodList)
                                 asyncPodList.forEach((podSet) => {
-                                    if (podSet.data) {
+                                    if (podSet.data && podSet.data.length > 0) {
                                         list[podSet.index].lastImage = podSet.data[0].containers[0].image
                                         list[podSet.index].running = podSet.data.length
                                         list[podSet.index].serviceIP = podSet.data[0].ip
