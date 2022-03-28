@@ -40,7 +40,8 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
     const [dpId, stepDpId] = useState<number>(0);
     const [deployImage, setDeployImage] = useState<string|undefined>(undefined);
 
-    const [appbuildOnloaded, setAppbuildOnloaded] = useState(false);
+    //const [appbuildOnloaded, setAppbuildOnloaded] = useState(false);
+    const [activeKey, setActiveKey] = useState<string>('all');
 
     const [autoLoadPipelineData, setAutoLoadPipelineData] = useState<boolean>(false)
 
@@ -185,18 +186,40 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
             >
                 <TabPane tab="部署环境" key="1" >
                     <ProTable  columns={columns} rowKey="id" dataSource={tableListDataSource}
-                        actionRef={actionRef} headerTitle="部署列表"
-                        toolBarRender={() => [
-                            <Button key='button' type="primary" icon={<PlusOutlined />}
-                                onClick={() => {
-                                    setStepFormEdit(false)
-                                    setStepFormVisible(true)
-                                }}>创建部署环境</Button>
-                        ]}
+                        actionRef={actionRef}  cardProps={{  bordered: true }}
+                        toolbar={{
+                            style:{ fontSize: 14 },
+                            menu:{
+                                type:'tab',
+                                activeKey: activeKey,
+                                items:[{key:'all',label:'全部'},{key:'dev',label:'开发环境'},{key:'test',label:'测试环境'},
+                                {key:'prerelease',label:'预发布环境'},{key:'prod',label:'生产环境'}],
+                                onChange:(key) => { 
+                                    setActiveKey(key as string)
+                                    actionRef.current?.reload()
+                                }
+                            },
+                            actions: [
+                                <Button key='button' type="primary" icon={<PlusOutlined />}
+                                    onClick={() => {
+                                        setStepFormEdit(false)
+                                        setStepFormVisible(true)
+                                    }}>创建部署环境</Button>
+                            ]
+                        }}
                         request={async (params, sort) => {
                             params.appid = appId
-                            console.log(params)
+                            if (activeKey == 'all') {
+                                params.profile = ''
+                            } else {
+                                params.profile = activeKey
+                            }
                             var datasource = await getDeploymentList(params, sort)
+                            
+                            if (!datasource.data) {
+                                setTableListDataSource([])
+                                return []
+                            }
 
                             var asyncAll = []
                             for (var index = 0; index < datasource.data.length; index++) {

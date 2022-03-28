@@ -33,6 +33,7 @@ export const getPodList = async (appName:string , clusterId:number , index :numb
         let resData=await request< ApiResponse<PodItem[]>>("/v1/cluster/pods",{
             method:'GET',
             timeout:1500,
+            skipErrorHandler: true,
             params:{ app: appName , cid: clusterId }
         })
         if (resData ){
