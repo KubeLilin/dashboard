@@ -163,15 +163,6 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level'>
                         <Select options={deploymentLevels}  disabled={props.isEdit} 
-                            
-                            // options={[
-                            //     {
-                            //         value: 'dev',
-                            //         label: 'dev',
-                            //     },
-                            //     { value: 'test', label: 'test' },
-                            //     { value: 'prod', label: 'prod' },
-                            // ]}
                         ></Select>
                     </ProForm.Item>
                     <ProForm.Item label="集群" name='clusterId' rules={[{ required: true, message: '请选择集群' }]} >

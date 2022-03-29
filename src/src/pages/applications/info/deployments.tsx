@@ -158,6 +158,7 @@ const Deployments: React.FC = () => {
                         dataSource={tableListDataSource}
                         actionRef={actionRef}
                         headerTitle="环境列表"
+                        toolBarRender={false}
                         request={async (params, sort) => {
                             params.appid = appId
                             console.log(params)
