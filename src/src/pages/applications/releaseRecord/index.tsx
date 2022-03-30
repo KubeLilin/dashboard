@@ -35,7 +35,7 @@ const ReleaseRecord: React.FC<Props> = (props) => {
             hideInSearch: true,
         },
         {
-            title: '部署环境级别',
+            title: '环境级别',
             dataIndex: 'dpLevel',
             valueType:'select',
             hideInTable: true,
