@@ -35,12 +35,19 @@ const ReleaseRecord: React.FC<Props> = (props) => {
             hideInSearch: true,
         },
         {
-            title: '环境级别',
-            dataIndex: 'level',
+            title: '部署环境级别',
+            dataIndex: 'dpLevel',
+            valueType:'select',
+            hideInTable: true,
             request: async ()=>{
                 const resData = await GetDeploymentLevels()
                 return resData
             } 
+        },
+        {
+            title: '环境级别',
+            dataIndex: 'level',
+            hideInSearch: true
         },
         {
             title: '部署环境',
