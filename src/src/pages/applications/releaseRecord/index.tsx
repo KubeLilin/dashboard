@@ -4,17 +4,18 @@ import { ReleaseRecordItem } from './releaseRecord_data';
 import { GetReleaseRecord, RollBack } from './service';
 import { getDeploymentList } from '../info/deployment.service'
 import { Button, Modal ,notification} from 'antd';
-import { CloseCircleTwoTone, CloudUploadOutlined, ExclamationCircleOutlined, SmileOutlined, UndoOutlined } from '@ant-design/icons';
+import { CloseCircleTwoTone, ExclamationCircleOutlined, SmileOutlined, UndoOutlined } from '@ant-design/icons';
 
 import { GetDeploymentLevels } from '../devlopmentForm/service'
 
 interface Props {
     AppId: number,
 }
+
 const ReleaseRecord: React.FC<Props> = (props) => {
     const { confirm } = Modal;
-    const [rollbackVisible, setrollbackVisible] = useState(false);
     const ref = useRef<ActionType>();
+
     const columns: ProColumns<ReleaseRecordItem>[] = [
         {
             title: 'appId',
@@ -36,7 +37,10 @@ const ReleaseRecord: React.FC<Props> = (props) => {
         {
             title: '环境级别',
             dataIndex: 'level',
-            request:GetDeploymentLevels
+            request: async ()=>{
+                const resData = await GetDeploymentLevels()
+                return resData
+            } 
         },
         {
             title: '部署环境',
