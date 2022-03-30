@@ -8,6 +8,7 @@ import ProForm, {
 } from '@ant-design/pro-form';
 import type { TableListItem } from '../data';
 import { GetAllRoleList,GetQueryUserRole } from '../service'
+import { values } from 'lodash';
 
 export type FormValueType = {
   target?: string;
@@ -28,10 +29,16 @@ export type UpdateFormProps = {
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
   const [selectRolesValue, setSelectRolesValue] = useState<number[]|undefined>(undefined);
+  const [form] = Form.useForm();
 
+
+  useEffect(()=>{
+    form.setFieldsValue(props.values)
+  },[props.values])
 
   return (
         <DrawerForm width={600} key="form1"
+            form={form}
             drawerProps={{ destroyOnClose:true , onClose: ()=>{props.onCancel()} }}
             title="用户信息编辑"
             visible={props.updateModalVisible}
@@ -40,9 +47,10 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               props.onSubmit(value)
               return true
             }}
-            request={async()=>{
-              return props.values
-            }}
+            initialValues={props.values}
+            // request={async()=>{
+            //   return props.values
+            // }}
             
         >
             <ProFormText  name="id" label="ID"  readonly={true} hidden={true} />

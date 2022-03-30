@@ -196,8 +196,9 @@ const Manage: React.FC = () => {
         <a key="updateUser" 
           onClick={ async() => {
             setUserId(record.id)
-            setCurrentRow(record)
             handleUpdateModalVisible(true)
+            setCurrentRow(record)
+           
           }}
         >更新</a>
       
