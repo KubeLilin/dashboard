@@ -46,7 +46,7 @@ export type QuotasSpec = {
 	usedValue:number   ,
 }
 
-export type NamespcaeInfo = {
+export type NamespaceInfo = {
   id : number,
   tenantId:number,
 	clusterId: number,

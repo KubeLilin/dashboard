@@ -302,6 +302,9 @@ const Pods: React.FC = (props) => {
                         expandable={{ expandedRowRender }}
                         request={async (params, sort) => {
                             params.cid = clusterId
+                            if(!params.namespace && namespace) {
+                                params.namespace = namespace
+                            }
                             if (appName) { params.app = appName } 
                             else { params.node = node }
                             var podsData = await getPodList(params, sort)

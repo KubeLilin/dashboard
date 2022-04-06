@@ -14,15 +14,15 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
     {
         width:60,
         render:()=>{
-            return <ApartmentOutlined style={{ fontSize: '150%'}} />
+            return <ApartmentOutlined key="icon" style={{ fontSize: '150%'}} />
         }
     },
     {
-        width:120,
+        width:170,
         dataIndex:'name',
         title:'节点名',
         render: (dom,row) =>{
-           return   <Link style={{color: 'blue', textDecorationLine: 'underline'}} to={'/resources/pods?node='+ row.name +'&cid='+clusterId }>{dom}</Link> 
+           return   <Link key="nodelink" style={{color: 'blue', textDecorationLine: 'underline'}} to={'/resources/pods?node='+ row.name +'&cid='+clusterId }>{dom}</Link> 
         }
     },
     {
@@ -44,7 +44,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         dataIndex: 'kubeletVersion',
         title:'Kubernetes版本',
         render:(dom,row) => {
-            return <span style={{color: 'blue'}}>{dom}</span>
+            return <span key="kubeletVersion" style={{color: 'blue'}}>{dom}</span>
         },
     },
     {
@@ -58,7 +58,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         title:'IP地址',
         render:(dom,row) => {
             return (
-                <Paragraph ellipsis={true}>
+                <Paragraph ellipsis={true} key="ip">
                      {row.addresses.map(item=> (
                            <div>{item.type + ":"+item.address}<br/></div>
                       )) }
@@ -81,7 +81,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         width:230,
         title:'CPU Usage',
         render:(dom,row)=>(
-            <Space direction="vertical" style={{ marginRight:30 }}>
+            <Space key="resource_cpu" direction="vertical" style={{ marginRight:30 }}>
             <Progress  percent={ Number(((row.usage.cpu /row.capacity.cpu)*100).toFixed(2))  } status="active" />
             <Paragraph>CPU: { (row.usage.cpu).toFixed(2)} / {row.capacity.cpu.toFixed(2)} 核</Paragraph>
             </Space>
@@ -91,9 +91,9 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         width:230,
         title:'Memory Usage',
         render:(dom,row)=>(
-            <Space direction="vertical" style={{ marginRight:30 }}>
-            <Progress percent={ Number(((row.usage.memory /row.capacity.memory)*100).toFixed(2))  } status="active" />
-            <Paragraph>内存: { (row.usage.memory / 1024/1024/1024 ).toFixed(2)} / {(row.capacity.memory /1024/1024/1024).toFixed(2)} Gi</Paragraph>
+            <Space  key="resource_mem"  direction="vertical" style={{ marginRight:30 }}>
+            <Progress key="m1" percent={ Number(((row.usage.memory /row.capacity.memory)*100).toFixed(2))  } status="active" />
+            <Paragraph key="m2">内存: { (row.usage.memory / 1024/1024/1024 ).toFixed(2)} / {(row.capacity.memory /1024/1024/1024).toFixed(2)} Gi</Paragraph>
             </Space>
         ),
     },
@@ -101,9 +101,9 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         width:230,
         title:'Storage Usage',
         render:(dom,row)=>(
-            <Space direction="vertical" style={{ marginRight:30 }}>
-            <Progress percent={ Number(((row.usage.storage /row.capacity.storage)*100).toFixed(2))  } status="active" />
-            <Paragraph>存储: { (row.usage.storage/1024/1024/1024).toFixed(2)} / {(row.capacity.storage/1024/1024/1024).toFixed(2)} GB</Paragraph>
+            <Space  key="resource_sag"  direction="vertical" style={{ marginRight:30 }}>
+            <Progress key="s1" percent={ Number(((row.usage.storage /row.capacity.storage)*100).toFixed(2))  } status="active" />
+            <Paragraph key="s2">存储: { (row.usage.storage/1024/1024/1024).toFixed(2)} / {(row.capacity.storage/1024/1024/1024).toFixed(2)} GB</Paragraph>
             </Space>
         ),
     },

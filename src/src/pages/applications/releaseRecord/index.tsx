@@ -4,15 +4,18 @@ import { ReleaseRecordItem } from './releaseRecord_data';
 import { GetReleaseRecord, RollBack } from './service';
 import { getDeploymentList } from '../info/deployment.service'
 import { Button, Modal ,notification} from 'antd';
-import { CloseCircleTwoTone, CloudUploadOutlined, ExclamationCircleOutlined, SmileOutlined, UndoOutlined } from '@ant-design/icons';
-import { PageContainer } from '@ant-design/pro-layout';
+import { CloseCircleTwoTone, ExclamationCircleOutlined, SmileOutlined, UndoOutlined } from '@ant-design/icons';
+
+import { GetDeploymentLevels } from '../devlopmentForm/service'
+
 interface Props {
     AppId: number,
 }
+
 const ReleaseRecord: React.FC<Props> = (props) => {
     const { confirm } = Modal;
-    const [rollbackVisible, setrollbackVisible] = useState(false);
     const ref = useRef<ActionType>();
+
     const columns: ProColumns<ReleaseRecordItem>[] = [
         {
             title: 'appId',
@@ -32,6 +35,21 @@ const ReleaseRecord: React.FC<Props> = (props) => {
             hideInSearch: true,
         },
         {
+            title: '环境级别',
+            dataIndex: 'dpLevel',
+            valueType:'select',
+            hideInTable: true,
+            request: async ()=>{
+                const resData = await GetDeploymentLevels()
+                return resData
+            } 
+        },
+        {
+            title: '环境级别',
+            dataIndex: 'level',
+            hideInSearch: true
+        },
+        {
             title: '部署环境',
             dataIndex: 'dpId',
             hideInTable: true,
@@ -46,12 +64,15 @@ const ReleaseRecord: React.FC<Props> = (props) => {
             valueEnum: {
                 manual: '手动触发',
                 githook: 'GIT触发',
-                rollback:'人为回滚'
-            }
+                rollback:'人为回滚',
+                undefined:'自动触发',
+            },
+            hideInSearch: true,
         },
         {
             title: '镜像名称',
             dataIndex: 'applyImage',
+            hideInSearch: true,
         },
         {
             title: '触发人',
@@ -62,14 +83,15 @@ const ReleaseRecord: React.FC<Props> = (props) => {
             title: '触发时间',
             dataIndex: 'creationTime',
             hideInSearch: true,
-        }, {
+        }, 
+        {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
-                <Button key="rollback" type="primary" icon={<UndoOutlined />} onClick={() => {
+                <Button key="rollback" type="primary" icon={<UndoOutlined key="roll_icon" />} onClick={() => {
                     confirm({
-                        icon: <ExclamationCircleOutlined />,
-                        content: <p>确认要把部署环境<h3>{record.deploymentName}</h3>回滚到<h3 color='#DC143C'>{record.applyImage} </h3>镜像吗？</p>,
+                        icon: <ExclamationCircleOutlined key="confirm_icon" />,
+                        content: <p key="a1">确认要把部署环境<h3 key="a2">{record.deploymentName}</h3>回滚到<h3 color='#DC143C'>{record.applyImage} </h3>镜像吗？</p>,
                         async onOk() {
                            let res=await RollBack({
                                 wholeImage:record.applyImage,
@@ -97,28 +119,26 @@ const ReleaseRecord: React.FC<Props> = (props) => {
                 }}>回滚</Button>
             ]
         }
-    ];
-
-    function handleOk() {
-
-    }
-
-    function handleCancel() {
-
-    }
+    ]
 
     return (
-        <PageContainer>
             <ProTable columns={columns}
+                rowKey="creationTime"
+                toolBarRender={false}
+                style={{marginLeft:20,marginRight:20}}
+                cardProps={{bordered: true}}
                 request={async (params, sort) => {
                     params.appId = props.AppId
                     let data = await GetReleaseRecord(params)
                     return data.data
                 }}
                 actionRef={ref}
+                dateFormatter={(value, valueType) => {
+                    console.log('====>', value, valueType);
+                    return value.format('YYYY-MM-DD HH:mm:ss');
+                  }}
             >
             </ProTable>
-        </PageContainer>
 
 
     )

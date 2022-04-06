@@ -32,13 +32,14 @@ export async function executeDeployment(dpId:any) {
 export const getPodList = async (appName:string , clusterId:number , index :number)=> {
         let resData=await request< ApiResponse<PodItem[]>>("/v1/cluster/pods",{
             method:'GET',
+            timeout:1500,
+            skipErrorHandler: true,
             params:{ app: appName , cid: clusterId }
         })
-        console.log(resData)
-        if (resData.data == null){
-            return { index:index, data: null }
+        if (resData ){
+            return { index:index, data: resData.data }
         }  
-        return { index:index, data: resData.data }
+        return { index:index, data: null }
     }
 
 export async function GetApplicationInfo(appid:number) {
@@ -175,6 +176,16 @@ export async function GetPipelineLogs(appId:number,pipelineId:number,taskId:numb
 export async function GetNotifications() {
     let resData = await request<ApiResponse<{label:string,value:string}[]>>("/v1/deployment/notifications",{
         method:'GET'
+    })
+    return resData
+}
+
+export async function GetDeployLevelCounts(appId:number) {
+    let resData = await request<ApiResponse<{label:string,value:string,count:number}[]>>("/v1/application/deploylevelcounts",{
+        method:'GET',
+        params: {
+            appid:appId
+        }
     })
     return resData
 }

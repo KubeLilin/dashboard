@@ -10,7 +10,7 @@ import * as allIcons from '@ant-design/icons';
 import type { MenuDataItem } from '@umijs/route-utils';
 import React from 'react';
 import { ResponseError } from 'umi-request';
-import { notification } from 'antd';
+import { notification,message } from 'antd';
 import Aegis from 'aegis-web-sdk';
 import { API_SERVER } from './apiserver';
 
@@ -214,13 +214,19 @@ const errorHandler = (error:ResponseError) => {
         })
     }
   } else {
-    var message = "操作失败"
-  
-    notification.error({
-      description:'提示',
-      message: message
-    })
-    //console.log(error)
+    console.log(error.type)
+    if (error.type == 'Timeout') {
+      return
+    }
+   
+    if (error.data){
+      message.error(error.data.message ? error.data.message : error.data)
+    } else {
+        notification.error({
+          description:'提示',
+          message: error.message
+        })
+    }
   }
 
 }

@@ -16,3 +16,9 @@ export type DeploymentStep={
     limitMemory:number,
     clusterSelect:any
 }
+
+
+export type DeploymentLevel = {
+    code: string,
+    name: string,
+}
