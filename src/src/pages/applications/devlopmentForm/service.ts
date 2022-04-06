@@ -1,7 +1,7 @@
 import { ClusterItem } from "@/pages/resources/clusters/cluster_data";
 import { ApiResponse } from "@/services/public/service";
 import {request} from "umi";
-import { DeploymentStep } from "./devlopment_data";
+import { DeploymentStep , DeploymentLevel } from "./devlopment_data";
 
 
 export async function BindCluster() :Promise<any>{
@@ -52,3 +52,9 @@ export async function GetDeploymentFormInfo(id?:number) {
     return req
 }
 
+export async function GetDeploymentLevels() {
+    const res = await request<ApiResponse<DeploymentLevel[]>>('/v1/application/deployLevel',{
+        method:'GET',
+    })
+    return res.data.map(item=> ({ label: item.name , value: item.code  }) )
+}

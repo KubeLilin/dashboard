@@ -12,11 +12,21 @@ params: {
 }, 
 sort: Record<string, any>,
 options?: { [key: string]: any },)=> {
-    let resData=await request< ApiResponse<NodeItem[]>>("/v1/cluster/nodes",{
+    let resData=await request< ApiResponse<NodeItem[]>>("/v1/metrics/nodes",{
         method:'GET',
+        timeout:1500,
         params:params
     })
     
+    if(!resData) {
+        return {
+            data: [],
+            success: false,
+            total:  0
+        }
+        
+    }
+
     return {
         data: resData.data,
         success: resData.success,

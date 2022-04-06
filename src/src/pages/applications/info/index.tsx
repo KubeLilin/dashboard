@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Tabs,Layout } from 'antd';
+import { Tabs,Layout,Badge } from 'antd';
 import React, { useEffect } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProDescriptions from '@ant-design/pro-descriptions';
@@ -10,7 +10,7 @@ import { PlusOutlined, LoadingOutlined,CloudUploadOutlined } from '@ant-design/i
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
-import {  getDeploymentList, getPodList ,GetApplicationInfo } from './deployment.service'
+import {  getDeploymentList, getPodList ,GetApplicationInfo,GetDeployLevelCounts } from './deployment.service'
 import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
@@ -32,17 +32,25 @@ const AppInfo: React.FC = () => {
 
 
     const actionRef = useRef<ActionType>();
-
-const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
+    const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
     const [execFormVisible, setExecFormVisible] = useState(false);
     const [stepFormEdit, setStepFormEdit] = useState(false);
     const [dpId, stepDpId] = useState<number>(0);
     const [deployImage, setDeployImage] = useState<string|undefined>(undefined);
-
-    const [appbuildOnloaded, setAppbuildOnloaded] = useState(false);
-
+    const [activeKey, setActiveKey] = useState<string>('all');
     const [autoLoadPipelineData, setAutoLoadPipelineData] = useState<boolean>(false)
+    const [levelTabs,levelTabsHandler] = useState<{label:string,value:string,count:number}[]>()
+    const [onLoaded,_] = useState<boolean>()
+
+    useEffect(()=>{
+        GetDeployLevelCounts(Number(appId)).then(res=>{
+            var allCount = 0
+            res.data.forEach(val=> allCount += val.count)
+            const data = [{label:'全部',value:'all',count:allCount}].concat(res.data)
+            levelTabsHandler(data)
+        })
+    },[onLoaded])
 
 
     const columns: ProColumns<DeploymentItem>[] = [
@@ -61,13 +69,26 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         },
         {
             title: '环境名称',
+            width: 320,
             dataIndex: 'nickname',
-            width: 250,
             render: (_, row) => {
                 return <span>
                     <Paragraph><Link to={{ pathname:'/resources/pods' ,  search: '?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId + '&ns=' + row.namespace ,  state:row } }  >{row.name}</Link></Paragraph>
                     <Paragraph>{row.nickname}</Paragraph>
                 </span>
+            }
+        },
+        {
+            title: '环境级别',
+            dataIndex: 'level',
+            hideInSearch: true,
+            width: 140,
+            valueEnum:{
+                '测试环境': { text: '测试环境', status: 'Warning' },
+                '开发环境': { text: '开发环境', status: 'Processing' },
+                '预发布环境': { text: '预发布环境', status: 'Default' },
+                '生产环境': { text: '生产环境', status: 'Success' },
+
             }
         },
         {
@@ -97,7 +118,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         {
             title: '镜像(last)',
             dataIndex: 'lastImage',
-            width: 450,
+            width: 330,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
@@ -105,9 +126,9 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
             }
         },
         {
-            title: '运行中/预期实例数',
+            title: '实例数',
             dataIndex: 'runningNumber',
-            width: 180,
+            width: 80,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
@@ -117,7 +138,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         {
             title: '服务名/IP',
             dataIndex: 'serviceIP',
-            width: 350,
+            width: 380,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
@@ -131,6 +152,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
         },
         {
             title: '操作',
+            width: 200,
             valueType: 'option',
             render: (dom, record, _, action) => [
                 <Button key="depoly"   icon={<CloudUploadOutlined />} onClick={() => {
@@ -148,6 +170,11 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
             ]
         },]
 
+    const renderBadge = (count: number, active = false) =>   {
+        return (<Badge count={count} showZero={true} 
+            style={{ marginTop: -2, marginLeft: 4, color: active ? '#1890FF' : '#722ed1',
+            backgroundColor: active ? '#722ed1' : '#eee',}} />) }
+
 
     return (
         <PageContainer title={'应用: ' + appName} 
@@ -157,7 +184,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
             ] }}
             header={{
                 extra: [
-                    <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
+                    <Button key="1" onClick={() => { history.replace('/applications/apps') }}>返回上一级</Button>]
             }}>
             <Content style={{ background:'white' }} > 
             <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} 
@@ -171,18 +198,45 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
             >
                 <TabPane tab="部署环境" key="1" >
                     <ProTable  columns={columns} rowKey="id" dataSource={tableListDataSource}
-                        actionRef={actionRef} headerTitle="部署列表"
-                        toolBarRender={() => [
-                            <Button key='button' type="primary" icon={<PlusOutlined />}
-                                onClick={() => {
-                                    setStepFormEdit(false)
-                                    setStepFormVisible(true)
-                                }}>创建部署环境</Button>
-                        ]}
+                        actionRef={actionRef}  cardProps={{  bordered: true }}
+                        toolbar={{
+                            style:{ fontSize: 14 },
+                            menu:{
+                                type:'tab',
+                                activeKey: activeKey,
+                                items:
+                                    levelTabs?.map((v):{key:string,label:React.ReactNode}  =>{ 
+                                        console.log(v)
+                                        return ( { key:v.value,label: (<span>{v.label}{renderBadge(v.count,activeKey==v.label)}</span>) } )
+                                    }),
+                  
+                                
+                                onChange:(key) => { 
+                                    setActiveKey(key as string)
+                                    actionRef.current?.reload()
+                                }
+                            },
+                            actions: [
+                                <Button key='button' type="primary" icon={<PlusOutlined />}
+                                    onClick={() => {
+                                        setStepFormEdit(false)
+                                        setStepFormVisible(true)
+                                    }}>创建部署环境</Button>
+                            ]
+                        }}
                         request={async (params, sort) => {
                             params.appid = appId
-                            console.log(params)
+                            if (activeKey == 'all') {
+                                params.profile = ''
+                            } else {
+                                params.profile = activeKey
+                            }
                             var datasource = await getDeploymentList(params, sort)
+                            
+                            if (!datasource.data) {
+                                setTableListDataSource([])
+                                return []
+                            }
 
                             var asyncAll = []
                             for (var index = 0; index < datasource.data.length; index++) {
@@ -193,7 +247,7 @@ const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>
                                 const list = [...datasource.data]
                                 console.log(asyncPodList)
                                 asyncPodList.forEach((podSet) => {
-                                    if (podSet.data) {
+                                    if (podSet.data && podSet.data.length > 0) {
                                         list[podSet.index].lastImage = podSet.data[0].containers[0].image
                                         list[podSet.index].running = podSet.data.length
                                         list[podSet.index].serviceIP = podSet.data[0].ip

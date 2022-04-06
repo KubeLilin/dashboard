@@ -9,7 +9,7 @@ export type PodItem = {
     age: Date,
     status: string,
     restarts:number
-
+    usage:any
     containers: ContainerItem[]
 }
 

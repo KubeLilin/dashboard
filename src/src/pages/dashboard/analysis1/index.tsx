@@ -29,7 +29,7 @@ type AnalysisProps = {
 
 type SalesType = 'all' | 'online' | 'stores';
 
-const Analysis: FC<AnalysisProps> = () => {
+const Analysis1: FC<AnalysisProps> = () => {
   const [salesType, setSalesType] = useState<SalesType>('all');
   const [currentTabKey, setCurrentTabKey] = useState<string>('');
   const [rangePickerValue, setRangePickerValue] = useState<RangePickerValue>(
@@ -159,4 +159,4 @@ const Analysis: FC<AnalysisProps> = () => {
   );
 };
 
-export default Analysis;
+export default Analysis1;

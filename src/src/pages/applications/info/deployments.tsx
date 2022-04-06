@@ -18,6 +18,7 @@ import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
 import { executeDeployment, getDeploymentList, getPodList } from './deployment.service'
+import { GetDeploymentLevels } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 
 const { TabPane } = Tabs;
@@ -47,9 +48,16 @@ const Deployments: React.FC = () => {
             hideInSearch: true
         },
         {
+            title: '环境级别',
+            width: 200,
+            dataIndex: 'profile',
+            hideInTable:true,
+            request:GetDeploymentLevels
+        },
+        {
             title: '环境名称',
             dataIndex: 'nickname',
-            width: 250,
+            width: 320,
             render: (_, row) => {
                 return <span>
                     <Paragraph><Link to={{ pathname:'/resources/pods' ,  search: '?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId + '&ns=' + row.namespace ,  state:row } }  >{row.name}</Link></Paragraph>
@@ -150,6 +158,7 @@ const Deployments: React.FC = () => {
                         dataSource={tableListDataSource}
                         actionRef={actionRef}
                         headerTitle="环境列表"
+                        toolBarRender={false}
                         request={async (params, sort) => {
                             params.appid = appId
                             console.log(params)

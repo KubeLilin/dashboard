@@ -3,8 +3,8 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ApplicationItem, ApplicationModel } from './apps_data';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProForm, { DrawerForm, ProFormSelect, ProFormTextArea, ProFormText, ProFormGroup } from '@ant-design/pro-form';
-import { Input, Button, Form } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Input, Button, Form, Checkbox, Radio, Select } from 'antd';
+import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled } from '@ant-design/icons';
 import { getAppLanguage, getAppLevel, createApp, getApps, updateApp, initGitRepoistry } from './apps_service';
 import { Link } from 'umi';
 const { Search } = Input;
@@ -80,7 +80,7 @@ const Apps: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
-                <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name }>进入应用</Link>,
+                <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name}>进入应用</Link>,
                 <a key={"edit" + record.id} onClick={() => {
                     formVisibleHandler(true)
                     console.log(record)
@@ -142,19 +142,36 @@ const Apps: React.FC = () => {
                 <ProForm.Item name="labels" label="应用标签">
                     <Input placeholder="" />
                 </ProForm.Item>
+                <ProForm.Item name="source" label="选择代码源">
+                    <Radio.Group defaultValue="github">
+                        <Radio value="github"><GithubOutlined style={{ fontSize: '50px' }} />Github</Radio>
+                        <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '50px' }} />Gitlab</Radio>
+                        <Radio value="gogs"><SettingFilled style={{ fontSize: '50px' }} />Gogs</Radio>
+                        <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '50px' }} />Gitee</Radio>
+                    </Radio.Group>
+                </ProForm.Item>
+                <ProForm.Item name="" label="选择凭证">
+                    
+                    <Select defaultValue="lucy" style={{ width: 120 }} >
+                   
+                    </Select>
+                    <a>创建凭证</a>
+                </ProForm.Item>
+
 
                 <ProForm.Item name="git" label="git地址" rules={[{ required: true, message: '请输入git地址' }]}>
+
                     <Search
                         placeholder="输入git地址"
                         allowClear
                         enterButton="生成git地址"
                         name='git'
-                        disabled={ edit?true:false }
+                        disabled={edit ? true : false}
                         onSearch={async () => {
                             let res = await initGitRepoistry(appName)
                             if (res.success) {
                                 //gieRepoHandler(res.data)
-                                appForm.setFieldsValue({git:res.data})
+                                appForm.setFieldsValue({ git: res.data })
                             }
                         }}
                     />

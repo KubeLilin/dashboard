@@ -32,13 +32,14 @@ export async function executeDeployment(dpId:any) {
 export const getPodList = async (appName:string , clusterId:number , index :number)=> {
         let resData=await request< ApiResponse<PodItem[]>>("/v1/cluster/pods",{
             method:'GET',
+            timeout:1500,
+            skipErrorHandler: true,
             params:{ app: appName , cid: clusterId }
         })
-        console.log(resData)
-        if (resData.data == null){
-            return { index:index, data: null }
+        if (resData ){
+            return { index:index, data: resData.data }
         }  
-        return { index:index, data: resData.data }
+        return { index:index, data: null }
     }
 
 export async function GetApplicationInfo(appid:number) {
@@ -123,6 +124,30 @@ export async function RunPipeline(pipelineId:number, appId:number) {
     return resData
 }
 
+export async function AbortPipeline(pipelineId:number, appId:number,taskId:number) {
+    let resData = await request<ApiResponse<number>>("/v1/application/abortpipeline",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: {
+            id: pipelineId,
+            appid: appId,
+            taskId: taskId
+        }
+    })
+    return resData
+}
+
+export async function DeletePipeline(pipelineId:number) {
+    let resData = await request<ApiResponse<any>>("/v1/application/pipeline",{
+        method:'DELETE',
+        params:{ id: pipelineId } 
+    })
+    return resData
+}
+
+
 export async function GetPipelineDetails(appId:number,pipelineId:number,taskId:number) {
     let resData = await request<ApiResponse<any>>("/v1/application/pipelinedetails",{
         method:'GET',
@@ -143,6 +168,23 @@ export async function GetPipelineLogs(appId:number,pipelineId:number,taskId:numb
             id: pipelineId,
             appId:appId,
             taskId:taskId
+        }
+    })
+    return resData
+}
+
+export async function GetNotifications() {
+    let resData = await request<ApiResponse<{label:string,value:string}[]>>("/v1/deployment/notifications",{
+        method:'GET'
+    })
+    return resData
+}
+
+export async function GetDeployLevelCounts(appId:number) {
+    let resData = await request<ApiResponse<{label:string,value:string,count:number}[]>>("/v1/application/deploylevelcounts",{
+        method:'GET',
+        params: {
+            appid:appId
         }
     })
     return resData

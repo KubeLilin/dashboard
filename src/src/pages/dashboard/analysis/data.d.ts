@@ -38,3 +38,21 @@ export type NodeStatus = {
   count:number;
 }
 
+export type QuotasSpec = {
+	name:string ,
+	displayValue:string  ,
+	displayUsedValue:string  ,
+	limitValue:number   ,
+	usedValue:number   ,
+}
+
+export type NamespaceInfo = {
+  id : number,
+  tenantId:number,
+	clusterId: number,
+	tenantCode: string,
+	clusterName :string,
+	namespace :string,
+	tenantName:string,
+  quotasSpec: QuotasSpec[]
+}

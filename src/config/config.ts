@@ -128,6 +128,11 @@ export default defineConfig({
           name: "pods",
           path: "/resources/pods",
           component:"./resources/pods"
+        },
+        {
+          name: "serviceConnection",
+          path: "/resources/serviceConnection",
+          component:"./resources/serviceConnection"
         }
       ]
     },
@@ -160,6 +165,11 @@ export default defineConfig({
           name: "pipeline",
           path: "/devops/pipeline",
           component:"./devops/pipeline"
+        },
+        {
+          name: "projects",
+          path: "/devops/projects",
+          component:"./devops/projects"
         },
       ]
     },

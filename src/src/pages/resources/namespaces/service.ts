@@ -30,8 +30,17 @@ export async function GetClusterList() :Promise<{ value: number; label: string; 
 export async function GetNameSpaceList(clusterId:number,tentantName:string,pageIndex:number,pageSize:number) :Promise<{ data:NamespcaeInfo[],success:boolean,total:number } >{
     let resData = await request<any>("/v1/cluster/namespacelist", {
         method: 'GET',
+        timeout: 1500,
         params:{'cid':clusterId , 'tenant': tentantName , 'current': pageIndex, 'pageSize':pageSize }
     })
+    if(!resData){ 
+        return { 
+            data: [],
+            success : false,
+            total : 0,
+        }
+    }
+
     return { 
         data: resData.data.data,
         success : resData.success,
