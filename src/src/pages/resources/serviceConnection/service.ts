@@ -28,3 +28,31 @@ export async function addGitRepo(data:any) {
     })
     return req
 }
+
+export async function editGitRepo(data:any,id:number) {
+    let reqData={
+        id:id,
+        name:data.name,
+        serviceType:1,
+        type:data.type,
+        detail:JSON.stringify(data)
+    }
+    console.log(reqData)
+    let req=await request<ApiResponse<any>>('/v1/serviceconnection/updateserviceconnection',{
+        method:'POST',
+        data:reqData,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    return req
+}
+
+export async function getServiceConnectionInfo(id:number) {
+    let req= await request<ApiResponse<ServiceConnectionItem>>('/v1/serviceconnection/serviceconnectioninfo',{
+        method:'GET',
+        params:{id
+        }
+    })
+    return req;
+}

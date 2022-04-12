@@ -2,15 +2,18 @@ import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
 import React, { useState, useRef } from 'react';
 import { ServiceConnectionItem } from './data';
-import { addGitRepo, queryServiceConnections } from './service';
-import { Drawer, Button, Radio, Space, List, notification } from 'antd';
+import { addGitRepo, editGitRepo, getServiceConnectionInfo, queryServiceConnections } from './service';
+import { Drawer, Button, Radio, Space, List, notification, Form } from 'antd';
 import { GithubOutlined, GitlabOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled } from '@ant-design/icons';
-import ProForm, { DrawerForm, ProFormText } from '@ant-design/pro-form';
+import ProForm, { DrawerForm, ProFormInstance, ProFormText } from '@ant-design/pro-form';
+import { ApiResponse } from '@/services/public/service';
 const ServiceConnection: React.FC = () => {
     const [firstDrawerVisible, setfirstDrawerVisible] = useState(false)
     const [repoDrawerVisible, setrepoDrawerVisible] = useState(false)
-    const [radioValue, setRadioValue] = useState("")
-
+    const [isEdit, setIsEdit] = useState(false)
+    const [radioValue, setRadioValue] = useState(0)
+    const [mainId, setMainId] = useState(0)
+    const [repoFormRef] = Form.useForm();
     const columns: ProColumns<ServiceConnectionItem>[] = [
         {
             dataIndex: 'id',
@@ -21,6 +24,7 @@ const ServiceConnection: React.FC = () => {
             dataIndex: 'name',
             title: '名称',
             copyable: true,
+            render: (text, record, _, action) => <a onClick={() => { editServiceConnection(record.id) }}>{text}</a>
         },
         {
             dataIndex: 'tenantId',
@@ -46,13 +50,24 @@ const ServiceConnection: React.FC = () => {
                 2: 'gitlab',
                 3: 'gogs',
                 4: 'gitee'
-            }
+            },
+            search: false
         },
         {
             dataIndex: 'detail',
             title: '连接明细',
             hideInTable: true,
             search: false,
+        },
+        {
+            title: '操作',
+            valueType: 'option',
+            key: 'option',
+            render: (text, record, _, action) => [
+                <a
+                    key="del"
+                >删除</a>
+            ]
         }
 
     ]
@@ -78,6 +93,24 @@ const ServiceConnection: React.FC = () => {
             value: 4
         }
     ]
+    async function editServiceConnection(id: number) {
+        setMainId(id)
+        let res = await getServiceConnectionInfo(id)
+        if (res.success == false) {
+            notification.open({
+                message: '获取信息失败',
+                description: res.message,
+            });
+        }
+
+        setRadioValue(res.data.type)
+        let repoData = JSON.parse(res.data.detail)
+        repoFormRef.setFieldsValue(repoData)
+        setfirstDrawerVisible(true)
+        setrepoDrawerVisible(true)
+        setIsEdit(true)
+    }
+
     return (
         <PageContainer>
             <Drawer visible={firstDrawerVisible}
@@ -87,7 +120,7 @@ const ServiceConnection: React.FC = () => {
                     <Space>
                         <Button onClick={() => { setfirstDrawerVisible(false) }} >Cancel</Button>
                         <Button type="primary" onClick={() => {
-                            if (radioValue == '1' || radioValue == "2" || radioValue == "3" || radioValue == "4") {
+                            if (radioValue == 1 || radioValue == 2 || radioValue == 3 || radioValue == 4) {
                                 setrepoDrawerVisible(true)
                             }
                         }}>
@@ -97,7 +130,7 @@ const ServiceConnection: React.FC = () => {
 
                 }
             >
-                <Radio.Group onChange={x => { setRadioValue(x.target.value) }} >
+                <Radio.Group onChange={x => { setRadioValue(x.target.value) }} value={radioValue}>
                     <List
                         dataSource={listData}
                         renderItem={item => (
@@ -117,8 +150,9 @@ const ServiceConnection: React.FC = () => {
                     userName: string
                     password: string
                     token: string
-                    type: string
+                    type: number
                 }>
+                    form={repoFormRef}
                     visible={repoDrawerVisible}
                     onVisibleChange={setrepoDrawerVisible}
                     drawerProps={{
@@ -128,12 +162,16 @@ const ServiceConnection: React.FC = () => {
                     onFinish={
                         async x => {
                             x.type = radioValue
-                            let res = await addGitRepo(x)
+                            let res:ApiResponse<any>
+                            if(isEdit){
+                                res = await editGitRepo(x,mainId)
+                            }else{
+                                res = await addGitRepo(x)
+                            }
                             if (res.success == false) {
                                 notification.open({
                                     message: '操作失败',
                                     description: res.message,
-
                                 });
                             } else {
                                 setfirstDrawerVisible(false)
@@ -147,7 +185,6 @@ const ServiceConnection: React.FC = () => {
                     <ProFormText name='userName' label='用户名' placeholder="请输入用户名" rules={[{ required: true, message: "请输入用户名" }]}></ProFormText>
                     <ProFormText name='password' label='密码' placeholder="请输入密码" rules={[{ required: true, message: "请输入密码" }]}></ProFormText>
                     <ProFormText name='token' label='token' placeholder="请输入token" ></ProFormText>
-
                 </DrawerForm>
             </Drawer>
             <ProTable<ServiceConnectionItem>
@@ -159,7 +196,7 @@ const ServiceConnection: React.FC = () => {
                     }
                 }
                 toolBarRender={() => [
-                    <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setfirstDrawerVisible(true) }}  >
+                    <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setfirstDrawerVisible(true) ;setIsEdit(false)}}  >
                         新建
                     </Button>,
                 ]}
