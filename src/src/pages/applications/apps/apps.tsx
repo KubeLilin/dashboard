@@ -95,11 +95,11 @@ const Apps: React.FC = () => {
     ]
     function bindRepo(repoType: string) {
         let res = queryRepoConnections(repoType)
-        console.log(res)
+       
         res.then(x => {    
+            console.log(x)
             repoOptionsHandler(x)
         })
-        
     }
 
 

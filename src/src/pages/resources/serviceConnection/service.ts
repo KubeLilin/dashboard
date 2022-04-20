@@ -69,15 +69,11 @@ export async function queryRepoConnections(repoType: string) {
             repoType: repoType
         }
     })
-    let noneOption = [{ label:"无", value:''}]
+    let noneOption = [{ label:"无", value:'-'}]
 
-    if (req.success){
-        if (req.data){
-            let retData = req.data.map(x=>{let detail= JSON.parse(x.detail);return {label:x.name,value:detail.repo}})
-            return retData
-        }
-        return noneOption
-      
+    if (req && req.data.length>0){
+        let retData = req.data.map(x=>{let detail= JSON.parse(x.detail);return {label:x.name,value:detail.repo}})
+        return retData
     }
     return noneOption
 }
