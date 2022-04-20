@@ -95,9 +95,11 @@ const Apps: React.FC = () => {
     ]
     function bindRepo(repoType: string) {
         let res = queryRepoConnections(repoType)
-        res.then(x => {
+        console.log(res)
+        res.then(x => {    
             repoOptionsHandler(x)
         })
+        
     }
 
 
@@ -151,15 +153,15 @@ const Apps: React.FC = () => {
                 <ProForm.Item name="labels" label="应用标签">
                     <Input placeholder="" />
                 </ProForm.Item>
-                <ProForm.Item name="source" label="选择代码源">
-                    <Radio.Group defaultValue="github" onChange={(x) => { bindRepo(x.target.value) }}>
+                <ProForm.Item name="sourceType" label="选择代码源类型" rules={[{ required: true, message: '请选择代码源类型' }]} >
+                    <Radio.Group  onChange={(x) => { bindRepo(x.target.value) }}>
                         <Radio value="github"><GithubOutlined style={{ fontSize: '50px' }} />Github</Radio>
+                        <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '50px' }} />Gitee</Radio>
                         <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '50px' }} />Gitlab</Radio>
                         <Radio value="gogs"><SettingFilled style={{ fontSize: '50px' }} />Gogs</Radio>
-                        <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '50px' }} />Gitee</Radio>
                     </Radio.Group>
                 </ProForm.Item>
-                <ProForm.Item name="" label="选择连接">
+                <ProForm.Item name="sources" label="代码源" rules={[{ required: true, message: '请选择代码源' }]}>
                     <Select options={repoOptions}>
                     </Select>
                 </ProForm.Item>

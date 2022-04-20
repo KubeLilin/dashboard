@@ -13,10 +13,10 @@ export async function queryServiceConnections(params: any) {
     return req
 }
 
-export async function addGitRepo(data: any) {
+export async function addGitRepo(data: any,serviceType:number) {
     let reqData = {
         name: data.name,
-        serviceType: 1,
+        serviceType: serviceType,
         type: data.type,
         detail: JSON.stringify(data)
     }
@@ -30,11 +30,11 @@ export async function addGitRepo(data: any) {
     return req
 }
 
-export async function editGitRepo(data: any, id: number) {
+export async function editGitRepo(data: any, id: number,serviceType:number) {
     let reqData = {
         id: id,
         name: data.name,
-        serviceType: 1,
+        serviceType: serviceType,
         type: data.type,
         detail: JSON.stringify(data)
     }
@@ -65,16 +65,19 @@ export async function queryRepoConnections(repoType: string) {
     let req = await request<ApiResponse<ServiceConnectionItem[]>>('/v1/serviceconnection/repolistbytype', {
         method: 'GET',
         params: {
+            serviceType:1,
             repoType: repoType
         }
     })
+    let noneOption = [{ label:"无", value:''}]
+
     if (req.success){
-        console.log(req.data)
-        if (req.data!=null){
-            return  req.data.map(x=>{let detail= JSON.parse(x.detail);return {name:x.name,value:detail.repo}})
+        if (req.data){
+            let retData = req.data.map(x=>{let detail= JSON.parse(x.detail);return {label:x.name,value:detail.repo}})
+            return retData
         }
-        return {}
+        return noneOption
       
     }
-    return {};
+    return noneOption
 }
