@@ -7,6 +7,7 @@ import { Input, Button, Form, Checkbox, Radio, Select } from 'antd';
 import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled } from '@ant-design/icons';
 import { getAppLanguage, getAppLevel, createApp, getApps, updateApp, initGitRepoistry } from './apps_service';
 import { Link } from 'umi';
+import { queryRepoConnections } from '@/pages/resources/serviceConnection/service';
 const { Search } = Input;
 const Apps: React.FC = () => {
     const actionRef = useRef<ActionType>();
@@ -14,7 +15,9 @@ const Apps: React.FC = () => {
     const [appForm] = Form.useForm()
     const [edit, editHandler] = useState<boolean>(false)
     const [gitRepo, gieRepoHandler] = useState<string>("");
-    const [appName, appNamehandler] = useState<string>("")
+    const [appName, appNamehandler] = useState<string>("");
+    const [repoOptions, repoOptionsHandler] = useState<any>();
+    const options = [{ label: '小白', value: '小白' }, { label: '小红', value: '小红' }]
     const columns: ProColumns<ApplicationItem>[] = [
         {
             title: 'id',
@@ -90,6 +93,12 @@ const Apps: React.FC = () => {
             ]
         }
     ]
+    function bindRepo(repoType: string) {
+        let res = queryRepoConnections(repoType)
+        res.then(x => {
+            repoOptionsHandler(x)
+        })
+    }
 
 
     return (
@@ -143,25 +152,19 @@ const Apps: React.FC = () => {
                     <Input placeholder="" />
                 </ProForm.Item>
                 <ProForm.Item name="source" label="选择代码源">
-                    <Radio.Group defaultValue="github">
+                    <Radio.Group defaultValue="github" onChange={(x) => { bindRepo(x.target.value) }}>
                         <Radio value="github"><GithubOutlined style={{ fontSize: '50px' }} />Github</Radio>
                         <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '50px' }} />Gitlab</Radio>
                         <Radio value="gogs"><SettingFilled style={{ fontSize: '50px' }} />Gogs</Radio>
                         <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '50px' }} />Gitee</Radio>
                     </Radio.Group>
                 </ProForm.Item>
-                <ProForm.Item name="" label="选择凭证">
-                    
-                    <Select defaultValue="lucy" style={{ width: 120 }} >
-                   
+                <ProForm.Item name="" label="选择连接">
+                    <Select options={repoOptions}>
                     </Select>
-                    <a>创建凭证</a>
                 </ProForm.Item>
-
-
-                <ProForm.Item name="git" label="git地址" rules={[{ required: true, message: '请输入git地址' }]}>
-
-                    <Search
+                <ProFormText name="git" label="git地址" rules={[{ required: true, message: '请输入git地址' }]}>
+                    {/* <Search
                         placeholder="输入git地址"
                         allowClear
                         enterButton="生成git地址"
@@ -174,8 +177,8 @@ const Apps: React.FC = () => {
                                 appForm.setFieldsValue({ git: res.data })
                             }
                         }}
-                    />
-                </ProForm.Item>
+                    />   */}
+                </ProFormText>
                 <ProForm.Item name='level' label="应用等级" rules={[{ required: true, message: '请选择应用级别!' }]}>
                     <ProFormSelect
                         request={getAppLevel}

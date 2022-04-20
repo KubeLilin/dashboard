@@ -1,7 +1,7 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
 import React, { useState, useRef } from 'react';
-import { ServiceConnectionItem } from './data';
+import { RepoServiceConnection, ServiceConnectionItem } from './data';
 import { addGitRepo, editGitRepo, getServiceConnectionInfo, queryServiceConnections } from './service';
 import { Drawer, Button, Radio, Space, List, notification, Form } from 'antd';
 import { GithubOutlined, GitlabOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled } from '@ant-design/icons';
@@ -144,14 +144,7 @@ const ServiceConnection: React.FC = () => {
                     >
                     </List>
                 </Radio.Group>
-                <DrawerForm<{
-                    name: string
-                    repo: string
-                    userName: string
-                    password: string
-                    token: string
-                    type: number
-                }>
+                <DrawerForm<RepoServiceConnection>
                     form={repoFormRef}
                     visible={repoDrawerVisible}
                     onVisibleChange={setrepoDrawerVisible}
