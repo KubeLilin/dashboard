@@ -10,6 +10,9 @@ export type ApplicationItem={
     language:number,
     languageName:string,
     status:number
+    sCID:number
+    sources:number
+    sourceType:string
 }
 
 export type ApplicationLevel={

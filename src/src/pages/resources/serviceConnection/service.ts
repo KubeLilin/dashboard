@@ -69,10 +69,10 @@ export async function queryRepoConnections(repoType: string) {
             repoType: repoType
         }
     })
-    let noneOption = [{ label:"无", value:'-'}]
+    let noneOption = [{ label:"公开", value:0}]
 
     if (req && req.data.length>0){
-        let retData = req.data.map(x=>{let detail= JSON.parse(x.detail);return {label:x.name,value:detail.repo}})
+        let retData = req.data.map(x=>{ return {label:x.name,value:x.id}})
         return retData
     }
     return noneOption

@@ -16,8 +16,7 @@ const Apps: React.FC = () => {
     const [edit, editHandler] = useState<boolean>(false)
     const [gitRepo, gieRepoHandler] = useState<string>("");
     const [appName, appNamehandler] = useState<string>("");
-    const [repoOptions, repoOptionsHandler] = useState<any>();
-    const options = [{ label: '小白', value: '小白' }, { label: '小红', value: '小红' }]
+    const [repoOptions, repoOptionsHandler] = useState<any>([{label:'公开',value:0}]);
     const columns: ProColumns<ApplicationItem>[] = [
         {
             title: 'id',
@@ -86,19 +85,24 @@ const Apps: React.FC = () => {
                 <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name}>进入应用</Link>,
                 <a key={"edit" + record.id} onClick={() => {
                     formVisibleHandler(true)
-                    console.log(record)
                     editHandler(true)
+                    record.sources = record.sCID
                     appForm.setFieldsValue(record)
+                    console.log(record)
+                    bindRepo(record.sourceType,record)
                 }}>编辑</a>,
             ]
         }
     ]
-    function bindRepo(repoType: string) {
+    function bindRepo(repoType: string,selectedRecord:any) {
         let res = queryRepoConnections(repoType)
-       
         res.then(x => {    
             console.log(x)
             repoOptionsHandler(x)
+            if (selectedRecord){
+                console.log(selectedRecord)
+                appForm.setFieldsValue({ sources:selectedRecord.sCID }) 
+            }           
         })
     }
 
@@ -127,6 +131,8 @@ const Apps: React.FC = () => {
                 visible={formVisible}
                 onVisibleChange={formVisibleHandler}
                 onFinish={async (x) => {
+                    console.log(x)
+
                     let res
                     if (edit) {
                         res = await updateApp(x)
@@ -154,35 +160,20 @@ const Apps: React.FC = () => {
                     <Input placeholder="" />
                 </ProForm.Item>
                 <ProForm.Item name="sourceType" label="选择代码源类型" rules={[{ required: true, message: '请选择代码源类型' }]} >
-                    <Radio.Group  onChange={(x) => { bindRepo(x.target.value) }}>
-                        <Radio value="github"><GithubOutlined style={{ fontSize: '50px' }} />Github</Radio>
-                        <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '50px' }} />Gitee</Radio>
-                        <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '50px' }} />Gitlab</Radio>
-                        <Radio value="gogs"><SettingFilled style={{ fontSize: '50px' }} />Gogs</Radio>
+                    <Radio.Group onChange={(x) => { bindRepo(x.target.value,null) }}>
+                        <Radio value="github"><GithubOutlined style={{ fontSize: '25px' }} />Github</Radio>
+                        <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '25px' }} />Gitee</Radio>
+                        <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '25px' }} />Gitlab</Radio>
+                        <Radio value="gogs"><SettingFilled style={{ fontSize: '25px' }} />Gogs</Radio>
                     </Radio.Group>
                 </ProForm.Item>
-                <ProForm.Item name="sources" label="代码源" rules={[{ required: true, message: '请选择代码源' }]}>
-                    <Select options={repoOptions}>
-                    </Select>
+                <ProForm.Item name="sources" label="代码源" initialValue={0} rules={[{ required: true, message: '请选择代码源' }]}>
+                    <Select options={repoOptions} ></Select>
                 </ProForm.Item>
                 <ProFormText name="git" label="git地址" rules={[{ required: true, message: '请输入git地址' }]}>
-                    {/* <Search
-                        placeholder="输入git地址"
-                        allowClear
-                        enterButton="生成git地址"
-                        name='git'
-                        disabled={edit ? true : false}
-                        onSearch={async () => {
-                            let res = await initGitRepoistry(appName)
-                            if (res.success) {
-                                //gieRepoHandler(res.data)
-                                appForm.setFieldsValue({ git: res.data })
-                            }
-                        }}
-                    />   */}
                 </ProFormText>
                 <ProForm.Item name='level' label="应用等级" rules={[{ required: true, message: '请选择应用级别!' }]}>
-                    <ProFormSelect
+                    <ProFormSelect initialValue={0}
                         request={getAppLevel}
                     ></ProFormSelect>
                 </ProForm.Item>
