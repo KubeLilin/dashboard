@@ -140,6 +140,7 @@ const ServiceConnection: React.FC = () => {
                     <Space>
                         <Button onClick={() => { setfirstDrawerVisible(false) }} >取消</Button>
                         <Button type="primary" onClick={() => {
+                            repoFormRef.resetFields()
                             setrepoDrawerVisible(true)
                         }}> 下一步 </Button>
                     </Space>
