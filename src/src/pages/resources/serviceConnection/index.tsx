@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { RepoServiceConnection, ServiceConnectionItem } from './data';
 import { addGitRepo, editGitRepo, getServiceConnectionInfo, queryServiceConnections } from './service';
 import { Drawer, Button, Radio, Space, List, notification, Form } from 'antd';
-import { GithubOutlined, GitlabOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled,CodeSandboxOutlined } from '@ant-design/icons';
+import { GithubOutlined, GitlabOutlined, GooglePlusOutlined,AppstoreAddOutlined, PlusOutlined, SettingFilled,CodeSandboxOutlined } from '@ant-design/icons';
 import { DrawerForm, ProFormText } from '@ant-design/pro-form';
 import { ApiResponse } from '@/services/public/service';
 import { Item } from 'gg-editor';
@@ -20,35 +20,35 @@ const ServiceConnection: React.FC = () => {
 
     const servicesList = [
         {
-            title: 'github',
+            title: 'Github',
             avatar: <GithubOutlined />,
             serviceType: 1,
             value: 1
         },
         {
-            title: 'gitee',
-            avatar: <CodeSandboxOutlined />,
-            serviceType: 1,
-            value: 4
-        },
-        {
-            title: 'gitlab',
+            title: 'Gitlab',
             avatar: <GitlabOutlined />,
             serviceType: 1,
             value: 2
         },
         {
-            title: 'gogs',
+            title: 'Gogs',
             avatar: <CodeSandboxOutlined />,
             serviceType: 1,
             value: 3
+        },       
+        {
+            title: 'Gitee',
+            avatar: <CodeSandboxOutlined />,
+            serviceType: 1,
+            value: 4
         },
-       
-        // {
-        //     title:'harbor',
-        //     serviceType: 2,
-        //     value: 1
-        // },
+        {
+            title:'Docker Registy',
+            avatar: <AppstoreAddOutlined />,
+            serviceType: 2,
+            value: 5
+        },
         
 
     ]
