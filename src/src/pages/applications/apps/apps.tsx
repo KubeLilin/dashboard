@@ -115,7 +115,7 @@ const Apps: React.FC = () => {
                 actionRef={actionRef}
                 headerTitle="应用列表"
                 toolBarRender={() => [
-                    <Button key='button' icon={<PlusOutlined />}
+                    <Button key='button' icon={<PlusOutlined />} type="primary"
                         onClick={() => {
                             appForm.resetFields()
                             formVisibleHandler(true);
