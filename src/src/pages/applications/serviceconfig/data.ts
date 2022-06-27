@@ -4,7 +4,8 @@ export  type ServiceData={
     type:string
     labels:any
     selector:any
-    createTime:any
+    createTime:Date
+    continueStr:string
 }
 
 
@@ -12,7 +13,8 @@ export  type ServiceViewData={
     namespace:string
     name:string
     type:string
-    labels:string,
+    labels:string
     selector:string
-    createTime:any
+    createTime:string
+    continueStr:string
 }
