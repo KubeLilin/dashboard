@@ -18,3 +18,24 @@ export  type ServiceViewData={
     createTime:string
     continueStr:string
 }
+
+
+export type ServiceInfo={
+    namespace:string
+    name:string
+    type:string
+    labels:string
+    selector:string
+    createTime:string
+    clusterIp:string,
+    port:ServicePort[]
+}
+
+export type ServicePort={
+    index:number,
+    name:string,
+    protocol:string,
+    port:number,
+    targetPort:number
+
+}

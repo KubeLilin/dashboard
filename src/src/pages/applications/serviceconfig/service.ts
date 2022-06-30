@@ -2,7 +2,7 @@ import success from "@/pages/result/success";
 import { ApiResponse, PageResponse } from "@/services/public/service";
 import { SortOrder } from "antd/lib/table/interface";
 import { request } from "umi";
-import { ServiceData, ServiceViewData } from "./data";
+import { ServiceData, ServiceInfo, ServiceViewData } from "./data";
 import moment from "moment";
 import { NamespaceInfo } from "@/pages/resources/namespaces/data";
 export async function queryServiceList(params: {
@@ -44,4 +44,22 @@ export async function BindNameSpace():Promise<any>{
     })
    let res= req.data.map(y => { return { value: y.namespace, label: y.namespace } })
    return new Promise(x=>x(res))
+}
+
+export async function getServiceInfo(params:{namespace:string,name:string}) {
+    let req=await request<ApiResponse<ServiceInfo>>('/v1/service/info',{
+        method:'GET',
+        params:params,
+    });
+    return req;
+}
+
+export async function ApplyService(params:ServiceInfo) {
+    console.log(params);
+    let req=await request<ApiResponse<ServiceInfo>>('/v1/service/changeservice',{
+        method:'POST',
+        data:params,
+    });
+    return req;
+    
 }
