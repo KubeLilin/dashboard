@@ -1,4 +1,4 @@
-import { CloseCircleTwoTone, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { CloseCircleTwoTone, MinusCircleOutlined, PlusOutlined, SmileOutlined } from '@ant-design/icons';
 import ProForm, { DrawerForm, ModalForm, ProFormContext, ProFormGroup, ProFormRadio, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
@@ -7,7 +7,7 @@ import React, { useState, useRef, useContext, useEffect } from 'react';
 import { ServiceData, ServiceInfo, ServicePort } from './data';
 import { ApplyService, BindNameSpace, getServiceInfo, queryServiceList } from './service';
 
-const EditableContext = React.createContext<FormInstance<any> | null>(null);
+const EditableContext = React.createContext<FormInstance<ServicePort> | null>(null);
 
 
 interface EditableRowProps {
@@ -97,13 +97,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 type EditableTableProps = Parameters<typeof Table>[0];
 
-interface DataType {
-    key: React.Key;
-    name: string;
-    age: string;
-    address: string;
-}
-
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
 const ServiceConfig: React.FC = () => {
     const [dataSource, setDataSource] = useState<ServicePort[]>([]);
@@ -116,6 +109,11 @@ const ServiceConfig: React.FC = () => {
     };
 
     const defaultColumns: (ColumnTypes[number] & { editable?: boolean; dataIndex: string })[] = [
+        {
+            title: '映射名称',
+            dataIndex: 'name',
+            editable: true,
+        },
         {
             title: '协议',
             dataIndex: 'protocol',
@@ -131,6 +129,7 @@ const ServiceConfig: React.FC = () => {
             title: '容器端口',
             dataIndex: 'targetPort',
             editable: true,
+            
         },
         {
             title: '操作',
@@ -145,7 +144,7 @@ const ServiceConfig: React.FC = () => {
     ];
 
     const handleAdd = () => {
-        const newData: ServicePort = { protocol: "TCP", port: 0, targetPort: 0, index: count, name: "" };
+        const newData: ServicePort = { protocol: "TCP", port: 0, targetPort: 0, index: count, name: "映射名称" };
         setDataSource([...dataSource, newData]);
         setCount(count + 1);
     };
@@ -174,7 +173,7 @@ const ServiceConfig: React.FC = () => {
         }
         return {
             ...col,
-            onCell: (record: DataType) => ({
+            onCell: (record: ServicePort) => ({
                 record,
                 editable: col.editable,
                 dataIndex: col.dataIndex,
@@ -271,7 +270,19 @@ const ServiceConfig: React.FC = () => {
                 onVisibleChange={formVisibleHandler}
                 onFinish={async (x)=>{
                     x.port=dataSource
-                    await ApplyService(x)
+                   let res= await ApplyService(x)
+                   if(res.success){
+                    notification.open({
+                        message: res.message,
+                        icon: <SmileOutlined style={{ color: '#108ee9' }} />,
+                    });
+                    formVisibleHandler(false)
+                   }else{
+                    notification.open({
+                        message: res.message,
+                        icon: <CloseCircleTwoTone />,
+                    });
+                   }
                 }}
             >
                 <ProFormGroup>

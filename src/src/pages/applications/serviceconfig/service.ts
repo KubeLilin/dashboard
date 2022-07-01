@@ -58,6 +58,9 @@ export async function ApplyService(params:ServiceInfo) {
     console.log(params);
     let req=await request<ApiResponse<ServiceInfo>>('/v1/service/changeservice',{
         method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
         data:params,
     });
     return req;
