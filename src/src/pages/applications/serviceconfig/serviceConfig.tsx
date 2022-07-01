@@ -187,6 +187,7 @@ const ServiceConfig: React.FC = () => {
     const [appForm] = Form.useForm()
     const [continueStr, continueStrHandler] = useState<string>();
     const [formVisible, formVisibleHandler] = useState<boolean>(false);
+    const [isAdd, isAddHandler] = useState<boolean>(false);
     const [serviceInfo, serviceInfoHandler] = useState<ServiceInfo>();
     const [namespace, nameSpaceHandler] = useState<string>("");
     const tableColumns: ProColumns<ServiceData>[] = [
@@ -269,6 +270,30 @@ const ServiceConfig: React.FC = () => {
                 form={appForm}
                 onVisibleChange={formVisibleHandler}
                 onFinish={async (x)=>{
+                    if(x.labels!=""&&x.labels!=null&&x.labels!=undefined){
+                        if(typeof JSON.parse(x.labels) == "object"){
+
+                        }else{
+                            notification.open({
+                                message: "labels必须是一个标准的json格式",
+                                icon: <CloseCircleTwoTone />,
+                            });
+                            return
+                        }
+                    }
+                    if(x.selector!=""&&x.selector!=null&&x.selector!=undefined){
+                        if(typeof JSON.parse(x.labels) == "object"){
+
+                        }else{
+                            notification.open({
+                                message: "selector必须是一个标准的json格式",
+                                icon: <CloseCircleTwoTone />,
+                            });
+                            return
+                        }
+                    }
+                    
+
                     x.port=dataSource
                    let res= await ApplyService(x)
                    if(res.success){
@@ -286,8 +311,8 @@ const ServiceConfig: React.FC = () => {
                 }}
             >
                 <ProFormGroup>
-                    <ProFormText name="namespace" label="命名空间" disabled={true}></ProFormText>
-                    <ProFormText name="name" label="服务名称" disabled={true}></ProFormText>
+                    <ProFormText name="namespace" label="命名空间" disabled={false}></ProFormText>
+                    <ProFormText name="name" label="服务名称" disabled={isAdd}></ProFormText>
                     <ProFormRadio.Group name="type" label="服务类型" options={[
                         {
                             label: 'ClusterIP',
@@ -299,8 +324,8 @@ const ServiceConfig: React.FC = () => {
                         }
                     ]}></ProFormRadio.Group>
                 </ProFormGroup>
-                <ProFormText name="labels" label="labels" disabled={true}></ProFormText>
-                <ProFormText name="selector" label="selector" disabled={true}></ProFormText>
+                <ProFormText name="labels" label="labels" disabled={isAdd}></ProFormText>
+                <ProFormText name="selector" label="selector" disabled={isAdd}></ProFormText>
                 <ProForm.Item>
                     <Button onClick={handleAdd} type="primary" style={{ marginBottom: 16 }}>
                         添加端口映射
