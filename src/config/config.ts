@@ -176,6 +176,11 @@ export default defineConfig({
           path: "/devops/projects",
           component:"./devops/projects"
         },
+        {
+          name: "projects",
+          path: "/devops/projects/info",
+          component:"./devops/projects/info"
+        },
       ]
     },
     {
