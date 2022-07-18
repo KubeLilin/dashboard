@@ -17,7 +17,18 @@ export async function getProjectList(params: any) {
         method: 'GET',
         params: params
     })
-
     return new Promise<PageResponse<DevopsProjectItem[]>>(x=>x(req))
+}
 
+export async function getApps(params:{
+    pageSize?: number;
+    current?: number;
+    pageIndex?:number;
+  },sort: Record<string, SortOrder>, filter: Record<string, React.ReactText[] | null>): Promise<any> {
+      params.pageIndex=params.current
+    let req= await request<ApiResponse<any>>('/v1/devops/applist',{
+        method:'GET',
+        params:params
+    })
+   return new Promise(x=>x({data:req.data.data,success:req.success,total:req.data.total}))
 }
