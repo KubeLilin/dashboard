@@ -8,13 +8,14 @@ import ProForm, { DrawerForm,  ProFormText } from '@ant-design/pro-form';
 import { RecordType } from './data'
 import { getApps  } from '../../applications/apps/apps_service';
 import { createProjectItem } from './data'
-import { createProject,getProjectList } from './service'
+import { createProject,EditProject,getProjectList } from './service'
 
 
 
 const Projects: React.FC = () => {
 
     const [formVisible, formVisibleHandler] = useState<boolean>(false)
+    const [projectEdited, projectEditedHandler] = useState<number>(0)
     const [appForm] = Form.useForm()
     const [modelAppListData, setModelAppListData] = useState<RecordType[]>([]);
     const [targetKeys, setTargetKeys] = useState<number[]>([]);
@@ -87,6 +88,7 @@ const Projects: React.FC = () => {
                         id: record.id,
                         name: record.name
                     })
+                    projectEditedHandler(record.id)
                     formVisibleHandler(true)
                 }}>编辑</a>,
             ]
@@ -107,23 +109,31 @@ const Projects: React.FC = () => {
                         onClick={async () => {
                             appForm.resetFields()
                             await getAppList()
+                            projectEditedHandler(0)
                             formVisibleHandler(true)
                         }}>创建项目</Button>
                 ]}
             ></ProTable>
            <DrawerForm form={appForm} title="项目编辑" visible={formVisible} onVisibleChange={formVisibleHandler} drawerProps={{ forceRender: true, destroyOnClose: true, }}
                 onFinish={async (data) => {
-                    console.log({
-                        name: data.name,
-                        appIdList: targetKeys
-                    })
-
-                    const res = await createProject({
-                        name: data.name,
-                        appIdList: targetKeys
-                    })
-                    if (res.success) {
-                        message.success({ content: '项目创建成功!', key:"createProject",duration: 3 });
+                    if(projectEdited > 0) {
+                        const res = await EditProject({
+                            project_id: projectEdited,
+                            name: data.name,
+                            appIdList: targetKeys
+                        })
+                        if (res.success) {
+                            message.success({ content: '项目修改成功!', key:"editProject",duration: 3 });
+                        }
+                    } else {
+                        const res = await createProject({
+                            project_id:0,
+                            name: data.name,
+                            appIdList: targetKeys
+                        })
+                        if (res.success) {
+                            message.success({ content: '项目创建成功!', key:"createProject",duration: 3 });
+                        }
                     }
 
                     //setTargetKeys([""])

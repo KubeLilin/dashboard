@@ -28,7 +28,7 @@ const ProjectInfo: React.FC = () => {
             <Tabs  size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} 
                 onChange={(key)=>{  }}>
                 <TabPane tab="应用列表" key="1" >
-                    <ProTable<ApplicationItem>  rowKey="id" columns={AppsColumns} 
+                    <ProTable<ApplicationItem>  headerTitle="项目应用列表" rowKey="id" columns={AppsColumns}
                         request={async (p, s, f) => {  p.pid = projectId
                             return getApps(p,s, f) }} >       
                     </ProTable>

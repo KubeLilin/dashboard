@@ -7,6 +7,7 @@ export type RecordType = {
 
 
 export type createProjectItem = {
+    project_id:number,
     name:string,
     appIdList:number[]
 }

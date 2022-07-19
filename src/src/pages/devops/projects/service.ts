@@ -12,6 +12,16 @@ export async function createProject(items:createProjectItem) {
     return resData
 }
 
+export async function EditProject(items:createProjectItem) {
+    let resData = await request<ApiResponse<string>>("/v1/devops/editproject", {
+        method: 'POST',
+        headers:{ 'Content-Type': 'application/json'},
+        data:items
+    })
+    return resData
+}
+
+
 export async function getProjectList(params: any) {
     let req = await request<PageResponse<DevopsProjectItem[]>>("/v1/devops/projectlist", {
         method: 'GET',
