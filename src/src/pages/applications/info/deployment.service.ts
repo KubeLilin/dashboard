@@ -189,3 +189,13 @@ export async function GetDeployLevelCounts(appId:number) {
     })
     return resData
 }
+
+export async function GetProjectDeployLevelCounts(projectId:number) {
+    let resData = await request<ApiResponse<{label:string,value:string,count:number}[]>>("/v1/application/projectdeploylevelcounts",{
+        method:'GET',
+        params: {
+            projectId:projectId
+        }
+    })
+    return resData
+}

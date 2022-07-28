@@ -21,6 +21,17 @@ export async function EditProject(items:createProjectItem) {
     return resData
 }
 
+export async function deleteProject(projectId:number) {
+    let resData = await request<ApiResponse<string>>("/v1/devops/project", {
+        method: 'DELETE',
+        params:{
+            id: projectId
+        }
+    })
+    return resData
+}
+
+
 
 export async function getProjectList(params: any) {
     let req = await request<PageResponse<DevopsProjectItem[]>>("/v1/devops/projectlist", {

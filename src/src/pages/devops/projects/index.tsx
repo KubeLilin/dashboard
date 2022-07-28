@@ -1,18 +1,18 @@
 import React, { useState, useRef } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Input, Button, Form,Transfer ,message } from 'antd';
+import { Input, Button, Form,Transfer ,message,Popconfirm ,Divider} from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { Link } from 'umi';
 import ProForm, { DrawerForm,  ProFormText } from '@ant-design/pro-form';
 import { RecordType } from './data'
 import { getApps  } from '../../applications/apps/apps_service';
-import { createProjectItem } from './data'
-import { createProject,EditProject,getProjectList } from './service'
+import { createProject,EditProject,deleteProject,getProjectList } from './service'
 
 
 
 const Projects: React.FC = () => {
+    const actionRef = useRef<ActionType>();
 
     const [formVisible, formVisibleHandler] = useState<boolean>(false)
     const [projectEdited, projectEditedHandler] = useState<number>(0)
@@ -27,7 +27,6 @@ const Projects: React.FC = () => {
     };
 
     const getAppList = () => {
-        const tempTargetKeys = [];
         return new Promise<boolean>(x=> {
             getApps({current:1,pageSize:100},{},{}).then((res)=>{
                 let coll:any[] = res.data
@@ -91,6 +90,13 @@ const Projects: React.FC = () => {
                     projectEditedHandler(record.id)
                     formVisibleHandler(true)
                 }}>编辑</a>,
+                <span key={"del-id" + record.id}>
+                    <Popconfirm title="是否要删除此项目吗？" onConfirm={() =>{
+                         deleteProject(record.id) 
+                         actionRef.current?.reload()
+                    }}><a>删除</a>
+                    </Popconfirm>
+                </span>
             ]
         }
     ]
@@ -98,7 +104,7 @@ const Projects: React.FC = () => {
 
     return (
        <PageContainer>
-            <ProTable columns={columns} rowKey="id" headerTitle="项目列表"
+            <ProTable columns={columns} rowKey="id" headerTitle="项目列表" actionRef={actionRef}
                 request={async (params, sort) => {
                     params.pageIndex = params.current
                     const data = await getProjectList(params)
