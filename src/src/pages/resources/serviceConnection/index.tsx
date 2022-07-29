@@ -47,9 +47,14 @@ const ServiceConnection: React.FC = () => {
             title:'Docker Registy',
             avatar: <AppstoreAddOutlined />,
             serviceType: 2,
-            value: 5
+            value: 0
         },
-        
+        {
+            title:'Jenkins',
+            avatar: <AppstoreAddOutlined />,
+            serviceType: 3,
+            value: 0
+        },
 
     ]
 
@@ -86,8 +91,8 @@ const ServiceConnection: React.FC = () => {
         },
         {
             dataIndex: 'type',
-            title: '连接来源',
             hideInTable: true,
+            title: '代码仓库',
             valueEnum: {
                 1: 'github',
                 2: 'gitlab',
