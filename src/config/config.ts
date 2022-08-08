@@ -157,8 +157,8 @@ export default defineConfig({
         },
         {
           name: "serviceConfig",
-          path: "/applications/serviceConfig",
-          component:"./applications/serviceConfig/serviceConfig"
+          path: "/applications/serviceconfig",
+          component:"./applications/serviceconfig/serviceConfig"
         },
       ]
     },
