@@ -1,19 +1,65 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns } from '@ant-design/pro-table';
 import React, { useState, useRef } from 'react';
-import { ServiceConnectionItem } from './data';
+import { RepoServiceConnection, ServiceConnectionItem } from './data';
 import { addGitRepo, editGitRepo, getServiceConnectionInfo, queryServiceConnections } from './service';
 import { Drawer, Button, Radio, Space, List, notification, Form } from 'antd';
-import { GithubOutlined, GitlabOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled } from '@ant-design/icons';
-import ProForm, { DrawerForm, ProFormInstance, ProFormText } from '@ant-design/pro-form';
+import { GithubOutlined, GitlabOutlined, GooglePlusOutlined,AppstoreAddOutlined, PlusOutlined, SettingFilled,CodeSandboxOutlined } from '@ant-design/icons';
+import { DrawerForm, ProFormText } from '@ant-design/pro-form';
 import { ApiResponse } from '@/services/public/service';
+import { Item } from 'gg-editor';
+
 const ServiceConnection: React.FC = () => {
     const [firstDrawerVisible, setfirstDrawerVisible] = useState(false)
     const [repoDrawerVisible, setrepoDrawerVisible] = useState(false)
     const [isEdit, setIsEdit] = useState(false)
-    const [radioValue, setRadioValue] = useState(0)
+    const [serviceType, setServiceType] = useState(0)
+    const [vcsType, setVcsType] = useState(0)
     const [mainId, setMainId] = useState(0)
     const [repoFormRef] = Form.useForm();
+
+    const servicesList = [
+        {
+            title: 'Github',
+            avatar: <GithubOutlined />,
+            serviceType: 1,
+            value: 1
+        },
+        {
+            title: 'Gitlab',
+            avatar: <GitlabOutlined />,
+            serviceType: 1,
+            value: 2
+        },
+        {
+            title: 'Gogs',
+            avatar: <CodeSandboxOutlined />,
+            serviceType: 1,
+            value: 3
+        },       
+        {
+            title: 'Gitee',
+            avatar: <CodeSandboxOutlined />,
+            serviceType: 1,
+            value: 4
+        },
+        {
+            title:'Docker Registy',
+            avatar: <AppstoreAddOutlined />,
+            serviceType: 2,
+            value: 0
+        },
+        {
+            title:'Jenkins',
+            avatar: <AppstoreAddOutlined />,
+            serviceType: 3,
+            value: 0
+        },
+
+    ]
+
+
+
     const columns: ProColumns<ServiceConnectionItem>[] = [
         {
             dataIndex: 'id',
@@ -24,7 +70,7 @@ const ServiceConnection: React.FC = () => {
             dataIndex: 'name',
             title: '名称',
             copyable: true,
-            render: (text, record, _, action) => <a onClick={() => { editServiceConnection(record.id) }}>{text}</a>
+            render: (text, record, _, action) => <a key="link_edit" onClick={() => { editServiceConnection(record.id) }}>{text}</a>
         },
         {
             dataIndex: 'tenantId',
@@ -37,14 +83,16 @@ const ServiceConnection: React.FC = () => {
             title: '连接类型',
             search: false,
             valueEnum: {
-                1: '连接凭证',
-                2: '连接信息'
+                1: '代码仓库',
+                2: '镜像仓库',
+                3: '流水线集成',
+                4: 'URL集成'
             }
         },
         {
             dataIndex: 'type',
-            title: '连接来源',
             hideInTable: true,
+            title: '代码仓库',
             valueEnum: {
                 1: 'github',
                 2: 'gitlab',
@@ -64,35 +112,12 @@ const ServiceConnection: React.FC = () => {
             valueType: 'option',
             key: 'option',
             render: (text, record, _, action) => [
-                <a
-                    key="del"
-                >删除</a>
+                <a key="del" >删除</a>
             ]
         }
 
     ]
-    const listData = [
-        {
-            title: 'github',
-            avatar: <GithubOutlined />,
-            value: 1
-        },
-        {
-            title: 'gitlab',
-            avatar: <GitlabOutlined />,
-            value: 2
-        },
-        {
-            title: 'gogs',
-            avatar: <SettingFilled />,
-            value: 3
-        },
-        {
-            title: 'gitee',
-            avatar: <GooglePlusOutlined />,
-            value: 4
-        }
-    ]
+    
     async function editServiceConnection(id: number) {
         setMainId(id)
         let res = await getServiceConnectionInfo(id)
@@ -103,7 +128,7 @@ const ServiceConnection: React.FC = () => {
             });
         }
 
-        setRadioValue(res.data.type)
+        setVcsType(res.data.type)
         let repoData = JSON.parse(res.data.detail)
         repoFormRef.setFieldsValue(repoData)
         setfirstDrawerVisible(true)
@@ -118,40 +143,30 @@ const ServiceConnection: React.FC = () => {
                 onClose={() => { setfirstDrawerVisible(false) }}
                 footer={
                     <Space>
-                        <Button onClick={() => { setfirstDrawerVisible(false) }} >Cancel</Button>
+                        <Button onClick={() => { setfirstDrawerVisible(false) }} >取消</Button>
                         <Button type="primary" onClick={() => {
-                            if (radioValue == 1 || radioValue == 2 || radioValue == 3 || radioValue == 4) {
-                                setrepoDrawerVisible(true)
-                            }
-                        }}>
-                            Next
-                        </Button>
+                            repoFormRef.resetFields()
+                            setrepoDrawerVisible(true)
+                        }}> 下一步 </Button>
                     </Space>
-
-                }
-            >
-                <Radio.Group onChange={x => { setRadioValue(x.target.value) }} value={radioValue}>
-                    <List
-                        dataSource={listData}
+                } >
+                <Radio.Group onChange={x => { 
+                        console.log(x.target["data-item"].serviceType)
+                        setVcsType(x.target.value) 
+                        setServiceType(x.target["data-item"].serviceType)
+                    }} value={vcsType}>
+                    <List dataSource={servicesList}
                         renderItem={item => (
                             <List.Item>
-                                <List.Item.Meta
+                                <List.Item.Meta key={item.value}
                                     avatar={item.avatar}
-                                    title={<Radio value={item.value} onChange={x => { setRadioValue(x.target.value) }}>{item.title}</Radio>}
+                                    title={<Radio data-item={item} value={item.value} >{item.title}</Radio>}
                                 />
                             </List.Item>
-                        )}
-                    >
+                        )} >
                     </List>
                 </Radio.Group>
-                <DrawerForm<{
-                    name: string
-                    repo: string
-                    userName: string
-                    password: string
-                    token: string
-                    type: number
-                }>
+                <DrawerForm<RepoServiceConnection>
                     form={repoFormRef}
                     visible={repoDrawerVisible}
                     onVisibleChange={setrepoDrawerVisible}
@@ -161,12 +176,12 @@ const ServiceConnection: React.FC = () => {
                     width={350}
                     onFinish={
                         async x => {
-                            x.type = radioValue
+                            x.type = vcsType
                             let res:ApiResponse<any>
                             if(isEdit){
-                                res = await editGitRepo(x,mainId)
+                                res = await editGitRepo(x,mainId,serviceType)
                             }else{
-                                res = await addGitRepo(x)
+                                res = await addGitRepo(x,serviceType)
                             }
                             if (res.success == false) {
                                 notification.open({
@@ -181,9 +196,9 @@ const ServiceConnection: React.FC = () => {
                     }
                 >
                     <ProFormText name='name' label='连接名称' placeholder="请输入连接名称" rules={[{ required: true, message: "请输入连接名称" }]}></ProFormText>
-                    <ProFormText name='repo' label='仓库地址' placeholder="请输入仓库地址" rules={[{ required: true, message: "请输入仓库地址" }]}></ProFormText>
-                    <ProFormText name='userName' label='用户名' placeholder="请输入用户名" rules={[{ required: true, message: "请输入用户名" }]}></ProFormText>
-                    <ProFormText name='password' label='密码' placeholder="请输入密码" rules={[{ required: true, message: "请输入密码" }]}></ProFormText>
+                    <ProFormText name='repo' label='连接地址' placeholder="请输入连接地址" rules={[{ required: true, message: "请输入连接地址" }]}></ProFormText>
+                    <ProFormText name='userName' label='用户名' placeholder="请输入用户名" ></ProFormText>
+                    <ProFormText name='password' label='密码' placeholder="请输入密码" ></ProFormText>
                     <ProFormText name='token' label='token' placeholder="请输入token" ></ProFormText>
                 </DrawerForm>
             </Drawer>

@@ -220,7 +220,7 @@ const errorHandler = (error:ResponseError) => {
     }
    
     if (error.data){
-      message.error(error.data.message ? error.data.message : error.data)
+      //message.error(error.data.message ? error.data.message : error.data)
     } else {
         notification.error({
           description:'提示',

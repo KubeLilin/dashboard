@@ -7,6 +7,7 @@ import { Input, Button, Form, Checkbox, Radio, Select } from 'antd';
 import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled } from '@ant-design/icons';
 import { getAppLanguage, getAppLevel, createApp, getApps, updateApp, initGitRepoistry } from './apps_service';
 import { Link } from 'umi';
+import { queryRepoConnections } from '@/pages/resources/serviceConnection/service';
 const { Search } = Input;
 const Apps: React.FC = () => {
     const actionRef = useRef<ActionType>();
@@ -14,7 +15,8 @@ const Apps: React.FC = () => {
     const [appForm] = Form.useForm()
     const [edit, editHandler] = useState<boolean>(false)
     const [gitRepo, gieRepoHandler] = useState<string>("");
-    const [appName, appNamehandler] = useState<string>("")
+    const [appName, appNamehandler] = useState<string>("");
+    const [repoOptions, repoOptionsHandler] = useState<any>([{label:'公开',value:0}]);
     const columns: ProColumns<ApplicationItem>[] = [
         {
             title: 'id',
@@ -83,13 +85,26 @@ const Apps: React.FC = () => {
                 <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name}>进入应用</Link>,
                 <a key={"edit" + record.id} onClick={() => {
                     formVisibleHandler(true)
-                    console.log(record)
                     editHandler(true)
+                    record.sources = record.sCID
                     appForm.setFieldsValue(record)
+                    console.log(record)
+                    bindRepo(record.sourceType,record)
                 }}>编辑</a>,
             ]
         }
     ]
+    function bindRepo(repoType: string,selectedRecord:any) {
+        let res = queryRepoConnections(repoType)
+        res.then(x => {    
+            console.log(x)
+            repoOptionsHandler(x)
+            if (selectedRecord){
+                console.log(selectedRecord)
+                appForm.setFieldsValue({ sources:selectedRecord.sCID }) 
+            }           
+        })
+    }
 
 
     return (
@@ -100,7 +115,7 @@ const Apps: React.FC = () => {
                 actionRef={actionRef}
                 headerTitle="应用列表"
                 toolBarRender={() => [
-                    <Button key='button' icon={<PlusOutlined />}
+                    <Button key='button' icon={<PlusOutlined />} type="primary"
                         onClick={() => {
                             appForm.resetFields()
                             formVisibleHandler(true);
@@ -116,6 +131,8 @@ const Apps: React.FC = () => {
                 visible={formVisible}
                 onVisibleChange={formVisibleHandler}
                 onFinish={async (x) => {
+                    console.log(x)
+
                     let res
                     if (edit) {
                         res = await updateApp(x)
@@ -142,42 +159,21 @@ const Apps: React.FC = () => {
                 <ProForm.Item name="labels" label="应用标签">
                     <Input placeholder="" />
                 </ProForm.Item>
-                <ProForm.Item name="source" label="选择代码源">
-                    <Radio.Group defaultValue="github">
-                        <Radio value="github"><GithubOutlined style={{ fontSize: '50px' }} />Github</Radio>
-                        <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '50px' }} />Gitlab</Radio>
-                        <Radio value="gogs"><SettingFilled style={{ fontSize: '50px' }} />Gogs</Radio>
-                        <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '50px' }} />Gitee</Radio>
+                <ProForm.Item name="sourceType" label="选择代码源类型" rules={[{ required: true, message: '请选择代码源类型' }]} >
+                    <Radio.Group onChange={(x) => { bindRepo(x.target.value,null) }}>
+                        <Radio value="github"><GithubOutlined style={{ fontSize: '25px' }} />Github</Radio>
+                        <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '25px' }} />Gitee</Radio>
+                        <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '25px' }} />Gitlab</Radio>
+                        <Radio value="gogs"><SettingFilled style={{ fontSize: '25px' }} />Gogs</Radio>
                     </Radio.Group>
                 </ProForm.Item>
-                <ProForm.Item name="" label="选择凭证">
-                    
-                    <Select defaultValue="lucy" style={{ width: 120 }} >
-                   
-                    </Select>
-                    <a>创建凭证</a>
+                <ProForm.Item name="sources" label="代码源" initialValue={0} rules={[{ required: true, message: '请选择代码源' }]}>
+                    <Select options={repoOptions} ></Select>
                 </ProForm.Item>
-
-
-                <ProForm.Item name="git" label="git地址" rules={[{ required: true, message: '请输入git地址' }]}>
-
-                    <Search
-                        placeholder="输入git地址"
-                        allowClear
-                        enterButton="生成git地址"
-                        name='git'
-                        disabled={edit ? true : false}
-                        onSearch={async () => {
-                            let res = await initGitRepoistry(appName)
-                            if (res.success) {
-                                //gieRepoHandler(res.data)
-                                appForm.setFieldsValue({ git: res.data })
-                            }
-                        }}
-                    />
-                </ProForm.Item>
+                <ProFormText name="git" label="git地址" rules={[{ required: true, message: '请输入git地址' }]}>
+                </ProFormText>
                 <ProForm.Item name='level' label="应用等级" rules={[{ required: true, message: '请选择应用级别!' }]}>
-                    <ProFormSelect
+                    <ProFormSelect initialValue={0}
                         request={getAppLevel}
                     ></ProFormSelect>
                 </ProForm.Item>

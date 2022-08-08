@@ -155,6 +155,11 @@ export default defineConfig({
           path: "/applications/info/deployments",
           component:"./applications/info/deployments"
         },
+        {
+          name: "serviceConfig",
+          path: "/applications/serviceConfig",
+          component:"./applications/serviceConfig/serviceConfig"
+        },
       ]
     },
     {
@@ -170,6 +175,11 @@ export default defineConfig({
           name: "projects",
           path: "/devops/projects",
           component:"./devops/projects"
+        },
+        {
+          name: "projects",
+          path: "/devops/projects/info",
+          component:"./devops/projects/info"
         },
       ]
     },
