@@ -30,7 +30,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
         if: github.event_name != 'pull_request'
       
-      - name: Build and push atomci frontend
+      - name: Build and push kubelilin dashboard
         uses: docker/build-push-action@v2
         with:
           context: .
