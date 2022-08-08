@@ -7,24 +7,18 @@ export default () => {
 
   return (
     <DefaultFooter
-      copyright={`${currentYear} KubeLilin 技术团队出品`}
+      copyright={`${currentYear} KubeLilin 技术团队出品 `}
       links={[
-        {
-          key: 'platform-ui',
-          title: 'KubeLilin Dashboard',
-          href: 'https://github.com/yoyofxteam/sgr-platform-ui',
-          blankTarget: true,
-        },
-        {
-          key: 'platform-api',
-          title: 'KubeLilin API Server',
-          href: 'https://github.com/yoyofxteam/sgr-platform-api',
-          blankTarget: true,
-        },
         {
           key: 'github',
           title: <GithubOutlined /> ,
-          href: 'https://github.com/yoyofx/yoyogo',
+          href: 'https://github.com/kubelilin',
+          blankTarget: true,
+        },
+        {
+          key: 'ban',
+          title: '京ICP备2020044483号-2',
+          href: 'https://beian.miit.gov.cn/',
           blankTarget: true,
         },
       ]}
