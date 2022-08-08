@@ -5,7 +5,7 @@ ENV NODE_ENV development
 
 WORKDIR /code
 
-ADD . /src /code/
+ADD ./src /code/
 
 RUN npm install
 
