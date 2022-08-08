@@ -13,9 +13,7 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@master
-      - name: Build atomci backend
-        run: make build
-      - name: Build frontend page
+      - name: Build frontend
         uses: actions/setup-node@v2
         with:
           node-version: '14'
