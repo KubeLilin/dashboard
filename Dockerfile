@@ -1,7 +1,5 @@
-## 开发镜像(dev image) ,uri: localhost:8092
 FROM node:14.20-alpine
-
-ENV NODE_ENV development
+## 开发镜像(dev image) ,docker run -p 8000:8000 kubelilin/dashboard:node-dev
 
 WORKDIR /code
 
@@ -11,4 +9,4 @@ RUN npm install
 
 EXPOSE 8000
 
-CMD npm run start
+CMD npm run start:pre

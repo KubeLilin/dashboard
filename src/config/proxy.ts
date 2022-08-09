@@ -8,11 +8,6 @@
  */
 export default {
   dev: {
-    '/api/': {
-      target: 'https://preview.pro.ant.design',
-      changeOrigin: true,
-      pathRewrite: { '^': '' },
-    },
     '/v1': {
       target: 'http://localhost:8080',
       changeOrigin: true,
@@ -27,8 +22,8 @@ export default {
     },
   },
   pre: {
-    '/api/': {
-      target: 'your pre url',
+    '/v1': {
+      target: 'http://kubelilin-apiserver:8080',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
