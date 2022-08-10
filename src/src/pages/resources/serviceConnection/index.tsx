@@ -1,13 +1,12 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ProColumns } from '@ant-design/pro-table';
+import ProTable, {ActionType, ProColumns } from '@ant-design/pro-table';
 import React, { useState, useRef } from 'react';
 import { RepoServiceConnection, ServiceConnectionItem } from './data';
-import { addGitRepo, editGitRepo, getServiceConnectionInfo, queryServiceConnections } from './service';
-import { Drawer, Button, Radio, Space, List, notification, Form } from 'antd';
-import { GithubOutlined, GitlabOutlined, GooglePlusOutlined,AppstoreAddOutlined, PlusOutlined, SettingFilled,CodeSandboxOutlined } from '@ant-design/icons';
+import { addGitRepo, editGitRepo, getServiceConnectionInfo, queryServiceConnections , DeleteServiceConnectionInfo } from './service';
+import { Drawer, Button, Radio, Space, List, notification, Form,Popconfirm } from 'antd';
+import { GithubOutlined, GitlabOutlined,AppstoreAddOutlined, PlusOutlined,CodeSandboxOutlined,DeleteOutlined } from '@ant-design/icons';
 import { DrawerForm, ProFormText } from '@ant-design/pro-form';
 import { ApiResponse } from '@/services/public/service';
-import { Item } from 'gg-editor';
 
 const ServiceConnection: React.FC = () => {
     const [firstDrawerVisible, setfirstDrawerVisible] = useState(false)
@@ -17,6 +16,8 @@ const ServiceConnection: React.FC = () => {
     const [vcsType, setVcsType] = useState(0)
     const [mainId, setMainId] = useState(0)
     const [repoFormRef] = Form.useForm();
+    const actionRef = useRef<ActionType>();
+
 
     const servicesList = [
         {
@@ -53,7 +54,13 @@ const ServiceConnection: React.FC = () => {
             title:'Jenkins',
             avatar: <AppstoreAddOutlined />,
             serviceType: 3,
-            value: 0
+            value: 5
+        },
+        {
+            title:'系统回调Webhook',
+            avatar: <AppstoreAddOutlined />,
+            serviceType: 4,
+            value: 6
         },
 
     ]
@@ -81,12 +88,11 @@ const ServiceConnection: React.FC = () => {
         {
             dataIndex: 'serviceType',
             title: '连接类型',
-            search: false,
             valueEnum: {
-                1: '代码仓库',
-                2: '镜像仓库',
-                3: '流水线集成',
-                4: 'URL集成'
+                1: 'GIT代码仓库',
+                2: '容器镜像仓库',
+                3: '流水线引擎',
+                4: '系统回调Webhook',
             }
         },
         {
@@ -112,7 +118,20 @@ const ServiceConnection: React.FC = () => {
             valueType: 'option',
             key: 'option',
             render: (text, record, _, action) => [
-                <a key="del" >删除</a>
+                <a key="link_edit" onClick={() => { editServiceConnection(record.id) }}>编辑</a>,
+                <Popconfirm title="确定要删除这个连接器吗?" onConfirm={async()=>{
+                    const res = await DeleteServiceConnectionInfo(record.id)
+                    if (res.success) {
+                        notification.open({
+                            message: '删除成功',
+                            description: record.name + '服务连接器删除成功',
+                        });
+                        actionRef.current?.reload()
+                    }
+                }}>
+                   <a>删除</a>
+                </Popconfirm>
+         
             ]
         }
 
@@ -166,16 +185,9 @@ const ServiceConnection: React.FC = () => {
                         )} >
                     </List>
                 </Radio.Group>
-                <DrawerForm<RepoServiceConnection>
-                    form={repoFormRef}
-                    visible={repoDrawerVisible}
-                    onVisibleChange={setrepoDrawerVisible}
-                    drawerProps={{
-                        destroyOnClose: true,
-                    }}
-                    width={350}
-                    onFinish={
-                        async x => {
+                <DrawerForm<RepoServiceConnection> form={repoFormRef}  width={350} visible={repoDrawerVisible} onVisibleChange={setrepoDrawerVisible}
+                    drawerProps={{ destroyOnClose: true, }}
+                    onFinish={ async x => {
                             x.type = vcsType
                             let res:ApiResponse<any>
                             if(isEdit){
@@ -192,6 +204,7 @@ const ServiceConnection: React.FC = () => {
                                 setfirstDrawerVisible(false)
                                 setrepoDrawerVisible(false)
                             }
+                            actionRef.current?.reload()
                         }
                     }
                 >
@@ -202,21 +215,16 @@ const ServiceConnection: React.FC = () => {
                     <ProFormText name='token' label='token' placeholder="请输入token" ></ProFormText>
                 </DrawerForm>
             </Drawer>
-            <ProTable<ServiceConnectionItem>
-                columns={columns}
-                request={
-                    async (params, sort) => {
+            <ProTable<ServiceConnectionItem>  actionRef={actionRef} columns={columns}
+                request={ async (params, sort) => {
                         let data = await queryServiceConnections(params)
                         return data.data
                     }
                 }
                 toolBarRender={() => [
                     <Button key="button" icon={<PlusOutlined />} type="primary" onClick={() => { setfirstDrawerVisible(true) ;setIsEdit(false)}}  >
-                        新建
-                    </Button>,
-                ]}
-            >
-            </ProTable>
+                        新建</Button>,]}
+            ></ProTable>
         </PageContainer>
     )
 }
