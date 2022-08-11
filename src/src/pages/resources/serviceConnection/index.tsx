@@ -119,7 +119,7 @@ const ServiceConnection: React.FC = () => {
             key: 'option',
             render: (text, record, _, action) => [
                 <a key="link_edit" onClick={() => { editServiceConnection(record.id) }}>编辑</a>,
-                <Popconfirm title="确定要删除这个连接器吗?" onConfirm={async()=>{
+                <Popconfirm key="link-confirm" title="确定要删除这个连接器吗?" onConfirm={async()=>{
                     const res = await DeleteServiceConnectionInfo(record.id)
                     if (res.success) {
                         notification.open({
@@ -127,9 +127,9 @@ const ServiceConnection: React.FC = () => {
                             description: record.name + '服务连接器删除成功',
                         });
                         actionRef.current?.reload()
-                    }
+                    } 
                 }}>
-                   <a>删除</a>
+                   <a key="link_del">删除</a>
                 </Popconfirm>
          
             ]
@@ -195,10 +195,10 @@ const ServiceConnection: React.FC = () => {
                             }else{
                                 res = await addGitRepo(x,serviceType)
                             }
-                            if (res.success == false) {
-                                notification.open({
-                                    message: '操作失败',
-                                    description: res.message,
+                            if (!res || res.success == false) {
+                                notification.error({
+                                    message: '创建失败',
+                                    description: "重复添加非GIT仓库类型或系统错误",
                                 });
                             } else {
                                 setfirstDrawerVisible(false)
