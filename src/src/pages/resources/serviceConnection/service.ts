@@ -59,6 +59,16 @@ export async function getServiceConnectionInfo(id: number) {
     return req;
 }
 
+export async function DeleteServiceConnectionInfo(id: number) {
+    let req = await request<ApiResponse<boolean>>('/v1/serviceconnection/serviceconnectioninfo', {
+        method: 'DELETE',
+        params: {
+            id:id
+        }
+    })
+    return req;
+}
+
 
 
 export async function queryRepoConnections(repoType: string) {
