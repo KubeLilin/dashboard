@@ -31,9 +31,11 @@ const Analysis: FC = () => {
 
   useEffect(()=>{
     BindCluster().then((res)=>{
-      clusterListHandler(res)
-      clusterHandler(res[0].label)
-      clusterIdHandler(res[0].value)
+      if (res) {
+        clusterListHandler(res)
+        clusterHandler(res[0].label)
+        clusterIdHandler(res[0].value)
+      }
     })
 
     GetProjectsMetrics().then((res)=>{

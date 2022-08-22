@@ -31,7 +31,7 @@ const Namespaces: React.FC = () => {
 
     useEffect(()=>{
         GetClusterList().then((res)=>{
-            if (res.length > 0){
+            if (res && res.length > 0){
                 ref.current?.setFieldsValue({clusterId:res[0].value})
                 setTimeout(() => ref.current?.submit(), 500)                   
             }

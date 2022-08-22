@@ -7,7 +7,7 @@ export async function BindCluster() :Promise<{label: string,value: string}[]> {
   let resData = await request<any>("/v1/cluster/list", {
       method: 'GET',
   })
-  let data=  resData.data.map(x=>{return  {value:x.id,label:x.name}})
+  let data=  resData.data?.map(x=>{return  {value:x.id,label:x.name}})
   return new Promise(x=>x(data))
 }
 
