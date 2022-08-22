@@ -5,7 +5,7 @@ WORKDIR /code
 
 ADD ./src /code/
 
-RUN npm install
+RUN npm install --force
 
 EXPOSE 8000
 

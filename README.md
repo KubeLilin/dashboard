@@ -1,3 +1,26 @@
+# Kubelilin dashboard
+Kubelilin cloud native frontEnd .
+
+## PaaS 平台运行
+### FrontEnd
+```bash
+git clone https://github.com/KubeLilin/dashboard.git
+cd dashboard/src
+npm install --force
+npm run start
+```
+
+### Docker-Compose FrontEnd & Backend & MySQL
+```bash
+git clone https://github.com/KubeLilin/kubelilin.git
+cd kubelilin/scripts
+docker-compose  up -d
+```
+#### 登录
+* 用户名: admin
+* 密  码: 1234abcd
+
+
 ## Environment Prepare
 
 Install `node_modules`:
