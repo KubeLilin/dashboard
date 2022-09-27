@@ -3,7 +3,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { Button, Tag, Typography,Tabs,Layout,List,Card,Divider,Input, Space,Popconfirm, Drawer,Avatar,Tooltip,message,Spin } from 'antd';
 import { history, Link } from 'umi';
 import ProCard from '@ant-design/pro-card';
-import { FormOutlined,SettingOutlined,EditOutlined ,CloseCircleTwoTone,SyncOutlined,CheckCircleOutlined,CloseCircleOutlined,
+import { FormOutlined,SettingOutlined,EditOutlined ,CloseCircleTwoTone,SyncOutlined,CheckCircleOutlined,CloseCircleOutlined,AppstoreAddOutlined,
     EllipsisOutlined,PlayCircleFilled,SaveTwoTone,PlusOutlined,ScheduleTwoTone ,CheckCircleTwoTone,DeleteOutlined} from '@ant-design/icons'
 import type { ProFormInstance } from '@ant-design/pro-form';
 import { CheckCard } from '@ant-design/pro-card';
@@ -16,25 +16,17 @@ const { TabPane } = Tabs;
 const { Content } = Layout;
 
 import { getDeploymentList,GetAppGitBranches,GetBuildScripts, SavePipeline, GetPipelineById ,GetNotifications  } from '../../applications/info/deployment.service'
+import { getAppLanguages,getBuildImageByLanguageId } from './service'
 import { StageItem, StepItem } from './data'
 
-var buildScriptList:any
 var initStages:StageItem[]
 
 const Pipeline : React.FC = () => {
     var PipelineId = Number(history.location.query?.id)
     var PipelineName = history.location.query?.name
 
-   
     var appId = history.location.query?.appid
     var appName =  history.location.query?.appname
-
-    if (!buildScriptList){
-        GetBuildScripts().then((v)=>{
-            buildScriptList =  v.data
-            console.log(buildScriptList)
-        })
-    }   
 
 
     const StepCommands = [
@@ -74,7 +66,9 @@ const Pipeline : React.FC = () => {
     }
 
     const [pipelineName, setPipelineName] = useState<string>(String(PipelineName));
-
+    const [appLanuages, setAppLanuages] = useState<[]>();
+    
+    const [languageCompileOptions, setLanguageCompileOptions] = useState<any>([]);
 
     const [allStages, setAllStages] = useState<StageItem[]>([]);
     const [currentStageIndex, setCurrentStageIndex] = useState<number>(0);
@@ -107,6 +101,11 @@ const Pipeline : React.FC = () => {
                 setAllStages([...initStages])
             }
             setLoaded(true)
+        })
+
+        getAppLanguages().then((x)=>{
+            setAppLanuages(x)
+            console.log(x)
         })
         
     },[onLoaded])
@@ -157,10 +156,10 @@ const Pipeline : React.FC = () => {
         setAllStages([...allStages])
 
         const key = 'onSaveForm';
-        message.loading({ content: '保存中...', key });
+        message.loading({ content: '保存步骤中...', key });
         setTimeout(() => {
-          message.success({ content: '保存成功!', key, duration: 3 });
-        }, 1000);
+          message.success({ content: '保存步骤成功!', key, duration: 3 });
+        }, 400);
 
         return true
     }
@@ -176,9 +175,22 @@ const Pipeline : React.FC = () => {
         })
 
         if (res && res.success){
-            message.success({ content: '保存成功!', key, duration: 3 , style: { marginTop: '20vh' } });
+            message.success({ content: '保存流水线成功!', key, duration: 3 , style: { marginTop: '20vh' } });
         } else {
-            message.error({content:'保存失败！',key ,  style: { marginTop: '20vh' }})
+            message.error({content:'保存流水线失败！',key ,  style: { marginTop: '20vh' }})
+        }
+    }
+
+
+    const BindingLanguageComilpeImages = async (languageName:string)=>{
+        const query:any = appLanuages?.filter((v:any)=>v.name == languageName)
+        if (query && query.length > 0) {
+            const script = query[0].compileScripts
+            buildForm?.current?.setFieldsValue({buildScript: script})
+            const languageId = query[0].id
+            console.log(languageId)
+            const dataList = await getBuildImageByLanguageId(languageId)
+            setLanguageCompileOptions(dataList)
         }
     }
 
@@ -197,6 +209,8 @@ const Pipeline : React.FC = () => {
                     break
                 case "code_build":
                     currentForm = buildForm
+                    console.log(currentSetpItem.content)
+                    BindingLanguageComilpeImages(currentSetpItem.content.buildEnv)
                     break
                 case "cmd_shell":
                     currentForm = shellForm
@@ -211,10 +225,7 @@ const Pipeline : React.FC = () => {
                 currentForm?.current?.resetFields()
                 currentForm?.current.setFieldsValue(currentSetpItem.content)
             }
-            
-          
         }
-           
     }
     
 
@@ -224,7 +235,9 @@ const Pipeline : React.FC = () => {
         <Input style={{width:300}} value={pipelineName} 
             onChange={(e)=>{ setPipelineName(e.target.value) }}></Input> 
         <span>  </span> 
+        <Tooltip title="最终保存流水线,否则修改将不生效!">
         <Button type='primary' icon={<CheckCircleOutlined />} onClick={onSavePipeline}>保存流程线</Button>
+        </Tooltip>
         </div> }
 
         breadcrumb={{ routes:[
@@ -245,21 +258,25 @@ const Pipeline : React.FC = () => {
                     <Spin spinning={!onLoaded}>
                     <div> <div style={{ fontSize:16,fontStyle:"oblique", marginLeft: 23  }}>         
                         <Space direction='horizontal'>
-                            当前阶段:
+                            当前阶段名称:
                             <Input value={currentStageName} onChange={(e)=>{ setCurrentStageName(e.currentTarget.value) }} />
-                            <Button type="primary" onClick={()=>{
-                                allStages[currentStageIndex].name = currentStageName
-                                setAllStages([...allStages])
-                            }} icon={<CheckCircleOutlined />} />
-                            <Popconfirm title="确定要删除这个阶段吗?" onConfirm={removeStage}>
-                                <Button type="primary" danger icon={<DeleteOutlined />}/>
+                            <Tooltip title="修改当前阶段名称" key="purple">
+                                <Button type="primary" onClick={()=>{
+                                    allStages[currentStageIndex].name = currentStageName
+                                    setAllStages([...allStages])
+                                }} icon={<CheckCircleOutlined />}>更新名称</Button>
+                            </Tooltip>
+                            <Popconfirm title={`确定要删除"${currentStageName}"这个阶段吗?`} onConfirm={removeStage}>
+                                <Tooltip title="删除当前阶段"  key="purple">
+                                    <Button type="primary" danger icon={<DeleteOutlined />}>删除阶段</Button>
+                                </Tooltip>
                             </Popconfirm>
                         </Space>
                     </div> </div>
            
                     <ProCard split="horizontal" >
                         <ProCard headerBordered >   
-                        <Button size="large">开始</Button>———<Button onClick={()=>addNewStage(0)} shape="circle" icon={<PlusOutlined />} size="small"/>
+                        <Button size="large">开始节点</Button>———<Tooltip title="添加新阶段"><Button onClick={()=>addNewStage(0)} shape="circle" icon={<PlusOutlined />} size="small"/></Tooltip>
                         
                         { allStages.map((item,index)=>{ 
                            return <span key={item.name+index}>
@@ -269,35 +286,35 @@ const Pipeline : React.FC = () => {
                                     setCurrentStageName(allStages[index].name)
                                     onStepItemClick(item.steps[0],index,0)
                                 }}>{item.name}</Button>
-                                ———<Button onClick={()=>addNewStage(index+1)} shape="circle" icon={<PlusOutlined />} size="small"/></span>
+                                ———<Tooltip title="添加新阶段"><Button onClick={()=>addNewStage(index+1)} shape="circle" icon={<PlusOutlined />} size="small"/></Tooltip></span>
                         }) }
 
-                        ———<Button size="large">结束</Button>
+                        ———<Button size="large">结束节点</Button>
                         </ProCard>
                         <ProCard split="vertical">
-                            <ProCard colSpan="17%">
-                                <List dataSource={allStages.length>0?allStages[currentStageIndex].steps:[]} bordered header={<span style={{fontSize:16}}> 步骤列表:</span>}
+                            <ProCard colSpan="340px">
+                                <List dataSource={allStages.length>0?allStages[currentStageIndex].steps:[]} bordered size="small"
+                                header={<Tooltip title="为当前阶段添加步骤" > 
+                                            <Button type="dashed"  size="large" block icon={<PlusOutlined />} onClick={()=>{  
+                                                setVisableStepsSelected(true)
+                                            }}>添加步骤</Button> </Tooltip> }
                                 renderItem={(item,index) => (
                                     <List.Item>
-                                        <Tooltip title={"步骤"+ (index+1) + ":" +item.name}  >
-                                         <Card hoverable bordered bodyStyle={{ backgroundColor: currentStageSetpIndex== index?"#f0f5ff":""}} 
+                                         <Card key={ (index+1) + ":" +item.name } hoverable bordered style={{width:'100%' , backgroundColor: currentStageSetpIndex == index?'ButtonHighlight':'' }} 
                                             onClick={()=>onStepItemClick(item,currentStageIndex,index)}> 
-                                            <div style={{color:"ButtonText"}}><ScheduleTwoTone />     {item.name} <span style={{ width:50,color:"red"}}>{getCurrentStep(index)?.save?"        ":"**        "}</span>  
-                                            <Popconfirm title="确定要删除这个阶段吗?" 
-                                                onConfirm={(e)=>{ 
-                                                    removeStep(index)
-                                                    e?.stopPropagation()
-                                                }}>
-                                           <Button type="primary" size="small" danger icon={<DeleteOutlined />} style={{marginLeft:20 , width:40}} />
-                                            </Popconfirm>
+                                            <div >
+                                            <AppstoreAddOutlined  /><span style={{ margin:20, fontSize:16,width:50,color:"black"}}>{item.name}</span><span style={{ width:50,color:"red"}}>{getCurrentStep(index)?.save?"        ":"**        "}</span>  
+                                                <Popconfirm title="确定要删除这个步聚吗?" onConfirm={(e)=>{  removeStep(index); e?.stopPropagation() }}>
+                                                    <Tooltip title="删除此步聚"  >
+                                                        <Button type="primary" size="middle" danger icon={<DeleteOutlined />} style={{marginLeft:20 , width:40}} />
+                                                    </Tooltip>
+                                                </Popconfirm>
                                             </div>
                                          </Card>
-                                         </Tooltip>
                                     </List.Item>
                                 )}   
-                                footer={<Tooltip title="为当前阶段添加步骤" ><a href='#' style={{fontSize:16}} onClick={()=>{  
-                                    setVisableStepsSelected(true)
-                                }} >    添加步骤</a></Tooltip>}  />
+                                // footer={} 
+                                 />
                             </ProCard >
                             <ProCard >
                                 <span style={{fontSize:16}}>步骤: { getCurrentStep(currentStageSetpIndex)?.name }  (每个步骤必须保存才能生效) </span>
@@ -327,28 +344,20 @@ const Pipeline : React.FC = () => {
                                     <ProForm onValuesChange={onFormValuesChanged} formRef={buildForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                         onFinish={onFormSave} >
                                     <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"} rules={[{ required: true, message: '请选择构建环境' }]}>
-                                        <CheckCard.Group style={{ width: '100%' }} onChange={(val)=>{
-                                            console.log(val)
-                                            var script = buildScriptList[String(val)]
-                                            buildForm.current?.setFieldsValue({buildScript: script})
-                                        }}>
-                                            <CheckCard  title="Spring Boot" avatar={  <Avatar src="../spring.svg"
-                                                size="large" /> } description="通过业界流行的技术栈来快速构建 Java 后端应用" value="java" />
-                                            <CheckCard title="Golang" avatar={ <Avatar
-                                                src="../golang.svg"
-                                                size="large" /> } description="使用Golang来快速构建分布式后端应用" value="golang" />
-                                            
-                                            <CheckCard title=".NET" avatar={ <Avatar
-                                                src="../dotnet.svg"
-                                                size="large" /> } description="通过业界流行的技术栈来快速构建 .NET 后端应用" value="dotnet" />
-                                            
-                                            <CheckCard title="Node JS" avatar={ <Avatar
-                                                src="../nodejs.svg"
-                                                size="large" /> } description="使用前后端统一的语言方案快速构建后端应用" value="nodejs" />
-                                            
+                                        <CheckCard.Group style={{ width: '100%' }} defaultValue={""}
+                                            onChange={async (val)=>{
+                                                console.log(val)
+                                                BindingLanguageComilpeImages(String(val))
+                                            }}
+                                        // CheckCard.Group end
+                                        > { appLanuages?.map((language:any) => 
+                                                <CheckCard key={language.id} title={language.alias} avatar={ <Avatar src={language.icon}
+                                                        size="large" /> } description={language.content} value={language.name} />) }
                                         </CheckCard.Group>
                                     </ProForm.Item>
-
+                                    <ProForm.Item name="buildImage" rules={[{ required: true, message: '请选择构建环境' }]}>
+                                        <ProFormSelect label="构建镜像" width="md" options={languageCompileOptions} ></ProFormSelect>
+                                    </ProForm.Item>
                                     <ProForm.Item name="buildScript" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "} rules={[{ required: true, message: '请选择填写构建脚本' }]} >
                                         <ProFormTextArea label="构建脚本"  
                                             fieldProps={ {autoSize:{minRows: 6, maxRows: 16},style:{ background:"black" ,color: 'whitesmoke'}  } }   ></ProFormTextArea>

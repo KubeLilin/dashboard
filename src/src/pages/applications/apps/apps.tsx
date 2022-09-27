@@ -178,10 +178,7 @@ const Apps: React.FC = () => {
                     ></ProFormSelect>
                 </ProForm.Item>
                 <ProForm.Item name='language' label="开发语言" rules={[{ required: true, message: '请选择开发语言!' }]}>
-                    <ProFormSelect
-                        request={getAppLanguage}
-                        disabled={edit}
-                    ></ProFormSelect>
+                    <ProFormSelect request={getAppLanguage} ></ProFormSelect>
                 </ProForm.Item>
                 <ProForm.Item name='remark' label='备注'>
                     <ProFormTextArea></ProFormTextArea>
