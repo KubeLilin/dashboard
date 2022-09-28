@@ -133,6 +133,11 @@ export default defineConfig({
           name: "serviceConnection",
           path: "/resources/serviceConnection",
           component:"./resources/serviceConnection"
+        },
+        {
+          name: "buildimagelist",
+          path: "/resources/buildimagelist",
+          component:"./resources/buildimagelist"
         }
       ]
     },
