@@ -6,7 +6,7 @@ import ProDescriptions from '@ant-design/pro-descriptions';
 
 import { history, Link } from 'umi';
 import { Button, Tag, Typography } from 'antd';
-import { PlusOutlined, LoadingOutlined,CloudUploadOutlined } from '@ant-design/icons';
+import { PlusOutlined, LoadingOutlined,CloudUploadOutlined, PushpinOutlined } from '@ant-design/icons';
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
@@ -15,6 +15,7 @@ import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
 import ReleaseRecord from '../releaseRecord';
+import Probe from '../probe';
 
 
 const { TabPane } = Tabs;
@@ -35,6 +36,7 @@ const AppInfo: React.FC = () => {
     const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
     const [execFormVisible, setExecFormVisible] = useState(false);
+    const [probeFormVisible, setProbeFormVisible] = useState(false);
     const [stepFormEdit, setStepFormEdit] = useState(false);
     const [dpId, stepDpId] = useState<number>(0);
     const [deployImage, setDeployImage] = useState<string|undefined>(undefined);
@@ -166,7 +168,13 @@ const AppInfo: React.FC = () => {
                     stepDpId(record.id)
                     setStepFormEdit(true)
                     setStepFormVisible(true)
-                }}>编辑部署</Button>
+                }}>编辑部署</Button>,
+                <Button key='probe' icon={<PushpinOutlined />} onClick={()=>{
+                    stepDpId(record.id)
+                    setProbeFormVisible(true)
+                }}>
+                    设置探针
+                </Button>
             ]
         },]
 
@@ -301,6 +309,9 @@ const AppInfo: React.FC = () => {
 
             <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} 
               deploymentId={dpId} deployImage={deployImage} tableRef={null} ></ExecDeployment>
+              <Probe visibleFunc={[probeFormVisible,setProbeFormVisible]} deploymentId={dpId} tableRef={actionRef}  >
+                
+              </Probe>
               
             </Content>
         </PageContainer>
