@@ -189,6 +189,27 @@ export default defineConfig({
       ]
     },
     {
+      name:'networks',
+      path:'/networks',
+      routes:[
+        {
+          name: "gateway",
+          path: "/networks/gateway",
+          component:"./networks/gateway"
+        },
+        {
+          name: "gateway_teams",
+          path: "/networks/gateway/teams",
+          component:"./networks/gateway/teams"
+        },
+        {
+          name: "gateway_routers",
+          path: "/networks/gateway/routers",
+          component:"./networks/gateway/routers"
+        },
+      ]
+    },
+    {
       name: 'account',
       icon: 'user',
       path: '/account',
