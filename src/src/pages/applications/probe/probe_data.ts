@@ -18,11 +18,16 @@ export type ProbeFormData={
     enableReadiness:boolean,
     enableLiveness:boolean,
     readinesstype:string,
-    readinessport:number,
-    readinessurl:string,
-    readinessreqScheme:string
+    readinessPort:number,
+    readinessUrl:string,
+    readinessReqScheme:string
+    readinessInitialDelaySeconds:number,
+    readinessPeriodSeconds:number
     livenesstype:string,
     livenessport:number,
     livenessurl:string,
-    livenessreqScheme:string
+    livenessreqScheme:string,
+    livenessInitialDelaySeconds:number,
+    livenessPeriodSeconds:number
+
 }

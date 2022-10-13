@@ -1,5 +1,5 @@
-import ProForm, { ModalForm, ProFormInstance, ProFormText } from '@ant-design/pro-form';
-import { Checkbox } from 'antd';
+import ProForm, { ModalForm, ProFormGroup, ProFormInstance, ProFormSelect, ProFormText } from '@ant-design/pro-form';
+import { Checkbox, InputNumber, Switch } from 'antd';
 import Form from 'antd/lib/form';
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
 import { ProbeFormData } from './probe_data';
@@ -22,10 +22,48 @@ const Probe: React.FC<Props> = (props: Props) => {
 
         }
     }} >
-        <ProForm.Item name='image' label='镜像仓库'>
-            <ProFormText></ProFormText>
-        </ProForm.Item>
-
+        <ProFormGroup title='Liveness'>
+            <ProForm.Item name='enableLiveness' label='开启Liveness探针'>
+            <Switch checkedChildren="开启" unCheckedChildren="关闭" defaultChecked />
+            </ProForm.Item>
+            <ProForm.Item name='livenessport' label='请求端口'>
+                <InputNumber min={0}></InputNumber>
+            </ProForm.Item>
+            <ProForm.Item name='livenessurl' label='请求路径'>
+                <ProFormText></ProFormText>
+            </ProForm.Item>
+            <ProForm.Item name='livenessInitialDelaySeconds' label='首次执行延迟秒数'>
+                <InputNumber min={0}></InputNumber>
+            </ProForm.Item>
+            <ProForm.Item name='livenessPeriodSeconds' label='检查间隔秒数'>
+                <InputNumber min={0}></InputNumber>
+            </ProForm.Item>
+            <ProFormSelect name='livenessreqScheme' label='请求协议' options={[
+                { label: 'HTTP', value: 'HTTP' }
+            ]}>
+            </ProFormSelect>
+        </ProFormGroup>
+        <ProFormGroup title='Readiness'>
+            <ProForm.Item name='enableReadiness' label='开启Readiness探针'>
+            <Switch checkedChildren="开启" unCheckedChildren="关闭" defaultChecked />
+            </ProForm.Item>
+            <ProForm.Item name='readinessPort' label='请求端口'>
+                <InputNumber min={0}></InputNumber>
+            </ProForm.Item>
+            <ProForm.Item name='readinessUrl' label='请求路径'>
+                <ProFormText></ProFormText>
+            </ProForm.Item>
+            <ProForm.Item name='readinessInitialDelaySeconds' label='首次执行延迟秒数'>
+                <InputNumber min={0}></InputNumber>
+            </ProForm.Item>
+            <ProForm.Item name='readinessPeriodSeconds' label='检查间隔秒数'>
+                <InputNumber min={0}></InputNumber>
+            </ProForm.Item>
+            <ProFormSelect name='readinessReqScheme' label='请求协议' options={[
+                { label: 'HTTP', value: 'HTTP' }
+            ]}>
+            </ProFormSelect>
+        </ProFormGroup>
     </ModalForm>);
 }
 
