@@ -133,6 +133,11 @@ export default defineConfig({
           name: "serviceConnection",
           path: "/resources/serviceConnection",
           component:"./resources/serviceConnection"
+        },
+        {
+          name: "buildimagelist",
+          path: "/resources/buildimagelist",
+          component:"./resources/buildimagelist"
         }
       ]
     },
@@ -180,6 +185,27 @@ export default defineConfig({
           name: "projects",
           path: "/devops/projects/info",
           component:"./devops/projects/info"
+        },
+      ]
+    },
+    {
+      name:'networks',
+      path:'/networks',
+      routes:[
+        {
+          name: "gateway",
+          path: "/networks/gateway",
+          component:"./networks/gateway"
+        },
+        {
+          name: "gateway_teams",
+          path: "/networks/gateway/teams",
+          component:"./networks/gateway/teams"
+        },
+        {
+          name: "gateway_routers",
+          path: "/networks/gateway/routers",
+          component:"./networks/gateway/routers"
         },
       ]
     },
