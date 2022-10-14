@@ -27,6 +27,14 @@ export async function getDeploymentList(params: any) {
 }
 
 
+export async function deleteRoute(params: any) {
+    let req= await request<ApiResponse<any>>('/v1/apigateway/route',{
+        method:'DELETE',
+        params: params
+    })
+   return req.data
+}
+
 export async function createOrEditRoute(formData: any){
     let resData = await request<ApiResponse<boolean>>("/v1/apigateway/createoreditrouter", {
         method: 'POST',

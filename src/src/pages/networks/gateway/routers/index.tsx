@@ -1,11 +1,11 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, {ActionType, ProColumns } from '@ant-design/pro-table';
 import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled ,SmileOutlined} from '@ant-design/icons';
-import { Input, Button, Form,Divider, Checkbox, Radio, Select,notification,message } from 'antd';
+import { Input, Button, Form,Divider, Checkbox, Radio, Select,notification,message,Popconfirm } from 'antd';
 import React, { useState, useRef } from 'react';
 import { DrawerForm, ProFormSelect, ProFormText,ProFormRadio } from '@ant-design/pro-form';
 import { history,Link } from 'umi';
-import { getRouterList,getAppList,getDeploymentList , createOrEditRoute } from './service'
+import { getRouterList,getAppList,getDeploymentList , createOrEditRoute ,deleteRoute} from './service'
 
 const Routers: React.FC = () => {
     const teamId = history.location.query?.teamId
@@ -71,6 +71,20 @@ const Routers: React.FC = () => {
                     repoFormRef.setFieldsValue(record)
                     setrepoDrawerVisible(true)
                 }} >编辑</a>,
+                ,
+                <Popconfirm key="link-confirm" title="确定要删除这个路由吗?" onConfirm={async()=>{
+                    const res = await deleteRoute({id:record.id,gatewayId:Number(gatewayId)})
+                    if (res.success) {
+                        notification.open({
+                            message: '删除成功',
+                            description: record.name + '路由删除成功',
+                        });
+                       
+                    } 
+                    actionRef.current?.reload()
+                }}>
+                   <a key="link_del">删除</a>
+                </Popconfirm>
             ]
         }
 
@@ -140,6 +154,13 @@ const Routers: React.FC = () => {
                     options={[ { label: '保持原样', value: 0 }, { label: '正则改写', value: 1 }, ]} 
                     fieldProps={{onChange:(e)=>{
                             setNoRewrite(Boolean( e.target.value))
+                            if(e.target.value==0) {
+                                repoFormRef.setFieldsValue({ 
+                                    uri:`/*`,
+                                    regexUri: `` ,
+                                    regexTmp: "",
+                                })
+                            }
                     }} } />
                 <div style={{ display: noRewrite?'block':'none' }}>
                 <ProFormText name='regexUri'  label='匹配正则表达式' placeholder="请输入匹配正则表达式"></ProFormText>
@@ -147,19 +168,20 @@ const Routers: React.FC = () => {
                 </div>
             </DrawerForm>
 
-            <ProTable rowKey={"id"} columns={columns} actionRef={actionRef} request={ (params)=>{
-                params.teamId = teamId
-                return getRouterList(params)
-            } }
-            toolBarRender={() => [
-                <Button key='button' icon={<PlusOutlined />} type="primary"
-                    onClick={() => {
-                        repoFormRef.resetFields()
-                        setNoRewrite(true)
-                        setrepoDrawerVisible(true)
-                        setIsEdit(false)
-                    }}>新增路由</Button>
-            ]} ></ProTable>
+            <ProTable rowKey={"id"} columns={columns} actionRef={actionRef} 
+                request={ (params)=>{
+                    params.teamId = teamId
+                    return getRouterList(params)
+                } }
+                toolBarRender={() => [
+                    <Button key='button' icon={<PlusOutlined />} type="primary"
+                        onClick={() => {
+                            repoFormRef.resetFields()
+                            setNoRewrite(true)
+                            setrepoDrawerVisible(true)
+                            setIsEdit(false)
+                        }}>新增路由</Button>
+                ]} ></ProTable>
         </PageContainer>
     )
 }
