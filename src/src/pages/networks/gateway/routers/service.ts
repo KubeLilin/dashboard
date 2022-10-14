@@ -27,4 +27,17 @@ export async function getDeploymentList(params: any) {
 }
 
 
+export async function createOrEditRoute(formData: any){
+    let resData = await request<ApiResponse<boolean>>("/v1/apigateway/createoreditrouter", {
+        method: 'POST',
+        headers:{
+            'Content-Type': 'application/json',
+        },
+        data:formData
+    })
+    return resData
+}
+
+
+
 

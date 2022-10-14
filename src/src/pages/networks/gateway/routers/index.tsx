@@ -5,12 +5,14 @@ import { Input, Button, Form,Divider, Checkbox, Radio, Select,notification } fro
 import React, { useState, useRef } from 'react';
 import { DrawerForm, ProFormSelect, ProFormText,ProFormRadio } from '@ant-design/pro-form';
 import { history,Link } from 'umi';
-import { getRouterList,getAppList,getDeploymentList } from './service'
+import { getRouterList,getAppList,getDeploymentList , createOrEditRoute } from './service'
 
 const Routers: React.FC = () => {
-    const teamId = history.location.query?.id
-    const teamName= history.location.query?.name
+    const teamId = history.location.query?.teamId
+    const teamName= history.location.query?.teamName
     const clusterId = history.location.query?.clusterId
+    const gatewayId = history.location.query?.gatewayId
+
     const [repoDrawerVisible, setrepoDrawerVisible] = useState(false)
     const [isEdit, setIsEdit] = useState(false)
     const [repoFormRef] = Form.useForm();
@@ -44,11 +46,17 @@ const Routers: React.FC = () => {
             title: '描述',
         },
         {
+            dataIndex:'liveness',
+            title:'探针',
+            render: (dom, row) => {
+                return <a key={'livenesslink' + row.id} href={row.liveness} target="_blank">{dom}</a>
+            }
+        },
+        {
             dataIndex: 'nodes',
             title: '绑定负载',
             hideInSearch:true,
         },
-
         {
             title: '操作',
             valueType: 'option',
@@ -58,7 +66,7 @@ const Routers: React.FC = () => {
                     var params = { appId:record.applicationId,clusterId: Number(clusterId) }
                     const res = await getDeploymentList(params)
                     deploymentListOptionsHandler(res)
-                    setNoRewrite(Boolean( record.rewirte ))
+                    setNoRewrite(Boolean( record.rewrite ))
                     setIsEdit(true)
                     repoFormRef.setFieldsValue(record)
                     setrepoDrawerVisible(true)
@@ -73,23 +81,26 @@ const Routers: React.FC = () => {
             <DrawerForm form={repoFormRef} title={ isEdit?"编辑-网关路由":"新增-网关路由" }  width={850} visible={repoDrawerVisible} onVisibleChange={setrepoDrawerVisible}
                 drawerProps={{ destroyOnClose: true, }}
                 onFinish={ async fromdata => {
-                        console.log(fromdata)
-                        // const res = await createOrEditTeam(fromdata)
-                        //  if (res.success == false) {
-                        //     notification.error({
-                        //         message: res.message,
-                        //     });
-                        // } else {
-                        //     notification.success({
-                        //         message: "保存成功" });
-                        // }
-                        //setrepoDrawerVisible(false) 
+                    fromdata.teamId = Number(teamId)
+                    fromdata.gatewayId = Number(gatewayId)
+                    console.log(fromdata)
+                        const res = await createOrEditRoute(fromdata)
+                         if (res.success == false) {
+                            notification.error({
+                                message: res.message,
+                            });
+                        } else {
+                            notification.success({
+                                message: "保存成功" });
+                        }
+                        setrepoDrawerVisible(false) 
                         actionRef.current?.reload()
                 }}>
                 <Divider orientation="left"  orientationMargin="0">基本信息</Divider>
                 <ProFormText name='id' hidden></ProFormText> 
                 <ProFormText name='name' label='路由名称' placeholder="请输入路由名称" rules={[{ required: true, message: "请输入路由名称" }]}></ProFormText>
                 <ProFormText name='desc' label='描述' placeholder="请输描述"></ProFormText>
+                <ProFormText name='liveness' label='存活探针' placeholder="请输入存活探针" ></ProFormText>
 
                 <Divider orientation="left"  orientationMargin="0">负载信息</Divider>
 
@@ -115,7 +126,7 @@ const Routers: React.FC = () => {
                             repoFormRef.setFieldsValue({ 
                                 uri:`/${option.label}/*`,
                                 regexUri: `^/${option.label}/(.*)` ,
-                                regexTmp: "$1",
+                                regexTmp: "/$1",
                             })
 
                         }
@@ -126,7 +137,7 @@ const Routers: React.FC = () => {
                 <ProFormText name='uri' label='路径' placeholder="请输入路径,HTTP 请求路径，如 /foo/index.html，支持请求路径前缀 /foo/*。/* 代表所有路径" rules={[{ required: true, message: "请输入路径" }]}></ProFormText>
                 
                 <Divider orientation="left"  orientationMargin="0">请求改写</Divider>
-                <ProFormRadio.Group name="rewirte" label="路径改写" initialValue={1} rules={[{ required: true, message: "请输入路径改写" }]}
+                <ProFormRadio.Group name="rewrite" label="路径改写" initialValue={1} rules={[{ required: true, message: "请输入路径改写" }]}
                     options={[ { label: '保持原样', value: 0 }, { label: '正则改写', value: 1 }, ]} 
                     fieldProps={{onChange:(e)=>{
                             setNoRewrite(Boolean( e.target.value))
