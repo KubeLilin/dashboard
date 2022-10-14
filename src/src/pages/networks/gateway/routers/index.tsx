@@ -1,7 +1,7 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, {ActionType, ProColumns } from '@ant-design/pro-table';
 import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled ,SmileOutlined} from '@ant-design/icons';
-import { Input, Button, Form,Divider, Checkbox, Radio, Select,notification } from 'antd';
+import { Input, Button, Form,Divider, Checkbox, Radio, Select,notification,message } from 'antd';
 import React, { useState, useRef } from 'react';
 import { DrawerForm, ProFormSelect, ProFormText,ProFormRadio } from '@ant-design/pro-form';
 import { history,Link } from 'umi';
@@ -90,8 +90,7 @@ const Routers: React.FC = () => {
                                 message: res.message,
                             });
                         } else {
-                            notification.success({
-                                message: "保存成功" });
+                            message.success({content:'路由已生效,请联系管理员对域名进行DNS解析.',duration: 3});
                         }
                         setrepoDrawerVisible(false) 
                         actionRef.current?.reload()
@@ -156,6 +155,7 @@ const Routers: React.FC = () => {
                 <Button key='button' icon={<PlusOutlined />} type="primary"
                     onClick={() => {
                         repoFormRef.resetFields()
+                        setNoRewrite(true)
                         setrepoDrawerVisible(true)
                         setIsEdit(false)
                     }}>新增路由</Button>
