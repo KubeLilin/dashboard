@@ -9,6 +9,7 @@ import { ApplicationItem } from '../../applications/apps/apps_data';
 import {  getApps } from './service';
 import { AppsColumns } from './components/project_apps'
 import ProjectDeployList from './components/project_deploys'
+import ProjectPipelineList from './components/project_pipeline'
 
 const ProjectInfo: React.FC = () => {
     var projectId = Number(history.location.query?.id)
@@ -38,6 +39,7 @@ const ProjectInfo: React.FC = () => {
                     <ProjectDeployList projectId={projectId} />
                 </TabPane>
                 <TabPane tab="流水线" key="3" >
+                    <ProjectPipelineList projectId={projectId} />
                 </TabPane>
                 <TabPane tab="权限管理" key="4" >
                 </TabPane>

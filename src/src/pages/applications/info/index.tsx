@@ -192,7 +192,7 @@ const AppInfo: React.FC = () => {
             ] }}
             header={{
                 extra: [
-                    <Button key="1" onClick={() => { history.replace('/applications/apps') }}>返回上一级</Button>]
+                    <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
             <Content style={{ background:'white' }} > 
             <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} 
