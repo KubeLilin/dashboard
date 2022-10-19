@@ -65,7 +65,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             if(res) {
                 var build = { success:false,status:'', action:'管理员: 手动触发', time:'-- 分钟', task:'' ,start:'',  } 
                 appBuildList = res.data.map((v:any,i)=>
-                     ({ id:v.id, title: v.name ,appId:v.appid,taskId:Number(v.lastTaskId),lastBuildRecords:build ,dsl:v.dsl?JSON.parse(v.dsl):undefined  }))
+                     ({ id:v.id, title: v.name ,appId:v.appid,appName:v.appName,taskId:Number(v.lastTaskId),lastBuildRecords:build ,dsl:v.dsl?JSON.parse(v.dsl):undefined  }))
                 //console.log(appBuildList)
             }      
             const cpBuildList:BuildItem[] = [...appBuildList]
@@ -132,18 +132,18 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             width: 68,
         },
         {
-            title: 'APPID',
-            dataIndex: 'appId',
-            width: 68,
-        },
-        {
             title:'流水线名称',
             dataIndex:'title',
+            width:400,
             render:(dom,item)=>(
                 <a style={{ color: 'blue', textDecorationLine: 'underline' }} onClick={()=>{
-                    history.push(`/devops/pipeline?id=${item.id}&name=${item.title}&appid=${item.appId}`)
+                    history.push(`/devops/pipeline?id=${item.id}&name=${item.title}&appid=${item.appId}&appname=${item.appName}`)
                 }}>{dom}</a>
             )
+        },
+        {
+            title: '应用名称',
+            dataIndex: 'appName',
         },
         {
             title:'任务ID',
