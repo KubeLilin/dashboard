@@ -73,3 +73,44 @@ export async function GetPipelineDetails(appId:number,pipelineId:number,taskId:n
     })
     return resData
 }
+
+export async function RunPipeline(pipelineId:number, appId:number) {
+    let resData = await request<ApiResponse<number>>("/v1/application/runpipeline",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: {
+            id: pipelineId,
+            appid: appId
+        }
+    })
+    return resData
+}
+
+export async function AbortPipeline(pipelineId:number, appId:number,taskId:number) {
+    let resData = await request<ApiResponse<number>>("/v1/application/abortpipeline",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: {
+            id: pipelineId,
+            appid: appId,
+            taskId: taskId
+        }
+    })
+    return resData
+}
+
+export async function GetPipelineLogs(appId:number,pipelineId:number,taskId:number) {
+    let resData = await request<ApiResponse<string>>("/v1/application/pipelinelogs",{
+        method:'GET',
+        params: {
+            id: pipelineId,
+            appId:appId,
+            taskId:taskId
+        }
+    })
+    return resData
+}

@@ -248,8 +248,13 @@ const Pipeline : React.FC = () => {
         header={{
             extra: [
                 <Button key="1" onClick={() => { 
-                    const returnUrl = `/applications/info?id=${appId}&name=${appName}&returnkey=3`
-                    history.replace(returnUrl)
+                    console.log(appName)
+                    if (appName){
+                        const returnUrl = `/applications/info?id=${appId}&name=${appName}&returnkey=3`
+                        history.replace(returnUrl)
+                    } else {
+                        history.goBack()
+                    }
                  }}>返回上一级</Button>]
         }}>
         <Content style={{ background:'white' }} > 

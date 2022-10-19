@@ -52,7 +52,7 @@ const AppBuildList : React.FC<Props> = (props) => {
     const [currentBuildItem,setCurrentBuildItem] = useState<BuildItem|undefined>(undefined)
     const [autoLogs, setAutoLogs] = useState(false);
 
-    const [currentLogs,setCurrentLogs] = useState<string>("")
+    const [currentLogs,setCurrentLogs] = useState<string>('Init Pod logs , please wait ..... ')
 
     const LoadData = (appId:number )=> {
         GetPipelineList(appId).then((res)=>{
@@ -166,6 +166,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                         <List.Item>
                         <Card hoverable bordered 
                                 onClick={ async()=>{
+                                    setCurrentLogs('Init Pod logs , please wait ..... ')
                                     setCurrentBuildItem(item)
                                     setVisablePipelineLogForm(true)
                                     if(item.lastBuildRecords?.status=='completed'){
@@ -179,7 +180,6 @@ const AppBuildList : React.FC<Props> = (props) => {
                                     } else {
                                         setAutoLogs(true)
                                     }
-
                                 }}
                                 title={  <Tooltip title={item.title}>{item.title}</Tooltip>  } 
                                 actions={[ 
@@ -278,6 +278,7 @@ const AppBuildList : React.FC<Props> = (props) => {
             
             <Drawer title="流水线日志" width={1280} visible={visablePipelineLogForm} destroyOnClose  
                 onClose={() => { 
+                    setCurrentLogs('Init Pod logs , please wait ..... ')
                     setVisablePipelineLogForm(false)
                     setAutoLogs(false)
                 }} > 
@@ -286,7 +287,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                             { title: '流水线ID', dataIndex: 'id' },
                             { title: '流水线名称', dataIndex: 'title' },
                             { title: '任务ID', dataIndex: 'taskId'},
-                            { title: "任务开始时间",dataIndex: ['lastBuildRecords','start'] }
+                            { title: "任务开始时间",dataIndex: ['lastBuildRecords','start'],valueType:"dateTime" }
                             ]}/>
             <div style={{ marginBottom: 10 }}></div>
             <textarea value={currentLogs} ref={(text) => { if (text) { text.scrollTop = Number(text?.scrollHeight) } }}
