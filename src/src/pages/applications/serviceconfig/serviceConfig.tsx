@@ -144,15 +144,15 @@ const ServiceConfig: React.FC = () => {
             dataIndex: 'operation',
             render: (_, record: any, index) =>
                 dataSource.length >= 1 ? (
-                    <Popconfirm title="Sure to delete?" onConfirm={() => handleDelete(record.index)}>
-                        <a>Delete</a>
+                    <Popconfirm title="确定要删除吗?" onConfirm={() => handleDelete(record.index)}>
+                        <a>删除</a>
                     </Popconfirm>
                 ) : null,
         },
     ];
 
     const handleAdd = () => {
-        const newData: ServicePort = { protocol: "TCP", port: 0, targetPort: 0, index: count, name: "映射名称" };
+        const newData: ServicePort = { protocol: "TCP", port: 80, targetPort: 80,nodePort:30000, index: count, name: "tcp-1" };
         setDataSource([...dataSource, newData]);
         setCount(count + 1);
     };

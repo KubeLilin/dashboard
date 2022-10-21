@@ -42,5 +42,6 @@ export type ServicePort={
     protocol:string,
     port:number,
     targetPort:number
+    nodePort:number
 
 }
