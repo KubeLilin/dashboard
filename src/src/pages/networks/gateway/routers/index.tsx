@@ -132,7 +132,7 @@ const Routers: React.FC = () => {
                             deploymentListOptionsHandler(res)
                         },
                     }}></ProFormSelect>
-                <ProFormSelect name='deploymentId' label="部署" options={deploymentListOptions} placeholder="请选择部署" showSearch rules={[{ required: true, message: "请选择部署" }]}
+                <ProFormSelect allowClear={true} name='deploymentId' label="部署" options={deploymentListOptions} placeholder="请选择部署" showSearch rules={[{ required: true, message: "请选择部署" }]}
                     fieldProps={{ 
                         filterOption:(input, option) =>  Boolean( option?.label?.toString().toLowerCase().includes(input.toLowerCase()) ),
                         onChange:async (value, option:any) => {

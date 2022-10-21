@@ -4,6 +4,8 @@ export  type ServiceData={
     type:string
     labels:any
     selector:any
+    clusterIP:string
+    sessionAffinity:string
     createTime:Date
     continueStr:string
 }
@@ -15,6 +17,8 @@ export  type ServiceViewData={
     type:string
     labels:string
     selector:string
+    clusterIP:string
+    sessionAffinity:string
     createTime:string
     continueStr:string
 }
@@ -27,7 +31,8 @@ export type ServiceInfo={
     labels:string
     selector:string
     createTime:string
-    clusterIp:string,
+    clusterIP:string
+    sessionAffinity:string
     port:ServicePort[]
 }
 

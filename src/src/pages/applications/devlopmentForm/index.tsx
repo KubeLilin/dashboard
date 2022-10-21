@@ -166,7 +166,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         ></Select>
                     </ProForm.Item>
                     <ProForm.Item label="集群" name='clusterId' rules={[{ required: true, message: '请选择集群' }]} >
-                        <Select
+                        <Select allowClear
                             disabled={props.isEdit}
                             options={cluster}
                             onChange={(value: any) => {
@@ -178,7 +178,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         </Select>
                     </ProForm.Item>
                     <ProForm.Item label="命名空间" name='namespaceId' rules={[{ required: true, message: '请选择命名空间' }]} >
-                        <Select
+                        <Select allowClear
                             disabled={props.isEdit}
                             options={namespace}
                         >
