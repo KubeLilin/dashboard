@@ -45,7 +45,7 @@ function  pareTime(date:Date):string {
    return moment(date.valueOf()).format('YYYY-MM-DD HH:mm:ss')
 }
 
-export async function BindNameSpace(clusterId:number):Promise<any>{
+export async function BindNameSpaceByPAAS(clusterId:number):Promise<any>{
     let req=await request<ApiResponse<any[]>>('/v1/service/namespacebytenant',{
         method:'GET',
         params:{
@@ -55,6 +55,18 @@ export async function BindNameSpace(clusterId:number):Promise<any>{
    let res= req.data.map(y => { return { value: y.namespace, label: y.namespace } })
    return new Promise(x=>x(res))
 }
+
+export async function BindNameSpace(clusterId:number):Promise<any>{
+    let req=await request<ApiResponse<any[]>>('/v1/service/namespacelist',{
+        method:'GET',
+        params:{
+            clusterId:clusterId
+        }
+    })
+   let res= req.data.map(y => { return { value: y.name, label: y.name } })
+   return new Promise(x=>x(res))
+}
+
 
 export async function getServiceInfo(params:{namespace:string,name:string}) {
     let req=await request<ApiResponse<ServiceInfo>>('/v1/service/info',{
@@ -83,4 +95,20 @@ export async function getClusterList() :Promise<any>{
     })
     let data=  resData.data?.map(x=>{return  {value:x.id,label:x.name}})
     return new Promise(x=>x(data))
+}
+
+
+export async function getDeploymentKVList(clusterId:number,ns:string):Promise<any>{
+    let req = await request<ApiResponse<any[]>>('/v1/cluster/deployments',{
+        method:'GET',
+        params:{
+            cid:clusterId,
+            namespace: ns
+        }
+    })
+    var res =[{label:'无',value:''}]
+    if (req.data &&  req.data.length >0 ) {
+        res= req.data.map(y => { return { label: y.name, value: JSON.stringify( y.labels) } })
+    }
+    return new Promise(x=>x(res))
 }
