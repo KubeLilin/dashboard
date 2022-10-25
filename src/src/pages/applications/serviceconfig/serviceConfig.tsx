@@ -264,11 +264,9 @@ const ServiceConfig: React.FC = () => {
             renderFormItem: () => {
                 return <ProFormSelect key="nssl" allowClear={true} options={bindNamespaceList} ></ProFormSelect>
             },
-            width:120,
             fieldProps:{
                 autoClearSearchValue:true,
                 allowClear:true,
-
             }
         },
         {
@@ -295,27 +293,26 @@ const ServiceConfig: React.FC = () => {
             title: '类型',
             dataIndex: 'type',
             hideInSearch: true,
-            width:120,
         },
         {
             title: 'IP地址',
             dataIndex: 'clusterIP',
             hideInSearch: true
         },
-        {
-            title: 'Labels',
-            dataIndex: 'labels',
-            hideInSearch: true,
-            render:(dom,item)=>{
-                var json = String(dom?.toString())
-                const labels  = getObjectKVString(json)
-              return  (
-                <Paragraph key={item.name+'_labels'} ellipsis={{ rows: 2, tooltip: labels.map(s=> (<Tag style={{fontSize:16}} color="purple">{s}</Tag>)) }} >
-                   {labels.map(s=> (<li>{s}</li>))}
-                </Paragraph>
-             )
-            } 
-        }, 
+        // {
+        //     title: 'Labels',
+        //     dataIndex: 'labels',
+        //     hideInSearch: true,
+        //     render:(dom,item)=>{
+        //         var json = String(dom?.toString())
+        //         const labels  = getObjectKVString(json)
+        //       return  (
+        //         <Paragraph key={item.name+'_labels'} ellipsis={{ rows: 2, tooltip: labels.map(s=> (<Tag style={{fontSize:16}} color="purple">{s}</Tag>)) }} >
+        //            {labels.map(s=> (<li>{s}</li>))}
+        //         </Paragraph>
+        //      )
+        //     } 
+        // }, 
         {
             title: 'Selector',
             dataIndex: 'selector',
@@ -344,13 +341,13 @@ const ServiceConfig: React.FC = () => {
         }, {
             title: '操作',
             valueType: 'option',
-            width:80,
+            width:130,
             render: (text, record, _, action) => [
                 <a key={record.name+'option'} onClick={() => {
                     isAddHandler(false)
                     const clusterId = Number(seacthForm.current?.getFieldValue('clusterId'))
                     const onlyPaaS = seacthForm.current?.getFieldValue('onlyPAAS')
-                    getServiceInfoDetail({ clusterId:clusterId,onlyPaaS:onlyPaaS, namespace: namespace, name: record.name })
+                    getServiceInfoDetail({ clusterId:clusterId,onlyPaaS:onlyPaaS, namespace: record.namespace, name: record.name })
                     formVisibleHandler(true);
                 }}>编辑</a>,
             ]
@@ -403,26 +400,13 @@ const ServiceConfig: React.FC = () => {
                     formVisibleHandler(v)
                 }}
                 onFinish={async (x)=>{
-                    if(x.labels!=""&&x.labels!=null&&x.labels!=undefined){
-                        if(typeof JSON.parse(x.labels) == "object"){
-
-                        }else{
-                            notification.open({
-                                message: "labels必须是一个标准的json格式",
-                                icon: <CloseCircleTwoTone />,
-                            });
-                            return
-                        }
-                    }
+                    console.log(x)
                     if(x.selector!=""&&x.selector!=null&&x.selector!=undefined){
-                        if(typeof JSON.parse(x.labels) == "object"){
-
-                        }else{
+                        if((typeof JSON.parse(x.selector)) != "object"){
                             notification.open({
                                 message: "selector必须是一个标准的json格式",
                                 icon: <CloseCircleTwoTone />,
                             });
-                            return
                         }
                     }
 
@@ -560,7 +544,6 @@ const ServiceConfig: React.FC = () => {
 
             <ProTable<ServiceData>
                 columns={tableColumns}
-                search={{ span: 5 }}
                 pagination={{ pageSize:50 }}
                 formRef={seacthForm}
                 rowKey={(i)=>i.name+i.createTime}

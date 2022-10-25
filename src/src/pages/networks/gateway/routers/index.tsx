@@ -61,6 +61,7 @@ const Routers: React.FC = () => {
             title: '操作',
             valueType: 'option',
             key: 'option',
+            width:130,
             render: (text, record, _, action) => [
                 <a key="link_edit" onClick={async()=>{
                     var params = { appId:record.applicationId,clusterId: Number(clusterId) }
