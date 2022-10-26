@@ -10,7 +10,7 @@ import {  getApps } from './service';
 import { AppsColumns } from './components/project_apps'
 import ProjectDeployList from './components/project_deploys'
 import ProjectPipelineList from './components/project_pipeline'
-import { Item } from 'gg-editor';
+import ProjectResource from './components/project_resource'
 
 const ProjectInfo: React.FC = () => {
     var projectId = Number(history.location.query?.id)
@@ -50,9 +50,10 @@ const ProjectInfo: React.FC = () => {
                 <TabPane tab="流水线" key="3" >
                     <ProjectPipelineList projectId={projectId} AutoLoad={autoLoadPipelineData} />
                 </TabPane>
-                <TabPane tab="权限管理" key="4" disabled>
+                <TabPane tab="资源情况" key="4">
+                    <ProjectResource projectId={projectId} projectName={String(projectName)} />
                 </TabPane>
-                <TabPane tab="资源情况" key="5" disabled>
+                <TabPane tab="权限管理" key="5" disabled>
                 </TabPane>
             </Tabs>
             </Content>

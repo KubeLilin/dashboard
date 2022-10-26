@@ -415,6 +415,9 @@ const Pods: React.FC = (props) => {
                     </CodeMirror>
                     </div>
                 </TabPane>
+                <TabPane tab="网络" key="5"  disabled={ namespace==undefined?true:false } >
+                </TabPane>
+
             </Tabs>
             </Content>
             <ModalForm<{ replicas: number; }>
