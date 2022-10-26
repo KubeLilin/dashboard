@@ -1,7 +1,7 @@
 import { CloseCircleTwoTone, MinusCircleOutlined, PlusOutlined, SmileOutlined } from '@ant-design/icons';
 import ProForm, {ProFormInstance, DrawerForm, ModalForm, ProFormContext, ProFormGroup, ProFormItem, ProFormRadio, ProFormSelect, ProFormText } from '@ant-design/pro-form';
 import { PageContainer } from '@ant-design/pro-layout';
-import ProTable, { ProColumns,ColumnsState } from '@ant-design/pro-table';
+import ProTable, { ProColumns,ColumnsState,ActionType } from '@ant-design/pro-table';
 import { Tag,Button, Form, FormInstance, Input, InputRef, notification, Popconfirm, Radio, Select, Space, Table,Typography, Tooltip } from 'antd';
 import route from 'mock/route';
 const { Paragraph, Text } = Typography;
@@ -227,9 +227,10 @@ const ServiceConfig: React.FC = () => {
     }
 
     const seacthForm = useRef<ProFormInstance>()
-
     const [appForm] = Form.useForm()
     const [workloadForm] = Form.useForm()
+    const serviceListActionRef =  useRef<ActionType>()
+
     const [continueStr, continueStrHandler] = useState<string>();
     const [formVisible, formVisibleHandler] = useState<boolean>(false);
     const [workloadFormVisible, workloadFormVisibleHandler] = useState<boolean>(false);
@@ -426,12 +427,13 @@ const ServiceConfig: React.FC = () => {
                             icon: <SmileOutlined style={{ color: '#108ee9' }} />,
                         });
                         formVisibleHandler(false)
-                    } else{
+                    } else {
                         notification.open({
                             message: res.message,
                             icon: <CloseCircleTwoTone />,
                         });
-                   }
+                    }
+                    serviceListActionRef.current?.reload()
                 }}
             >
                 <ProFormText name="name" label="服务名称" disabled={!isAdd}  rules={[ { required: true, message: '服务名称不能为空'},]} ></ProFormText>
@@ -545,6 +547,7 @@ const ServiceConfig: React.FC = () => {
             <ProTable<ServiceData>
                 columns={tableColumns}
                 pagination={{ pageSize:50 }}
+                actionRef={serviceListActionRef}
                 formRef={seacthForm}
                 rowKey={(i)=>i.name+i.createTime}
                 toolBarRender={() => [
