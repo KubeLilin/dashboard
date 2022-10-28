@@ -114,3 +114,12 @@ export async function GetPipelineLogs(appId:number,pipelineId:number,taskId:numb
     })
     return resData
 }
+
+
+export async function GetResourceMetrics(projectId:number) {
+    let resData = await request<ApiResponse<[]>>("/v1/devops/resourcemetrics",{
+        method:'GET',
+        params:{ projectId: projectId }
+    })
+    return resData
+} 
