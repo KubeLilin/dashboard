@@ -219,8 +219,8 @@ const AppInfo: React.FC = () => {
                 extra: [
                     <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
-            <Content style={{ background:'white' }} > 
-            <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} 
+            <Content  > 
+            <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ paddingLeft:25 }} 
                 onChange={(key)=>{
                     if(key=="3") {
                         setAutoLoadPipelineData(true)

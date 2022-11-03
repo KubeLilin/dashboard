@@ -28,8 +28,8 @@ const ProjectInfo: React.FC = () => {
                 extra: [
                     <Button key="1" onClick={() => { history.replace('/devops/projects') }}>返回项目列表</Button>]
             }}>
-            <Content style={{ background:'white'}} > 
-            <Tabs  size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft: 25 }} 
+            <Content  > 
+            <Tabs  size="large" type="line" tabBarStyle={{  paddingLeft: 25 }} 
                 onChange={(key)=>{
                     console.log(key)
                     if(key=="3") {

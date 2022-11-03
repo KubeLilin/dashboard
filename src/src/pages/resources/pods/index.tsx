@@ -271,8 +271,8 @@ const Pods: React.FC = (props) => {
                 }}>返回上一级</Button>,],
             }}
         >
-            <Content style={{ background:'white' }} > 
-            <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }}
+            <Content   > 
+            <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{  paddingLeft:25 }}
                 onChange={(e) => {
                     switch(e){
                         case "2":
