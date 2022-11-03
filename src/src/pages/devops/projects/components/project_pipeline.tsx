@@ -119,7 +119,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
                         setCurrentLogs( res.data)
                     }
                 })
-            },1500)
+            },5500)
         }
         return () => { clearInterval(id) }
     } ,[autoLogs])
