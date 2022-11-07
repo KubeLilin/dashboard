@@ -47,11 +47,26 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
             datasource.allCount = allCount
             projectResourceInfoHandler(datasource)
             projectEnvPieHandler(pieDataStruct)
+            return datasource
+        }).then((info)=>{
+
+            GetResourceMetrics(props.projectId).then(res=>{
+                projectResourceMetricsHandler(res.data)
+               
+                console.log(info)
+                var copyInfo = {
+                    ...info,
+                    totalCpu: res.data.totalCpu,
+                    totalMemory: res.data.totalMemory
+                }
+                console.log(copyInfo)
+                projectResourceInfoHandler(copyInfo)
+
+            })
+
         })
 
-        GetResourceMetrics(props.projectId).then(res=>{
-            projectResourceMetricsHandler(res.data)
-        })
+       
 
 
     },[onLoaded])
@@ -66,15 +81,15 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
 
     return (
     <div>
-      <Row gutter={8}>
-      <Col span={8}>
-        <Card title="部署环境数占比统计"     >
+      <Row>
+      <Col span={5}>
+        <Card title="部署环境数占比统计" bordered={false}      >
                 <Pie data={projectEnvPie} {...config}  height={250} width={250} style={{marginTop:0,marginLeft:15}}  />
          </Card>
       </Col>
-      <Col span={8}>
-        <Card title="部署环境详情"   >
-            <ProDescriptions  style={{ padding:25, } }  dataSource={projectResourceInfo}
+      <Col span={11}>
+        <Card title="部署环境详情" bordered={false}   >
+            <ProDescriptions  style={{ padding:20,height:250 } }  dataSource={projectResourceInfo}
                 column={3}  bordered
                 columns={[
                     { title: '项目名称', dataIndex: 'projectName',span:3 },
@@ -82,17 +97,17 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
                     { title: '生产环境实例数',  dataIndex: 'prodCount' },
                     { title: '预生产环境实例数',  dataIndex: 'releaseCount' },
                     { title: '开发环境实例数',  dataIndex: 'devCount' },
-                    { title: '测试环境实例数',  dataIndex: 'testCount' },
+                    { title: '测试环境实例数',  dataIndex: 'testCount' ,span:3},
+                    { title: '申请CPU数量(Core)',  dataIndex: 'totalCpu' },
+                    { title: '申请内存数量(MBi)',  dataIndex: 'totalMemory' },
                 ]}/>
         </Card>
       </Col>
     </Row>
-
-    <GridContent style={{marginLeft:75,marginTop:20}}>
-    <Row>
+    <Row  style={{ marginTop:20}}>
         <Col span={4} >
-        <Card title="生产环境CPU申请量占比(%)" hoverable
-            bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
+        <Card title="项目生产环境CPU占比(%)" hoverable
+            bodyStyle={{ textAlign: 'center',height:270,width:300,marginTop:0  }}
             bordered={false} >
             <Space direction="vertical">
                 <Liquid height={130} width={130} min={0} max={Number(projectResourceMetrics?.totalCpu)}
@@ -108,7 +123,7 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
         </Card>
         </Col>
         <Col span={4}  style={{ marginBottom: 12 }}>
-        <Card title="生产环境内存申请量占比(%)MBi" hoverable
+        <Card title="项目生产环境内存占比(%)MBi" hoverable
             bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }} bordered={false} >
             <Space direction="vertical">
                 <Liquid height={130} width={130} min={0} max={Number(projectResourceMetrics?.totalMemory)}
@@ -125,7 +140,7 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
         </Col>
   
         <Col span={4}  style={{ marginBottom: 12 }}>
-        <Card title="预生产环境CPU申请量占比(%)" hoverable
+        <Card title="项目预生产环境CPU占比(%)" hoverable
             bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
             bordered={false} >
            <Space direction="vertical">
@@ -142,7 +157,7 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
         </Card>
         </Col>
         <Col span={4}  style={{ marginBottom: 12 }}>
-        <Card title="预生产环境内存申请量占比(%)MBi" hoverable
+        <Card title="项目预生产环境内存占比(%)MBi" hoverable
             bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
             bordered={false} >
            <Space direction="vertical">
@@ -160,10 +175,8 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
         </Col>
         </Row>
         <Row>
-
-
         <Col span={4}  >
-        <Card title="开发环境CPU申请量占比(%)" hoverable
+        <Card title="项目开发环境CPU占比(%)" hoverable
             bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
             bordered={false} >
              <Space direction="vertical">
@@ -181,7 +194,7 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
         </Col>
         
         <Col span={4}  style={{ marginBottom: 12 }}>
-        <Card title="开发环境内存申请量占比(%)MBi" hoverable
+        <Card title="项目开发环境内存占比(%)MBi" hoverable
             bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
             bordered={false} >
             <Space direction="vertical">
@@ -199,7 +212,7 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
         </Col>
 
         <Col span={4}>
-        <Card title="测试环境CPU申请量占比(%)" hoverable
+        <Card title="项目测试环境CPU占比(%)" hoverable
             bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
             bordered={false} >
             <Space direction="vertical">
@@ -218,7 +231,7 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
         </Col>
 
         <Col span={4}  style={{ marginBottom: 12 }}>
-        <Card title="测试环境内存申请量占比(%)MBi" hoverable
+        <Card title="项目测试环境内存占比(%)MBi" hoverable
             bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
             bordered={false} >
              <Space direction="vertical">
@@ -235,7 +248,6 @@ const ProjectResource: React.FC<ProjectResourceProps> = ( props ) => {
         </Card>
         </Col>
     </Row>
-    </GridContent>
     </div>
     )
 }
