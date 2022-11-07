@@ -52,3 +52,26 @@ export type  EventListProps = {
     namespace?:string,
     deployment?:string,
 }
+
+
+export type ServiceInfo={
+    namespace:string
+    name:string
+    type:string
+    labels:string
+    selector:string
+    createTime:string
+    clusterIP:string
+    sessionAffinity:string
+    port:ServicePort[]
+}
+
+export type ServicePort={
+    index:number,
+    name:string,
+    protocol:string,
+    port:number,
+    targetPort:number
+    nodePort:number
+
+}

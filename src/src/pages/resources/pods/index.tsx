@@ -4,10 +4,11 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm, { ModalForm, ProFormInstance } from '@ant-design/pro-form';
 import { history, Link,useModel } from 'umi';
 import { PodItem, ContainerItem, podLogsRequest } from './data';
-import { Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, notification, Radio } from 'antd'
+import { Table,Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, notification, Radio } from 'antd'
 import { getPodList, getNamespaceList, setReplicasByDeployId, 
-    GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , DeleteDeployment } from './service'
+    GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , DeleteDeployment,getServiceInfo } from './service'
 import React, { useState, useRef, useEffect } from 'react';
+import ProDescriptions from '@ant-design/pro-descriptions';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined ,SearchOutlined } from '@ant-design/icons';
 import moment from 'moment'; 
 import 'codemirror/lib/codemirror.js'
@@ -49,7 +50,8 @@ const Pods: React.FC = (props) => {
     var text1: any = undefined;
 
 
-    var deploymentInfo = history.location.state
+    var deploymentInfo:any = history.location.state
+    console.log(deploymentInfo)
     var deployId = history.location.query?.did
     var namespace = history.location.query?.ns
     var appName = history.location.query?.app
@@ -62,6 +64,8 @@ const Pods: React.FC = (props) => {
     if (clusterId == undefined && (node == undefined || appName == undefined)) {
         history.goBack()
     }
+
+   
 
     function bindYaml() {
         let res = getYaml(deployId)
@@ -224,14 +228,14 @@ const Pods: React.FC = (props) => {
 
     console.log(clusterId)
     console.log(node)
-    var pageTitle = "Pod 管理     "
+    var pageTitle = "实例管理     "
     var breadcrumb = [
         { path: '', breadcrumbName: '资源中心' },
         { path: '', breadcrumbName: '', }]
     if (appName) {
         breadcrumb[0] = { path: '', breadcrumbName: '应用中心' }
-        breadcrumb[1] = { path: '', breadcrumbName: 'Pod列表' }
-        pageTitle = pageTitle + ' -- 应用部署: ' + appName
+        breadcrumb[1] = { path: '', breadcrumbName: '实例管理' }
+        pageTitle = pageTitle + ' - 部署环境:  ' + appName
     } else if (node) {
         breadcrumb[0] = { path: '', breadcrumbName: '资源中心' }
         breadcrumb[1] = { path: '', breadcrumbName: '节点管理' }
@@ -298,7 +302,7 @@ const Pods: React.FC = (props) => {
                         columns={podColumns}
                         dateFormatter="string"
                         pagination={{ pageSize: 1000 }}
-                        headerTitle={`Pod 列表 - 上次更新时间：${moment(time).format('HH:mm:ss')}`}
+                        headerTitle={`实例列表 - 上次更新时间：${moment(time).format('HH:mm:ss')}`}
                         expandable={{ expandedRowRender }}
                         request={async (params, sort) => {
                             params.cid = clusterId
@@ -415,7 +419,48 @@ const Pods: React.FC = (props) => {
                     </CodeMirror>
                     </div>
                 </TabPane>
-                <TabPane tab="网络" key="5"  disabled={ namespace==undefined?true:false } >
+                <TabPane tab="详情" key="5"  disabled={ namespace==undefined?true:false } >
+                <ProDescriptions title="部署详情"  style={{ padding:15, } } dataSource={deploymentInfo} bordered  column={3} 
+                  columns={[
+                    { title: '应用名称', dataIndex: 'appName' },
+                    { title: '部署名称', dataIndex: 'name' },
+                    { title: '集群名称', dataIndex: 'clusterName' },
+                    { title: '命名空间',  dataIndex: 'namespace' },
+                    { title: '部署级别',  dataIndex: 'level' },
+                    { title: '部署镜像',  dataIndex: 'lastImage' },
+                    { title: '运行实例数',  dataIndex: 'running',render:(_,item)=>(<span>{item.running}/{item.expected}</span>) },
+                    // { title: '预期实例数',  dataIndex: 'expected' }
+                ]}/>
+
+                <ProDescriptions title="服务详情" request={async(params)=>{
+                    var data:any = deploymentInfo
+                    const res:any = await getServiceInfo({clusterId:deploymentInfo.clusterId,
+                           namespace:deploymentInfo.namespace,name:deploymentInfo.serviceName})
+                    data.serviceType = res.data.type
+                    data.sessionAffinity = res.data.sessionAffinity
+                    data.servicePorts = res.data.port
+                    res.data = data
+                    console.log(res)
+                    return res
+                }} style={{ padding:15, } }  bordered  column={3}
+                  columns={[
+                    { title: '服务类型', dataIndex: 'serviceType' },
+                    { title: '服务IP', dataIndex: 'serviceIP' },
+                    { title: '服务端口',  dataIndex: 'servicePort',span:3 },
+                    { title: '服务名称', dataIndex: 'serviceName',span:3 },
+                    { title: '端口映射',  dataIndex: 'option',span:3,
+                    render:(dom,item)=> (
+                        <Table bordered dataSource={item.servicePorts} pagination={false}
+                            columns={[ { title: '映射名称', dataIndex: 'name' },
+                                { title: '协议', dataIndex: 'protocol' },
+                                { title: '服务端口',dataIndex: 'port'},
+                                {title: '主机端口',dataIndex: 'nodePort' },
+                                {title: '容器端口',dataIndex: 'targetPort'}]}
+                    /> ) },
+                ]}/>
+
+        
+
                 </TabPane>
 
             </Tabs>

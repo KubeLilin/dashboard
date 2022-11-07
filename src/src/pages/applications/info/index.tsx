@@ -137,16 +137,17 @@ const AppInfo: React.FC = () => {
             }
         },
         {
-            title: '服务名/IP',
+            title: '服务名 / IP / Port',
             dataIndex: 'serviceIP',
-            width: 380,
+            width: 520,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
                 return (<span>
                     {row.serviceIP != '0.0.0.0' ? <span>
                         <Paragraph copyable>{row.serviceName}</Paragraph>
-                        <Paragraph copyable>{row.serviceIP} </Paragraph>
+                        <Paragraph>ClusterIP: {row.serviceIP} </Paragraph>
+                        <Paragraph>Port: {row.servicePort} </Paragraph>
                     </span> : <span><LoadingOutlined /> / {dom}</span>}
                 </span>)
             }

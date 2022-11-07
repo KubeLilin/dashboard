@@ -1,7 +1,7 @@
 import success from '@/pages/result/success';
 import { ApiResponse } from '@/services/public/service';
 import { request } from 'umi';
-import { EventsList, PodItem ,podLogsRequest,EventListProps } from './data';
+import { EventsList, PodItem ,podLogsRequest,EventListProps,ServiceInfo,ServicePort } from './data';
 
 export const getNamespaceList = async(cid?:string)=>{
     const params = {
@@ -111,4 +111,13 @@ export const getPodList = async (
             params:{dpId:dpId}
         })
         return req
+    }
+
+
+    export async function getServiceInfo(params:{clusterId:number,namespace:string,name:string}) {
+        let req=await request<ApiResponse<ServiceInfo[]>>('/v1/service/info',{
+            method:'GET',
+            params:params,
+        });
+        return req;
     }
