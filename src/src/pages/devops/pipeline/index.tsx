@@ -248,15 +248,20 @@ const Pipeline : React.FC = () => {
         header={{
             extra: [
                 <Button key="1" onClick={() => { 
-                    const returnUrl = `/applications/info?id=${appId}&name=${appName}&returnkey=3`
-                    history.replace(returnUrl)
+                    console.log(appName)
+                    if (appName){
+                        const returnUrl = `/applications/info?id=${appId}&name=${appName}&returnkey=3`
+                        history.replace(returnUrl)
+                    } else {
+                        history.goBack()
+                    }
                  }}>返回上一级</Button>]
         }}>
-        <Content style={{ background:'white' }} > 
-                <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} >
+        <Content style={{   }} > 
+                <Tabs defaultActiveKey="1" size="large" type="line" tabBarStyle={{ paddingLeft:25 }} >
                     <TabPane tab="编辑泳道" key="1" >
                     <Spin spinning={!onLoaded}>
-                    <div> <div style={{ fontSize:16,fontStyle:"oblique", marginLeft: 23  }}>         
+                    <div> <div style={{ fontSize:16,fontStyle:"oblique", marginLeft: 23,marginBottom:18,  }}>         
                         <Space direction='horizontal'>
                             当前阶段名称:
                             <Input value={currentStageName} onChange={(e)=>{ setCurrentStageName(e.currentTarget.value) }} />
@@ -300,10 +305,10 @@ const Pipeline : React.FC = () => {
                                             }}>添加步骤</Button> </Tooltip> }
                                 renderItem={(item,index) => (
                                     <List.Item>
-                                         <Card key={ (index+1) + ":" +item.name } hoverable bordered style={{width:'100%' , backgroundColor: currentStageSetpIndex == index?'ButtonHighlight':'' }} 
+                                         <Card key={ (index+1) + ":" +item.name } hoverable bordered style={{width:'100%',color:'#722ED1', borderColor: currentStageSetpIndex == index?'#722ED1':'' }} 
                                             onClick={()=>onStepItemClick(item,currentStageIndex,index)}> 
                                             <div >
-                                            <AppstoreAddOutlined  /><span style={{ margin:20, fontSize:16,width:50,color:"black"}}>{item.name}</span><span style={{ width:50,color:"red"}}>{getCurrentStep(index)?.save?"        ":"**        "}</span>  
+                                            <AppstoreAddOutlined  /><span style={{ margin:20, fontSize:16,width:50,color:"#722ED1"}}>{item.name}</span><span style={{ width:50,color:"red"}}>{getCurrentStep(index)?.save?"        ":"**        "}</span>  
                                                 <Popconfirm title="确定要删除这个步聚吗?" onConfirm={(e)=>{  removeStep(index); e?.stopPropagation() }}>
                                                     <Tooltip title="删除此步聚"  >
                                                         <Button type="primary" size="middle" danger icon={<DeleteOutlined />} style={{marginLeft:20 , width:40}} />
@@ -344,16 +349,16 @@ const Pipeline : React.FC = () => {
                                     <ProForm onValuesChange={onFormValuesChanged} formRef={buildForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                         onFinish={onFormSave} >
                                     <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"} rules={[{ required: true, message: '请选择构建环境' }]}>
-                                        <CheckCard.Group style={{ width: '100%' }} defaultValue={""}
+                                        <CheckCard.Group style={{ width: '100%'  }} defaultValue={""}
                                             onChange={async (val)=>{
                                                 console.log(val)
                                                 BindingLanguageComilpeImages(String(val))
                                             }}
                                         // CheckCard.Group end
                                         > { appLanuages?.map((language:any) => 
-                                                <CheckCard key={language.id} title={language.alias} avatar={ <Avatar src={language.icon}
-                                                        size="large" /> } description={language.content} value={language.name} />) }
-                                        </CheckCard.Group>
+                                                <CheckCard key={language.id} title={language.alias} avatar={ <Avatar src={language.icon} 
+                                                        size="large" /> } description={language.content} value={language.name} style={{ background:'#000' }} />) }
+                                                </CheckCard.Group>
                                     </ProForm.Item>
                                     <ProForm.Item name="buildImage" rules={[{ required: true, message: '请选择构建环境' }]}>
                                         <ProFormSelect label="构建镜像" width="md" options={languageCompileOptions} ></ProFormSelect>

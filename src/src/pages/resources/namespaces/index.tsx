@@ -65,10 +65,12 @@ const Namespaces: React.FC = () => {
         {
             title: '租户(团队)',
             dataIndex: 'tenantName',
+            width:280,
         },
         {
             title: '命名空间',
             dataIndex: 'namespace',
+            width:280,
             search:false,
             render:(_,record)=>(
                 <Link to={`/resources/pods?cid=${record.clusterId}&ns=${record.namespace}`}>{record.namespace}</Link>
@@ -121,7 +123,7 @@ const Namespaces: React.FC = () => {
         },
         {
             title: '操作',
-            width:150,
+            width:200,
             dataIndex: 'option',
             search:false,
             render:(_,row)=> [

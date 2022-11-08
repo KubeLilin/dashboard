@@ -15,19 +15,29 @@ export type ProbeItem={
 
 export type ProbeFormData={
     dpId:number,
+
+    enableLifecycle:boolean,
     enableReadiness:boolean,
     enableLiveness:boolean,
-    readinesstype:string,
+
+    terminationGracePeriodSeconds:number, // 定义在 deployment资源中
+    lifecyclePreStop:string,        // 定义在容器中
+    lifecyclePreStart:string,       // 
+    
+    readinessType:string,           // 定义在容器中
     readinessPort:number,
     readinessUrl:string,
     readinessReqScheme:string
     readinessInitialDelaySeconds:number,
+    readinessTimeoutSeconds:number,
     readinessPeriodSeconds:number
-    livenesstype:string,
-    livenessport:number,
-    livenessurl:string,
-    livenessreqScheme:string,
+
+    livenessType:string,            //定义在容器中
+    livenessPort:number,
+    livenessUrl:string,
+    livenessReqScheme:string,
     livenessInitialDelaySeconds:number,
+    livenessTimeoutSeconds:number,
     livenessPeriodSeconds:number
 
 }

@@ -83,6 +83,7 @@ const ReleaseRecord: React.FC<Props> = (props) => {
             title: '触发时间',
             dataIndex: 'creationTime',
             hideInSearch: true,
+            valueType:"dateTime"
         }, 
         {
             title: '操作',

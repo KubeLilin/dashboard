@@ -52,7 +52,7 @@ const AppBuildList : React.FC<Props> = (props) => {
     const [currentBuildItem,setCurrentBuildItem] = useState<BuildItem|undefined>(undefined)
     const [autoLogs, setAutoLogs] = useState(false);
 
-    const [currentLogs,setCurrentLogs] = useState<string>("")
+    const [currentLogs,setCurrentLogs] = useState<string>('Init Pod logs , please wait ..... ')
 
     const LoadData = (appId:number )=> {
         GetPipelineList(appId).then((res)=>{
@@ -67,7 +67,7 @@ const AppBuildList : React.FC<Props> = (props) => {
             // setBuildList(appBuildList)
         }).then(()=>{
             const cpBuildList:any = [...appBuildList]
-            cpBuildList.forEach(async (v,i)=>{
+            const allTasks = cpBuildList.map(async (v,i)=>{
                 if(v.taskId > 0){
                    const res = await GetPipelineDetails(props.AppId,v.id,v.taskId)
                    if (res && res.data){
@@ -91,13 +91,15 @@ const AppBuildList : React.FC<Props> = (props) => {
                         } else {
                                 cpBuildList[i].lastBuildRecords = undefined
                         }
-                        setBuildList(cpBuildList)
-                    } else {
-                        setBuildList(appBuildList)
-                    }
-                } else {
-                    setBuildList(appBuildList)
-                }
+                        //setBuildList(cpBuildList)
+                        appBuildList = cpBuildList
+                } 
+                return appBuildList
+            }})
+
+            Promise.all(allTasks).then(tasks=>{
+                console.log(tasks)
+                setBuildList(appBuildList)
             })
         }).catch(()=>{
             setBuildList(appBuildList)
@@ -114,7 +116,7 @@ const AppBuildList : React.FC<Props> = (props) => {
         if (props.AutoLoad) {
             id =  setInterval(()=>{
                 LoadData(props.AppId)
-            },2500)
+            },5500)
         }
         return () => { clearInterval(id) }
 
@@ -139,7 +141,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                         setCurrentLogs( res.data)
                     }
                 })
-            },1500)
+            },5500)
         }
         return () => { clearInterval(id) }
     } ,[autoLogs])
@@ -159,13 +161,14 @@ const AppBuildList : React.FC<Props> = (props) => {
                 }} >新建构建</Button>
             </Space>
             </div>
-            <div style={{  marginLeft: 55,marginTop: 10,marginRight: 55 ,   background: "#f0f2f5" ,padding: 30} }>
+            <div style={{  marginLeft: 55,marginTop: 10,marginRight: 55 ,padding: 30} }>
                 <div  >
                 <List dataSource={buildList}  grid={{ gutter: 16, xs: 1, sm: 2, md: 3,lg: 3,xl: 4,xxl: 5,}}
                     renderItem={item => (
                         <List.Item>
                         <Card hoverable bordered 
                                 onClick={ async()=>{
+                                    setCurrentLogs('Init Pod logs , please wait ..... ')
                                     setCurrentBuildItem(item)
                                     setVisablePipelineLogForm(true)
                                     if(item.lastBuildRecords?.status=='completed'){
@@ -179,7 +182,6 @@ const AppBuildList : React.FC<Props> = (props) => {
                                     } else {
                                         setAutoLogs(true)
                                     }
-
                                 }}
                                 title={  <Tooltip title={item.title}>{item.title}</Tooltip>  } 
                                 actions={[ 
@@ -278,6 +280,7 @@ const AppBuildList : React.FC<Props> = (props) => {
             
             <Drawer title="流水线日志" width={1280} visible={visablePipelineLogForm} destroyOnClose  
                 onClose={() => { 
+                    setCurrentLogs('Init Pod logs , please wait ..... ')
                     setVisablePipelineLogForm(false)
                     setAutoLogs(false)
                 }} > 
@@ -286,7 +289,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                             { title: '流水线ID', dataIndex: 'id' },
                             { title: '流水线名称', dataIndex: 'title' },
                             { title: '任务ID', dataIndex: 'taskId'},
-                            { title: "任务开始时间",dataIndex: ['lastBuildRecords','start'] }
+                            { title: "任务开始时间",dataIndex: ['lastBuildRecords','start'],valueType:"dateTime" }
                             ]}/>
             <div style={{ marginBottom: 10 }}></div>
             <textarea value={currentLogs} ref={(text) => { if (text) { text.scrollTop = Number(text?.scrollHeight) } }}

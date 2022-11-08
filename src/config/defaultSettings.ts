@@ -4,14 +4,14 @@ const Settings: LayoutSettings & {
   pwa?: boolean;
   logo?: string;
 } = {
-  navTheme: 'light',
+  navTheme: 'dark',
   primaryColor: '#722ED1',
   layout: 'mix',
   contentWidth: 'Fluid',
   fixedHeader: true,
   fixSiderbar: true,
   colorWeak: false,
-  headerHeight:48,
+  headerHeight:24,
   title: 'KubeLilin',
   pwa: false,
   logo: '/icon.svg',

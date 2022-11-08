@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Tabs,Layout,Badge } from 'antd';
+import { Tabs,Layout,Badge,Dropdown,Menu } from 'antd';
 import React, { useEffect } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProDescriptions from '@ant-design/pro-descriptions';
@@ -53,7 +53,6 @@ const AppInfo: React.FC = () => {
             levelTabsHandler(data)
         })
     },[onLoaded])
-
 
     const columns: ProColumns<DeploymentItem>[] = [
         {
@@ -138,16 +137,17 @@ const AppInfo: React.FC = () => {
             }
         },
         {
-            title: '服务名/IP',
+            title: '服务名 / IP / Port',
             dataIndex: 'serviceIP',
-            width: 380,
+            width: 520,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
                 return (<span>
                     {row.serviceIP != '0.0.0.0' ? <span>
                         <Paragraph copyable>{row.serviceName}</Paragraph>
-                        <Paragraph copyable>{row.serviceIP} </Paragraph>
+                        <Paragraph>ClusterIP: {row.serviceIP} </Paragraph>
+                        <Paragraph>Port: {row.servicePort} </Paragraph>
                     </span> : <span><LoadingOutlined /> / {dom}</span>}
                 </span>)
             }
@@ -156,26 +156,52 @@ const AppInfo: React.FC = () => {
             title: '操作',
             width: 200,
             valueType: 'option',
-            render: (dom, record, _, action) => [
-                <Button key="depoly"   icon={<CloudUploadOutlined />} onClick={() => {
-                    tableListDataSource[0].namespace = 'n' + Math.random()
-                    setTableListDataSource(tableListDataSource)
-                    stepDpId(record.id)
-                    setDeployImage(record.lastImage)
-                    setExecFormVisible(true)
-                }}>部署应用</Button>,
-                <Button key="edit" onClick={() => {
-                    stepDpId(record.id)
-                    setStepFormEdit(true)
-                    setStepFormVisible(true)
-                }}>编辑部署</Button>,
-                <Button key='probe' icon={<PushpinOutlined />} onClick={()=>{
-                    stepDpId(record.id)
-                    setProbeFormVisible(true)
-                }}>
-                    设置探针
-                </Button>
-            ]
+            render: (dom, record, _, action) => {
+                // <Button key="depoly"   icon={<CloudUploadOutlined />} onClick={() => {
+                //     tableListDataSource[0].namespace = 'n' + Math.random()
+                //     setTableListDataSource(tableListDataSource)
+                //     stepDpId(record.id)
+                //     setDeployImage(record.lastImage)
+                //     setExecFormVisible(true)
+                // }}>部署应用</Button>,
+                // <Button key="edit" onClick={() => {
+                //     stepDpId(record.id)
+                //     setStepFormEdit(true)
+                //     setStepFormVisible(true)
+                // }}>编辑部署</Button>,
+                // <Button key='probe' icon={<PushpinOutlined />} onClick={()=>{
+                //     stepDpId(record.id)
+                //     setProbeFormVisible(true)
+                // }}>
+                //     设置探针
+                // </Button>,
+
+                const menu = (
+                    <Menu items={[
+                        { key:1,icon:<CloudUploadOutlined /> ,label: '部署应用',onClick:()=>{
+                                tableListDataSource[0].namespace = 'n' + Math.random()
+                                setTableListDataSource(tableListDataSource)
+                                stepDpId(record.id)
+                                setDeployImage(record.lastImage)
+                                setExecFormVisible(true)
+                        }},
+                        { key:2,icon:<PushpinOutlined />,label: '生命周期',onClick:()=>{
+                                stepDpId(record.id)
+                                setProbeFormVisible(true)
+                        }},
+                      ]} />
+                  );
+
+                return (
+                <Dropdown.Button type="primary"  overlay={menu}
+                    onClick={() =>{
+                        stepDpId(record.id)
+                        setStepFormEdit(true)
+                        setStepFormVisible(true)
+                    }}>编辑部署
+                </Dropdown.Button>)
+            }
+            
         },]
 
     const renderBadge = (count: number, active = false) =>   {
@@ -192,10 +218,10 @@ const AppInfo: React.FC = () => {
             ] }}
             header={{
                 extra: [
-                    <Button key="1" onClick={() => { history.replace('/applications/apps') }}>返回上一级</Button>]
+                    <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
-            <Content style={{ background:'white' }} > 
-            <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft:25 }} 
+            <Content  > 
+            <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ paddingLeft:25 }} 
                 onChange={(key)=>{
                     if(key=="3") {
                         setAutoLoadPipelineData(true)
@@ -309,9 +335,9 @@ const AppInfo: React.FC = () => {
 
             <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} 
               deploymentId={dpId} deployImage={deployImage} tableRef={null} ></ExecDeployment>
-              <Probe visibleFunc={[probeFormVisible,setProbeFormVisible]} deploymentId={dpId} tableRef={actionRef}  >
-                
-              </Probe>
+
+            <Probe visibleFunc={[probeFormVisible,setProbeFormVisible]} 
+                deploymentId={dpId} tableRef={actionRef} ></Probe>
               
             </Content>
         </PageContainer>

@@ -9,27 +9,37 @@ import { ApplicationItem } from '../../applications/apps/apps_data';
 import {  getApps } from './service';
 import { AppsColumns } from './components/project_apps'
 import ProjectDeployList from './components/project_deploys'
+import ProjectPipelineList from './components/project_pipeline'
+import ProjectResource from './components/project_resource'
 
 const ProjectInfo: React.FC = () => {
     var projectId = Number(history.location.query?.id)
     var projectName = history.location.query?.name
+    const [autoLoadPipelineData, setAutoLoadPipelineData] = useState<boolean>(false)
 
 
     return (
         <PageContainer title={'项目名称: ' + projectName} 
             breadcrumb={{ routes:[
                 { path: '#', breadcrumbName: 'DevOps' },
-                { path: '#', breadcrumbName: '项目管理', }
+                { path: '/devops/projects', breadcrumbName: '项目管理', }
             ] }}
             header={{
                 extra: [
                     <Button key="1" onClick={() => { history.replace('/devops/projects') }}>返回项目列表</Button>]
             }}>
-            <Content style={{ background:'white'}} > 
-            <Tabs  size="large" type="line" tabBarStyle={{ background:'white' ,paddingLeft: 25 }} 
-                onChange={(key)=>{  }}>
+            <Content  > 
+            <Tabs  size="large" type="line" tabBarStyle={{  paddingLeft: 25 }} 
+                onChange={(key)=>{
+                    console.log(key)
+                    if(key=="3") {
+                        setAutoLoadPipelineData(true)
+                    } else {
+                        setAutoLoadPipelineData(false)
+                    }
+                }}>
                 <TabPane tab="应用列表" key="1" >
-                    <ProTable<ApplicationItem>  headerTitle="项目应用列表" rowKey="id" columns={AppsColumns}
+                    <ProTable<ApplicationItem>  headerTitle="项目应用列表"  rowKey={record => record.id} columns={AppsColumns}
                         request={async (p, s, f) => {  p.pid = projectId
                             return getApps(p,s, f) }} >       
                     </ProTable>
@@ -38,10 +48,12 @@ const ProjectInfo: React.FC = () => {
                     <ProjectDeployList projectId={projectId} />
                 </TabPane>
                 <TabPane tab="流水线" key="3" >
+                    <ProjectPipelineList projectId={projectId} AutoLoad={autoLoadPipelineData} />
                 </TabPane>
-                <TabPane tab="权限管理" key="4" >
+                <TabPane tab="资源情况" key="4">
+                    <ProjectResource projectId={projectId} projectName={String(projectName)} />
                 </TabPane>
-                <TabPane tab="资源情况" key="5" >
+                <TabPane tab="权限管理" key="5" disabled>
                 </TabPane>
             </Tabs>
             </Content>

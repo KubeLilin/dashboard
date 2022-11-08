@@ -274,7 +274,7 @@ const Analysis: FC = () => {
                 <Col span={3} style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}   format={(percent) => 
-                    <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
+                    <Space direction="vertical" style={{fontSize:16}}>
                         <span>Deployment</span> 
                         <span>{workloadsMetrics?.deployment + '/' +workloadsMetrics?.deployment  }</span> 
                     </Space>
@@ -284,7 +284,7 @@ const Analysis: FC = () => {
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}    format={(percent) => 
-                  <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
+                  <Space direction="vertical" style={{fontSize:16}}>
                   <span>StatefulSets</span> 
                   <span>{workloadsMetrics?.statefulSets + '/' +workloadsMetrics?.statefulSets  }</span> 
               </Space>
@@ -294,7 +294,7 @@ const Analysis: FC = () => {
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}   format={(percent) => 
-                  <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
+                  <Space direction="vertical" style={{fontSize:16 }}>
                     <span>DaemonSets</span> 
                     <span>{workloadsMetrics?.daemonSets + '/' +workloadsMetrics?.daemonSets  }</span> 
                   </Space>
@@ -304,7 +304,7 @@ const Analysis: FC = () => {
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}  format={(percent) => 
-                  <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
+                  <Space direction="vertical" style={{fontSize:16 }}>
                     <span>CronJob</span> 
                     <span>{workloadsMetrics?.cronJobs + '/' +workloadsMetrics?.cronJobs  }</span> 
                   </Space>
@@ -314,7 +314,7 @@ const Analysis: FC = () => {
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
-                  <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
+                  <Space direction="vertical" style={{fontSize:16 }}>
                     <span>Job</span> 
                     <span>{workloadsMetrics?.jobs + '/' +workloadsMetrics?.jobs  }</span> 
                   </Space>
@@ -324,7 +324,7 @@ const Analysis: FC = () => {
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
                 <Progress  type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
-                    <Space direction="vertical" style={{fontSize:16,color:'ButtonText'}}>
+                    <Space direction="vertical" style={{fontSize:16 }}>
                       <span>ReplicaSet</span> 
                       <span>{workloadsMetrics?.replicaSets + '/' +workloadsMetrics?.replicaSets  }</span> 
                     </Space>
