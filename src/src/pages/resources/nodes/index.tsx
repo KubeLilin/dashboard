@@ -22,11 +22,12 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         dataIndex:'name',
         title:'节点名',
         render: (dom,row) =>{
-           return   <Link key="nodelink" style={{color: 'blue', textDecorationLine: 'underline'}} to={'/resources/pods?node='+ row.name +'&cid='+clusterId }>{dom}</Link> 
+           return   <Link key="nodelink" style={{  textDecorationLine: 'underline'}} to={'/resources/pods?node='+ row.name +'&cid='+clusterId }>{dom}</Link> 
         }
     },
     {
         width:120,
+        title:'状态',
         dataIndex: 'status',
         valueEnum: {
             'notready': {
@@ -44,7 +45,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         dataIndex: 'kubeletVersion',
         title:'Kubernetes版本',
         render:(dom,row) => {
-            return <span key="kubeletVersion" style={{color: 'blue'}}>{dom}</span>
+            return <span key="kubeletVersion"  >{dom}</span>
         },
     },
     {

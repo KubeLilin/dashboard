@@ -87,7 +87,7 @@ const Pods: React.FC = (props) => {
             dataIndex: 'name',
             search: false,
             render: (dom, _) => {
-                return <span style={{ color: 'blue' }}>{dom}</span>
+                return <span style={{ color: 'blueviolet' }}>{dom}</span>
             }
         },
         {
@@ -106,7 +106,7 @@ const Pods: React.FC = (props) => {
             dataIndex: 'ip',
             search: false,
             render: (dom, _) => {
-                return <span style={{ color: 'blue' }}>{dom}</span>
+                return <span style={{ color: 'blueviolet' }}>{dom}</span>
             }
         },
         {

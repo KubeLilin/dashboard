@@ -3,7 +3,7 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Input, Button, Form,Transfer ,message,Popconfirm ,Divider} from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { Link } from 'umi';
+import { history ,Link} from 'umi';
 import ProForm, { DrawerForm,  ProFormText } from '@ant-design/pro-form';
 import { RecordType } from './data'
 import { getApps  } from '../../applications/apps/apps_service';
@@ -58,9 +58,8 @@ const Projects: React.FC = () => {
         {
             title: '项目名称',
             dataIndex: 'name',
-            copyable: true,
             render: (dom, row) => {
-                return <Link key={'linkapp' + row.id} style={{ color: 'blue', textDecorationLine: 'underline' }} to={'/devops/projects/info?id=' + row.id + '&name=' + row.name}>{dom}</Link>
+                return <Link key={'linkapp' + row.id} style={{  textDecorationLine: 'underline' }} to={'/devops/projects/info?id=' + row.id + '&name=' + row.name}>{dom}</Link>
             }
         },
         {

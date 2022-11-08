@@ -29,7 +29,7 @@ const Teams: React.FC = () => {
             title: '团队目录名称',
             hideInSearch:true,
             render: (dom, row) => {
-                return <Link key={'linkgateway' + row.id} style={{ color: 'blue', textDecorationLine: 'underline' }} to={'/networks/gateway/routers?teamId=' + row.id + '&teamName=' + row.name + `&clusterId=${clusterId}` + `&gatewayId=${gatewayId}` }>{dom}</Link>
+                return <Link key={'linkgateway' + row.id} style={{  textDecorationLine: 'underline' }} to={'/networks/gateway/routers?teamId=' + row.id + '&teamName=' + row.name + `&clusterId=${clusterId}` + `&gatewayId=${gatewayId}` }>{dom}</Link>
             }
         },
         {

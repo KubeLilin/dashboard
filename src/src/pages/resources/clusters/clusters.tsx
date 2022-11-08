@@ -29,7 +29,6 @@ const Clusters: React.FC = () => {
         {
             title: '集群标示',
             dataIndex: 'name',
-            copyable: true,
             render: (dom, row) => {
                 return <Link to={'/resources/nodes?cid=' + row.id}>{dom}</Link>
             }
