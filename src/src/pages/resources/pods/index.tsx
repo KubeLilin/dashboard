@@ -5,8 +5,11 @@ import ProForm, { ModalForm, ProFormInstance } from '@ant-design/pro-form';
 import { history, Link,useModel } from 'umi';
 import { PodItem, ContainerItem, podLogsRequest } from './data';
 import { Table,Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, notification, Radio } from 'antd'
+
 import { getPodList, getNamespaceList, setReplicasByDeployId, 
-    GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , DeleteDeployment,getServiceInfo } from './service'
+    GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , 
+    DeleteDeployment,getServiceInfo , getGatewayRouterList } from './service'
+
 import React, { useState, useRef, useEffect } from 'react';
 import ProDescriptions from '@ant-design/pro-descriptions';
 import { CloudUploadOutlined,ExpandAltOutlined,LoadingOutlined, ReloadOutlined ,SearchOutlined } from '@ant-design/icons';
@@ -409,7 +412,7 @@ const Pods: React.FC = (props) => {
                 <TabPane tab="事件" key="3"  disabled={ namespace==undefined?true:false } >
                     <EventListComponent clusterId={ Number(clusterId) } deployment={ appName?.toString() } namespace={ namespace?.toString() } ></EventListComponent>
                 </TabPane>
-                <TabPane tab="YAML" key="4"  disabled={ namespace==undefined?true:false } >
+                <TabPane tab="YAML" key="4"  disabled={ namespace==undefined || did==0?true:false } >
                     <div style={{  height: 890 }}>
                     <CodeMirror
                         editorDidMount={editor => { editor.setSize('auto','780') }}
@@ -419,7 +422,7 @@ const Pods: React.FC = (props) => {
                     </CodeMirror>
                     </div>
                 </TabPane>
-                <TabPane tab="详情" key="5"  disabled={ namespace==undefined?true:false } >
+                <TabPane tab="详情&路由" key="5"  disabled={ namespace==undefined || did==0?true:false } >
                 <ProDescriptions title="部署详情"  style={{ padding:15, } } dataSource={deploymentInfo} bordered  column={3} 
                   columns={[
                     { title: '应用名称', dataIndex: 'appName' },
@@ -459,7 +462,23 @@ const Pods: React.FC = (props) => {
                     /> ) },
                 ]}/>
 
-        
+
+                <ProTable cardBordered  rowKey={"id"} search={false} headerTitle="路由信息"
+                        columns={ [
+                        { dataIndex: 'id', title: 'ID', hideInSearch:true,},
+                        { dataIndex: 'name', title: '路由名称',},
+                        { dataIndex: 'host',title: '域名',},
+                        { dataIndex: 'uri',title: '路径',hideInSearch:true,},
+                        { dataIndex: 'desc',title: '描述',},
+                        { dataIndex:'liveness',title:'探针', render: (dom, row) => (<a key={'livenesslink' + row.id} href={row.liveness} target="_blank">{dom}</a>)},
+                        { dataIndex: 'nodes',title: '绑定负载',hideInSearch:true,},]}
+                    request={ (params)=>{
+                        params.deployId = Number(deployId)
+                        return getGatewayRouterList(params)
+                    } } 
+                    toolBarRender={() => [
+                        <Button key='button'  type="primary" onClick={() => { history.push('/networks/gateway') }}>网关路由设置</Button>
+                    ]} ></ProTable>
 
                 </TabPane>
 

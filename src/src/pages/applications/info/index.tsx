@@ -10,7 +10,7 @@ import { PlusOutlined, LoadingOutlined,CloudUploadOutlined, PushpinOutlined } fr
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
-import {  getDeploymentList, getPodList ,GetApplicationInfo,GetDeployLevelCounts } from './deployment.service'
+import {  getDeploymentList, getPodList ,GetApplicationInfo,GetDeployLevelCounts,getRouterList } from './deployment.service'
 import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
@@ -157,25 +157,6 @@ const AppInfo: React.FC = () => {
             width: 200,
             valueType: 'option',
             render: (dom, record, _, action) => {
-                // <Button key="depoly"   icon={<CloudUploadOutlined />} onClick={() => {
-                //     tableListDataSource[0].namespace = 'n' + Math.random()
-                //     setTableListDataSource(tableListDataSource)
-                //     stepDpId(record.id)
-                //     setDeployImage(record.lastImage)
-                //     setExecFormVisible(true)
-                // }}>部署应用</Button>,
-                // <Button key="edit" onClick={() => {
-                //     stepDpId(record.id)
-                //     setStepFormEdit(true)
-                //     setStepFormVisible(true)
-                // }}>编辑部署</Button>,
-                // <Button key='probe' icon={<PushpinOutlined />} onClick={()=>{
-                //     stepDpId(record.id)
-                //     setProbeFormVisible(true)
-                // }}>
-                //     设置探针
-                // </Button>,
-
                 const menu = (
                     <Menu items={[
                         { key:1,icon:<CloudUploadOutlined /> ,label: '部署应用',onClick:()=>{
@@ -302,8 +283,8 @@ const AppInfo: React.FC = () => {
                         }}
                     ></ProTable>
                 </TabPane>
-                <TabPane tab="基本信息" key="2" >
-                    <ProDescriptions request={ async () => GetApplicationInfo(Number(appId)) } style={{ padding:35, }} 
+                <TabPane tab="详情&路由" key="2" >
+                    <ProDescriptions title="应用详情" request={ async () => GetApplicationInfo(Number(appId)) } style={{ padding:35, }} 
                         column={2}  bordered	
                         columns={[
                             { title: '所属团队', dataIndex: 'tenantName'},
@@ -315,6 +296,26 @@ const AppInfo: React.FC = () => {
                             { title: '应用标签', dataIndex: 'labels' },
                             { title: '应用状态', dataIndex: 'status',valueEnum:{ 1: "生效",0:"失效" } }
                         ]}/>
+                    <ProTable  rowKey={"id"} search={false} headerTitle="应用路由"
+                        columns={ [
+                        { dataIndex: 'id', title: 'ID', hideInSearch:true,},
+                        { dataIndex: 'name', title: '路由名称',},
+                        { dataIndex: 'host',title: '域名',},
+                        { dataIndex: 'uri',title: '路径',hideInSearch:true,},
+                        { dataIndex: 'desc',title: '描述',},
+                        { dataIndex:'liveness',title:'探针', render: (dom, row) => (<a key={'livenesslink' + row.id} href={row.liveness} target="_blank">{dom}</a>)},
+                        { dataIndex: 'nodes',title: '绑定负载',hideInSearch:true,},]}
+                    request={ (params)=>{
+                        params.appId = Number(appId)
+                        return getRouterList(params)
+                    } } 
+                    toolBarRender={() => [
+                        <Button key='button' icon={<PlusOutlined />} type="primary"
+                            onClick={() => {
+                              history.push('/networks/gateway')
+                            }}>网关路由设置</Button>
+                    ]}
+                    ></ProTable>
                 </TabPane>
                 <TabPane tab="应用流水线" key="3">
                     <AppBuildList AppId={Number(appId)} AppName={String(appName)} AutoLoad={autoLoadPipelineData} />

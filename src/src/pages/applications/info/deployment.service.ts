@@ -199,3 +199,11 @@ export async function GetProjectDeployLevelCounts(projectId:number) {
     })
     return resData
 }
+
+export async function getRouterList(params: any) {
+    let req= await request<ApiResponse<any>>('/v1/apigateway/routerlistBy',{
+        method:'GET',
+        params: params
+    })
+   return req
+}

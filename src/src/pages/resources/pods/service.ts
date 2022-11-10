@@ -121,3 +121,11 @@ export const getPodList = async (
         });
         return req;
     }
+
+    export async function getGatewayRouterList(params: any) {
+        let req= await request<ApiResponse<any>>('/v1/apigateway/routerlistBy',{
+            method:'GET',
+            params: params
+        })
+       return req
+    }
