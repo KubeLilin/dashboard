@@ -3,7 +3,7 @@ import { request } from "umi";
 import { ProbeFormData } from "./probe_data";
 
 export async function saveProbe(params:ProbeFormData) {
-    let req=await request<ApiResponse<string>>('/v1/deployment/rollbackbyreleaserecord',{
+    let req=await request<ApiResponse<string>>('/v1/deployment/probe',{
         method:'POST',
         data:params,
         headers:{

@@ -31,6 +31,9 @@ const Probe: React.FC<Props> = (props: Props) => {
             visible={props.visibleFunc[0]}
             form={form} formRef={actionRef}
             onFinish={async (formData) => {
+                console.log(props);
+                
+                formData.dpId=props.deploymentId;
                 let res = await saveProbe(formData);
                 if (res.success) {
                     return true
