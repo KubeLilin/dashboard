@@ -1,16 +1,16 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Tabs,Layout,Badge,Dropdown,Menu } from 'antd';
+import { Tabs,Layout,Badge,Dropdown,Menu,Divider,Space,Modal ,message} from 'antd';
 import React, { useEffect } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProDescriptions from '@ant-design/pro-descriptions';
 
 import { history, Link } from 'umi';
 import { Button, Tag, Typography } from 'antd';
-import { PlusOutlined, LoadingOutlined,CloudUploadOutlined, PushpinOutlined } from '@ant-design/icons';
+import { PlusOutlined, LoadingOutlined,CloudUploadOutlined, PushpinOutlined,ExclamationCircleOutlined } from '@ant-design/icons';
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
 import { DeploymentItem } from './data'
-import {  getDeploymentList, getPodList ,GetApplicationInfo,GetDeployLevelCounts,getRouterList } from './deployment.service'
+import {  getDeploymentList, getPodList ,GetApplicationInfo,GetDeployLevelCounts,getRouterList,DeleteDeployment } from './deployment.service'
 import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
@@ -170,11 +170,29 @@ const AppInfo: React.FC = () => {
                                 stepDpId(record.id)
                                 setProbeFormVisible(true)
                         }},
+                        { key:3,icon:<PushpinOutlined />,label: '删除部署环境',danger:true,onClick:()=>{
+                            Modal.confirm({
+                                title: 'Confirm',
+                                icon: <ExclamationCircleOutlined />,
+                                content: `确认要删除${record.name}部署环境吗?`,
+                                okText: '确认',
+                                cancelText: '取消',
+                                onOk:async ()=>{
+                                    const resp = await DeleteDeployment(record.id)
+                                    if (resp.success) {
+                                            message.success('删除部署成功');
+                                    } else {
+                                            message.error('删除部署失败！');
+                                    }
+                                    actionRef.current?.reload()
+                                }
+                              });
+                        }},
                       ]} />
                   );
 
                 return (
-                <Dropdown.Button type="primary"  overlay={menu}
+                <Dropdown.Button type="primary"  overlay={menu} 
                     onClick={() =>{
                         stepDpId(record.id)
                         setStepFormEdit(true)

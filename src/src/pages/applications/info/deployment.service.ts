@@ -20,6 +20,15 @@ export async function getDeploymentList(
     
 }
 
+
+export async function DeleteDeployment(dpId:number) {
+    let req = await request<ApiResponse<string>>("/v1/deployment/deployment",{
+        method:'DELETE',
+        params:{dpId:dpId}
+    })
+    return req
+}
+
 export async function executeDeployment(dpId:any) {
     let req=await request<ApiResponse<any>>("/v1/deployment/executedeployment",{
         method:'POST',
