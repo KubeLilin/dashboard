@@ -16,8 +16,9 @@ export async function getClusterList(params: {
     })
 }
 
-export async function importConfigFile(file: any){
+export async function importConfigFile(file: any,name:string){
     const formData = new FormData()
+    formData.append('name',name)
     formData.append('file1',file)
     let resData = await request<ApiResponse<boolean>>("/v1/cluster/clusterByConfig", {
         method: 'POST',
