@@ -13,6 +13,7 @@ export type ApplicationItem={
     sCID:number
     sources:number
     sourceType:string
+    deployCount:number
 }
 
 export type ApplicationLevel={

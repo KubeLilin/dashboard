@@ -69,6 +69,14 @@ export async function initGitRepoistry(appName:string) {
     return req;
 }
 
-
+export async function deleteApp(appId:number) {
+    let req= await request<ApiResponse<any>>('/v1/application/app',{
+        method:'DELETE',
+        params: {
+            appId: appId
+        }
+    })
+   return req
+}
 
 

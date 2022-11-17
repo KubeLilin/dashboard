@@ -3,9 +3,9 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ApplicationItem, ApplicationModel } from './apps_data';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProForm, { DrawerForm, ProFormSelect, ProFormTextArea, ProFormText, ProFormGroup } from '@ant-design/pro-form';
-import { Input, Button, Form, Checkbox, Radio, Select } from 'antd';
-import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled } from '@ant-design/icons';
-import { getAppLanguage, getAppLevel, createApp, getApps, updateApp, initGitRepoistry } from './apps_service';
+import { Input, Button, Form, Checkbox, Radio, Select,Modal, message } from 'antd';
+import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled,ExclamationCircleOutlined } from '@ant-design/icons';
+import { getAppLanguage, getAppLevel, createApp, getApps, updateApp,deleteApp, initGitRepoistry } from './apps_service';
 import { Link } from 'umi';
 import { queryRepoConnections } from '@/pages/resources/serviceConnection/service';
 const { Search } = Input;
@@ -39,6 +39,10 @@ const Apps: React.FC = () => {
             hideInForm: true,
             hideInSearch: true
         },
+        {
+            title: "部署环境",
+            dataIndex: 'deployCount',
+        }, 
         {
             title: "标签",
             dataIndex: 'labels',
@@ -82,14 +86,39 @@ const Apps: React.FC = () => {
             valueType: 'option',
             render: (text, record, _, action) => [
                 <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name}>进入应用</Link>,
-                <a key={"edit" + record.id} onClick={() => {
+                <Button key={"edit" + record.id} onClick={() => {
                     formVisibleHandler(true)
                     editHandler(true)
                     record.sources = record.sCID
                     appForm.setFieldsValue(record)
                     console.log(record)
                     bindRepo(record.sourceType,record)
-                }}>编辑</a>,
+                }}>编辑</Button>,
+                <Button danger key={"delete" + record.id} onClick={()=>{
+                    Modal.confirm({
+                        title: 'Confirm',
+                        icon: <ExclamationCircleOutlined />,
+                        content: `确认要删除${record.name}应用吗?`,
+                        okText: '确认',
+                        cancelText: '取消',
+                        onOk:async ()=>{
+                          if(record.deployCount > 0) {
+                            message.error('应用中还存在部署环境,请删除所有部署环境后再进行应用删除操作!')
+                          } else {
+                            const res= await deleteApp(record.id)
+                            if (res.success) {
+                                message.success('删除成功')
+                            } else {
+                                message.error(res.message)
+                            }
+   
+                          }
+                          actionRef.current?.reload()
+                        }
+                      });
+
+
+                }}>删除</Button>
             ]
         }
     ]
