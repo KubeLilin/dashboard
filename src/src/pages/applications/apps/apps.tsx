@@ -7,7 +7,8 @@ import { Input, Button, Form, Checkbox, Radio, Select,Modal, message } from 'ant
 import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled,ExclamationCircleOutlined } from '@ant-design/icons';
 import { getAppLanguage, getAppLevel, createApp, getApps, updateApp,deleteApp, initGitRepoistry } from './apps_service';
 import { Link } from 'umi';
-import { queryRepoConnections } from '@/pages/resources/serviceConnection/service';
+import AppDrawForm from './new_app_form'
+
 const { Search } = Input;
 const Apps: React.FC = () => {
     const actionRef = useRef<ActionType>();
@@ -91,8 +92,6 @@ const Apps: React.FC = () => {
                     editHandler(true)
                     record.sources = record.sCID
                     appForm.setFieldsValue(record)
-                    console.log(record)
-                    bindRepo(record.sourceType,record)
                 }}>编辑</Button>,
                 <Button danger key={"delete" + record.id} onClick={()=>{
                     Modal.confirm({
@@ -122,18 +121,7 @@ const Apps: React.FC = () => {
             ]
         }
     ]
-    function bindRepo(repoType: string,selectedRecord:any) {
-        let res = queryRepoConnections(repoType)
-        res.then(x => {    
-            console.log(x)
-            repoOptionsHandler(x)
-            if (selectedRecord){
-                console.log(selectedRecord)
-                appForm.setFieldsValue({ sources:selectedRecord.sCID }) 
-            }           
-        })
-    }
-
+   
 
     return (
         <PageContainer >
@@ -153,7 +141,13 @@ const Apps: React.FC = () => {
                 ]}
                 request={getApps}
             ></ProTable>
-            <DrawerForm<ApplicationModel>
+            <AppDrawForm projectId={0} visbleAble={[formVisible,formVisibleHandler]} editable={edit} form={appForm}
+                onFinish={(success:boolean)=>{
+                    if (success){
+                        actionRef.current?.reload()
+                    }
+                }} />
+            {/* <DrawerForm<ApplicationModel>
                 form={appForm}
                 title="创建应用"
                 visible={formVisible}
@@ -219,7 +213,7 @@ const Apps: React.FC = () => {
                         ]}
                     ></ProFormSelect>
                 </ProForm.Item>
-            </DrawerForm>
+            </DrawerForm> */}
         </PageContainer>
     )
 }
