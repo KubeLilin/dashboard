@@ -23,10 +23,8 @@ const AppDrawForm: React.FC<AppDrawFormProps> = (props) => {
     function bindRepo(repoType: string,selectedRecord:any) {
         let res = queryRepoConnections(repoType)
         res.then(x => {    
-            console.log(x)
             repoOptionsHandler(x)
             if (selectedRecord){
-                console.log(selectedRecord)
                 props.form.setFieldsValue({ sources:selectedRecord.sources }) 
             }           
         })
@@ -44,14 +42,15 @@ const AppDrawForm: React.FC<AppDrawFormProps> = (props) => {
                 }
                 props.visbleAble[1](vis)
             } }
-            onFinish={async (x) => {
-                console.log(x)
-
+            onFinish={async (formData) => {
+                console.log(formData)
+                console.log(props)
+                formData.pid = props.projectId
                 let res
                 if (props.editable) {
-                    res = await updateApp(x)
+                    res = await updateApp(formData)
                 } else {
-                    res = await createApp(x)
+                    res = await createApp(formData)
                 }
 
                 if (res.success) {

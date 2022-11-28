@@ -26,6 +26,7 @@ export type ApplicationLevel={
 export type ApplicationModel={
     id:number,
     name:string,
+    pid:number,
     tenantId:number,
     labels:string,
     remarks:string,
