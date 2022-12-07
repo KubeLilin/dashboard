@@ -210,36 +210,6 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                             <Input></Input>
                         </ProForm.Item>
                     </ProCard>
-                    <ProCard title="数据卷" bordered headerBordered defaultCollapsed
-                        collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
-                        <ProForm.Group label="">
-                        <Form.List name="volumes">
-                            {(fields, { add, remove }) => (
-                                <div>
-                                    {fields.map(({ key, name, ...restField }) => (
-                                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                                            <Form.Item {...restField} name={[name, 'key']} rules={[{ required: true, message: 'key 不可为空' }]} >
-                                                <Select  options={[ 
-                                                    { value: 'emptyDir', label: '使用临时目录', },
-                                                ]}  />
-                                            </Form.Item>
-                                            <Form.Item {...restField} name={[name, 'value']} rules={[{ required: true, message: 'value 不可为空' }]} >
-                                                <Input placeholder="value" />
-                                            </Form.Item>
-                                            <MinusCircleOutlined onClick={() => remove(name)} />
-                                        </Space>
-                                    ))}
-                                    <Form.Item>
-                                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                            添加数据卷
-                                        </Button>
-                                    </Form.Item>
-                                </div>
-                            )}
-                        </Form.List>
-                    </ProForm.Group>
-                    </ProCard>
-                  
                 </StepsForm.StepForm>
                 <StepsForm.StepForm<DeploymentStep> title="实例配置">
                 <ProCard title="实例配置" bordered headerBordered
