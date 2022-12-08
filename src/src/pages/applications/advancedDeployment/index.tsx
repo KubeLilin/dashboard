@@ -6,12 +6,12 @@ import ProForm, {
 } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
 import { Select, Input, Checkbox, Modal, InputNumber, Space, Alert, notification, Drawer,
-    Form,  Button,Tabs } from 'antd';
+    Form,  Button,Tabs, message } from 'antd';
 import ProFormItem from '@ant-design/pro-form/lib/components/FormItem';
 import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, GetDeploymentFormInfo, GetDeploymentLevels } from './service';
 import { DeploymentStep,DeploymentLevel } from './devlopment_data';
 import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
-
+import ProbeForm from './forms/probe/index' 
 export interface Props {
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>],
     appId: any,
@@ -47,7 +47,8 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
     const [clusterName, clusterNameHandler] = useState<string>("")
     const [deployment, deploymentHandler] = useState<DeploymentStep>()
     const [deploymentLevels, deploymentLevelsHandler] = useState<any>()
-    
+    const [formEditable, formEditableHandler] = useState<boolean>(props.isEdit);
+
     const baseForm = useRef<ProFormInstance>();
     const instanceForm = useRef<ProFormInstance>();
 
@@ -59,6 +60,8 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
     const BindDeploymentLevels = ()=> GetDeploymentLevels().then(res=> deploymentLevelsHandler(res))
 
     useEffect(() => {
+        console.log('loaded')
+        formEditableHandler(props.isEdit)
         BindDeploymentLevels()
         BindClusterSelect()
         if (props.isEdit) {
@@ -70,13 +73,12 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                 setTimeout(() => {
                     deploymentHandler(x.data)
                     BindClusterName(x.data.clusterId, cluster, clusterNameHandler)
-                    // dpLevelHandler(x.data.level)
-               
                     BindNamespaceSelect(x.data.clusterId, namespcaeHandler)
                     openScvHandler(x.data.serviceEnable)
+                    console.log(x.data)
                     baseForm.current?.setFieldsValue(x.data)
                     instanceForm.current?.setFieldsValue(x.data)
-                }, 200)
+                }, 150)
             })
         } else {
             openScvHandler(true)
@@ -98,17 +100,13 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
         }
     }, props.visibleFunc)
     return (
-        <Drawer
-        title="高级部署环境配置"
-        width="88%"
-        onClose={() => { props.visibleFunc[1](false) }}
-        visible={props.visibleFunc[0]}
-        destroyOnClose={true}
-        maskClosable={false}
-    >
+        <Drawer title="高级部署环境配置" width="88%"
+            onClose={() => { props.visibleFunc[1](false) }}
+            visible={props.visibleFunc[0]} destroyOnClose={true} maskClosable={false} >
         <Tabs defaultActiveKey="1" tabPosition='left'>
             <Tabs.TabPane tab="基本信息" key="1" forceRender={true}>
-                <ProForm formRef={baseForm} submitter={{ resetButtonProps:{ style:{ display:'none'} } }}
+                <ProForm formRef={baseForm} submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
+                 onReset={()=>{ props.visibleFunc[1](false) }}
                  onFinish={async (value) => {
                     value.clusterId = clusterId;
                     value.serviceEnable = openScv;
@@ -129,10 +127,9 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                             icon: <CloseCircleTwoTone />,
                         });
                     } else {
-                        notification.open({
-                            message: "保存成功",
-                            icon: <SmileOutlined style={{ color: '#108ee9' }} />,
-                        });
+                        message.success("保存成功")
+                        formEditableHandler(true)
+                        props.tableRef.current?.reload()
                     }
                     dpStepHandler(res.data)
                     return res.success
@@ -144,8 +141,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                         <Input ></Input>
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level' rules={[{ required: true, message: '请选择环境级别' }]}>
-                        <Select options={deploymentLevels}  disabled={props.isEdit} 
-                        ></Select>
+                        <Select options={deploymentLevels}  disabled={props.isEdit}></Select>
                     </ProForm.Item>
                     <ProForm.Item label="集群" name='clusterId' rules={[{ required: true, message: '请选择集群' }]} >
                         <Select allowClear
@@ -160,10 +156,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                         </Select>
                     </ProForm.Item>
                     <ProForm.Item label="命名空间" name='namespaceId' rules={[{ required: true, message: '请选择命名空间' }]} >
-                        <Select allowClear
-                            disabled={props.isEdit}
-                            options={namespace}
-                        >
+                        <Select allowClear disabled={props.isEdit} options={namespace} >
                         </Select>
                     </ProForm.Item>
                     </ProCard>
@@ -176,10 +169,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
 
                         <ProForm.Item label="服务方式" name='serviceAway' rules={[{ required: true, message: '请输入网络服务方式' }]}>
                             <ProFormSelect options={[
-                                {
-                                    value: 'ClusterPort',
-                                    label: 'ClusterPort',
-                                },
+                                { value: 'ClusterPort', label: 'ClusterPort', },
                                 { value: 'NodePort', label: 'NodePort' },
                             ]
 
@@ -194,8 +184,19 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                    
                 </ProForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="实例配置" key="2" forceRender={true}>
-                <ProForm formRef={instanceForm}>
+            <Tabs.TabPane tab="实例配置" key="2" forceRender={true} disabled={!formEditable}>
+                <ProForm formRef={instanceForm} submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
+                 onReset={()=>{ props.visibleFunc[1](false) }}
+                 onFinish={async (value) => {
+                    value.id = dpStep?.id;
+                    value.appId = props.appId;
+                    let res = await CreateDeploymnetLimit(value)
+                    if (res.success) {
+                        message.success('实例信息保存成功')
+                    }
+                    props.tableRef.current?.reload()
+                    return res.success
+                }}>
                     <ProCard title="实例配置" bordered headerBordered
                             collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                         <ProForm.Item name='replicas' rules={[{ required: true, message: "请输入副本数量" }]}>
@@ -263,10 +264,8 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     </ProCard>        
                 </ProForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="健康检查" key="3">
-                <ProForm>
-                    
-                </ProForm>
+            <Tabs.TabPane tab="健康检查" key="3" disabled={!formEditable}>
+               <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]}></ProbeForm>
             </Tabs.TabPane>
         </Tabs>
     </Drawer>
