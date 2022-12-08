@@ -3,6 +3,7 @@ import ProForm, {
     DrawerForm, ModalForm, ProFormGroup, ProFormInstance,
     ProFormSwitch, ProFormTextArea, ProFormSelect, ProFormText
 } from '@ant-design/pro-form';
+import ProCard from '@ant-design/pro-card';
 import { Checkbox, Divider, InputNumber, Switch, Input, notification } from 'antd';
 import Form from 'antd/lib/form';
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
@@ -44,7 +45,8 @@ const ProbeForm: React.FC<Props> = (props: Props) => {
                     return false;
                 }
             }}  >
-
+        <ProCard title="生命周期管理" bordered headerBordered 
+              style={{ marginBlockEnd: 16 , maxWidth: '100%', }} > 
              <ProFormGroup label='滚动更新策略' >
                 <ProForm.Item name='maxSurge' initialValue={30} label='maxSurge(额外Pod)'  required>
                         <InputNumber min={1} max={100} value={25}></InputNumber> %
@@ -145,7 +147,8 @@ sleep 30" />
 
                 </div>
             </ProFormGroup>
-        </ProForm>);
+            </ProCard>
+        </ProForm> )
 }
 
 export default ProbeForm;

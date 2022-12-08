@@ -75,6 +75,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     BindClusterName(x.data.clusterId, cluster, clusterNameHandler)
                     BindNamespaceSelect(x.data.clusterId, namespcaeHandler)
                     openScvHandler(x.data.serviceEnable)
+                    openScvHandler(true)
                     console.log(x.data)
                     baseForm.current?.setFieldsValue(x.data)
                     instanceForm.current?.setFieldsValue(x.data)
