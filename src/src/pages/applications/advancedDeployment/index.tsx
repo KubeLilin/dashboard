@@ -141,7 +141,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                 <ProCard title="部署目标" bordered headerBordered
                         collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                     <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }]}>
-                        <Input ></Input>
+                        <Input  disabled={props.isEdit}></Input>
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level' rules={[{ required: true, message: '请选择环境级别' }]}>
                         <Select options={deploymentLevels}  disabled={props.isEdit}></Select>
@@ -267,11 +267,17 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     </ProCard>        
                 </ProForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="健康检查" key="3" disabled={!formEditable}>
+            <Tabs.TabPane tab="生命周期" key="3" disabled={!formEditable}>
                <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]}></ProbeForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="负载路由" key="4" disabled={!formEditable}>
                 <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]}></RouteForm>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="配置存储" key="5" disabled >
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="日志采集" key="6" disabled >
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="应用监控" key="7" disabled >
             </Tabs.TabPane>
         </Tabs>
     </Drawer>
