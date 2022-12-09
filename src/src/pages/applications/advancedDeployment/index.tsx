@@ -11,7 +11,9 @@ import ProFormItem from '@ant-design/pro-form/lib/components/FormItem';
 import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, GetDeploymentFormInfo, GetDeploymentLevels } from './service';
 import { DeploymentStep,DeploymentLevel } from './devlopment_data';
 import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
-import ProbeForm from './forms/probe/index' 
+import ProbeForm from './forms/probe' 
+import RouteForm from './forms/route';
+
 export interface Props {
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>],
     appId: any,
@@ -267,6 +269,9 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
             </Tabs.TabPane>
             <Tabs.TabPane tab="健康检查" key="3" disabled={!formEditable}>
                <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]}></ProbeForm>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="负载路由" key="4" disabled={!formEditable}>
+                <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]}></RouteForm>
             </Tabs.TabPane>
         </Tabs>
     </Drawer>
