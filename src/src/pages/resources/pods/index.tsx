@@ -8,7 +8,7 @@ import { Table,Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, mes
 
 import { getPodList, getNamespaceList, setReplicasByDeployId, 
     GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , 
-    DeleteDeployment,getServiceInfo , getGatewayRouterList } from './service'
+    DeleteDeploymentWithOutDB,getServiceInfo , getGatewayRouterList } from './service'
 
 import React, { useState, useRef, useEffect } from 'react';
 import ProDescriptions from '@ant-design/pro-descriptions';
@@ -353,16 +353,16 @@ const Pods: React.FC = (props) => {
                                         message.error('清空实例失败！');
                                     }
                                 }}> <Button key='button' danger style={{ display: did > 0 ? 'block' : 'none' }}>清空实例</Button></Popconfirm>,
-                                // <Popconfirm title="确定要删除部署吗? 删除后实例将全部清空，但元数据将保留！"
-                                // onConfirm={async () => {
-                                //     console.log(deploymentInfo)
-                                //     const resp = await DeleteDeployment(did)
-                                //     if (resp.success) {
-                                //             message.success('删除部署成功');
-                                //     } else {
-                                //             message.error('删除部署失败！');
-                                //     }
-                                // }}> <Button key='button' type="primary" danger style={{ display: did > 0 ? 'block' : 'none' }}>删除部署环境</Button></Popconfirm>,
+                                <Popconfirm title="确定要删除部署吗?删除部署后,集群中的Deployment将被删除,所有对应实例将全部清空,但平台元数据将保留！"
+                                onConfirm={async () => {
+                                    console.log(deploymentInfo)
+                                    const resp = await DeleteDeploymentWithOutDB(did)
+                                    if (resp.success) {
+                                            message.success('删除部署成功');
+                                    } else {
+                                            message.error('删除部署失败！');
+                                    }
+                                }}> <Button key='button' type="primary" danger style={{ display: did > 0 ? 'block' : 'none' }}>删除Deployment</Button></Popconfirm>,
                             <Button key="3"
                                 onClick={() => { if (polling) { setPolling(undefined); return; } setPolling(2000); }} >
                                 {polling ? <LoadingOutlined /> : <ReloadOutlined />}

@@ -116,8 +116,8 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                 stepsFormRender={(dom, submitter) => {
                     return (
                         <Drawer
-                            title="创建部署"
-                            width={600}
+                            title="部署环境配置"
+                            width={880}
                             onClose={() => { props.visibleFunc[1](false) }}
                             visible={props.visibleFunc[0]}
                             footer={submitter}
@@ -129,7 +129,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                 }}
             >
                 <StepsForm.StepForm<DeploymentStep>
-                    title="部署方式"
+                    title="部署环境"
                     onFinish={async (value) => {
                         value.clusterId = clusterId;
                         value.serviceEnable = openScv;
@@ -158,6 +158,8 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         return res.success
                     }}
                 >
+                  <ProCard title="部署目标" bordered headerBordered
+                        collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                     <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }]}>
                         <Input ></Input>
                     </ProForm.Item>
@@ -184,57 +186,64 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         >
                         </Select>
                     </ProForm.Item>
-                    < ProForm.Item name='serviceEnable'>
-                        <Checkbox onChange={(value) => { openScvHandler(value.target.checked) }} checked={openScv}>开启服务访问</Checkbox>
-                    </ProForm.Item>
+                    </ProCard>
 
-                    <ProForm.Item label="服务方式" name='serviceAway'>
-                        <ProFormSelect options={[
-                            {
-                                value: 'ClusterPort',
-                                label: 'ClusterPort',
-                            },
-                            { value: 'NodePort', label: 'NodePort' },
-                        ]
+                    <ProCard title="网络配置" bordered headerBordered defaultCollapsed
+                        collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
+                        < ProForm.Item name='serviceEnable'>
+                            <Checkbox disabled onChange={(value) => { openScvHandler(value.target.checked) }} checked={openScv}>开启服务访问</Checkbox>
+                        </ProForm.Item>
 
-                        } disabled={props.isEdit}
-                        ></ProFormSelect>
-                    </ProForm.Item>
-                    <ProForm.Item label="服务端口" name='servicePort'>
-                        <Input></Input>
-                    </ProForm.Item>
+                        <ProForm.Item label="服务方式" name='serviceAway'>
+                            <ProFormSelect options={[
+                                {
+                                    value: 'ClusterPort',
+                                    label: 'ClusterPort',
+                                },
+                                { value: 'NodePort', label: 'NodePort' },
+                            ]
+
+                            } disabled={props.isEdit}
+                            ></ProFormSelect>
+                        </ProForm.Item>
+                        <ProForm.Item label="服务端口  (应与服务启动端口保持一致,多容器端口应当不同)" name='servicePort'>
+                            <Input></Input>
+                        </ProForm.Item>
+                    </ProCard>
                 </StepsForm.StepForm>
-                <StepsForm.StepForm<DeploymentStep>
-                    title="实例配置"
-                >
-                    <ProForm.Item label="副本数量" name='replicas' rules={[{ required: true, message: "请输入副本数量" }]}>
-                        <InputNumber min={0} max={20}></InputNumber>
+                <StepsForm.StepForm<DeploymentStep> title="实例配置">
+                <ProCard title="实例配置" bordered headerBordered
+                        collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
+                    <ProForm.Item name='replicas' rules={[{ required: true, message: "请输入副本数量" }]}>
+                        <InputNumber addonBefore="实例数" addonAfter="个"  min={1} max={20}></InputNumber>
                     </ProForm.Item>
 
                     <ProForm.Group label="CPU限制 0为不限制" >
-                        <ProFormItem name='requestCpu' label='Request' rules={[{ required: true, message: "requestCpu不可为空" }]}>
-                            <InputNumber step={0.1} min={0} max={1}></InputNumber>
+                        <ProFormItem name='requestCpu' rules={[{ required: true, message: "requestCpu不可为空" }]}>
+                            <InputNumber addonBefore="request"  step={0.1} min={0} max={8}></InputNumber>
                         </ProFormItem>
                         <Space>
                             -
                         </Space>
-                        <ProFormItem name='limitCpu' label='Limit' rules={[{ required: true, message: "limitCpu不可为空" }]}  >
-                            <InputNumber step={0.1} min={0} max={128}></InputNumber>
+                        <ProFormItem name='limitCpu' rules={[{ required: true, message: "limitCpu不可为空" }]}  >
+                            <InputNumber addonBefore="limit" addonAfter="核" step={0.1} min={0} max={32}></InputNumber>
                         </ProFormItem>
 
                     </ProForm.Group>
                     <ProForm.Group label="内存限制(MB) 0为不限制">
-                        <ProFormItem name='requestMemory' label='Request' rules={[{ required: true, message: "requestMemory不可为空" }]}>
-                            <InputNumber min={0}></InputNumber>
+                        <ProFormItem name='requestMemory'   rules={[{ required: true, message: "requestMemory不可为空" }]}>
+                            <InputNumber addonBefore="request"  min={0}></InputNumber>
                         </ProFormItem>
                         <Space>
                             -
                         </Space>
-                        <ProFormItem name='limitMemory' label='Limit' rules={[{ required: true, message: "limitMemory不可为空" }]}>
-                            <InputNumber min={0} ></InputNumber>
+                        <ProFormItem name='limitMemory'  rules={[{ required: true, message: "limitMemory不可为空" }]}>
+                            <InputNumber addonBefore="limit" addonAfter="MiB"  min={0} ></InputNumber>
                         </ProFormItem>
                     </ProForm.Group>
-
+                    </ProCard>
+                    <ProCard title="环境" bordered headerBordered defaultCollapsed
+                        collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                     <ProForm.Group label="环境变量">
                         <Form.List name="environments">
                             {(fields, { add, remove }) => (
@@ -260,14 +269,14 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                                     ))}
                                     <Form.Item>
                                         <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                            Add ENV
+                                            添加环境变量
                                         </Button>
                                     </Form.Item>
                                 </>
                             )}
                         </Form.List>
                     </ProForm.Group>
-
+                   </ProCard>                         
                 </StepsForm.StepForm>
             </StepsForm>
         </ProCard>

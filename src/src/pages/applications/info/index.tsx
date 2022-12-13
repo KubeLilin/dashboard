@@ -9,6 +9,8 @@ import { Button, Tag, Typography } from 'antd';
 import { PlusOutlined, LoadingOutlined,CloudUploadOutlined, PushpinOutlined,ExclamationCircleOutlined } from '@ant-design/icons';
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
+import AdvancedDevlopment from '../advancedDeployment';
+
 import { DeploymentItem } from './data'
 import {  getDeploymentList, getPodList ,GetApplicationInfo,GetDeployLevelCounts,getRouterList,DeleteDeployment } from './deployment.service'
 import { BindCluster } from '../devlopmentForm/service'
@@ -35,6 +37,9 @@ const AppInfo: React.FC = () => {
     const actionRef = useRef<ActionType>();
     const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
+    const [advancedDeployFormVisible, setAdvancedDeployFormVisible] = useState(false);
+
+
     const [execFormVisible, setExecFormVisible] = useState(false);
     const [probeFormVisible, setProbeFormVisible] = useState(false);
     const [stepFormEdit, setStepFormEdit] = useState(false);
@@ -196,7 +201,8 @@ const AppInfo: React.FC = () => {
                     onClick={() =>{
                         stepDpId(record.id)
                         setStepFormEdit(true)
-                        setStepFormVisible(true)
+                        setAdvancedDeployFormVisible(true)
+                        //setStepFormVisible(true)
                     }}>编辑部署
                 </Dropdown.Button>)
             }
@@ -250,11 +256,19 @@ const AppInfo: React.FC = () => {
                                 }
                             },
                             actions: [
-                                <Button key='button' type="primary" icon={<PlusOutlined />}
-                                    onClick={() => {
+
+
+                                <Dropdown.Button type="primary"  overlay={ <Menu items={[
+                                    { key:1,icon:<CloudUploadOutlined /> ,label: '创建部署环境(高级)',onClick:()=>{
+                                        setStepFormEdit(false)
+                                        setAdvancedDeployFormVisible(true)
+                                    }},
+                                   
+                                    ]}/> }
+                                    onClick={() =>{
                                         setStepFormEdit(false)
                                         setStepFormVisible(true)
-                                    }}>创建部署环境</Button>
+                                    }}> 创建部署环境(快速) </Dropdown.Button>,
                             ]
                         }}
                         request={async (params, sort) => {
@@ -349,8 +363,12 @@ const AppInfo: React.FC = () => {
                 </TabPane>
             </Tabs>
          
-            <DevlopmentFormentForm visibleFunc={[stepFormVisible, setStepFormVisible]}
+            <DevlopmentFormentForm visibleFunc={[stepFormVisible ,setStepFormVisible ]}
                 appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+
+            <AdvancedDevlopment visibleFunc={[advancedDeployFormVisible, setAdvancedDeployFormVisible]}
+                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+
 
             <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} 
               deploymentId={dpId} deployImage={deployImage} tableRef={null} ></ExecDeployment>
