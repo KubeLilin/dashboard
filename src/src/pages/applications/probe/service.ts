@@ -12,3 +12,7 @@ export async function saveProbe(params:ProbeFormData) {
     })
     return req;
 }
+
+export async function  getProbeInfo(dpId:number) {
+    
+}
