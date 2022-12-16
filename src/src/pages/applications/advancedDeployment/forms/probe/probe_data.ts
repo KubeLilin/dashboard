@@ -16,6 +16,10 @@ export type ProbeItem = {
 export type ProbeFormData = {
     dpId: number,
 
+    maxUnavailable:number,
+    maxSurge:number,
+
+
     enableLifecycle: boolean,
     enableReadiness: boolean,
     enableLiveness: boolean,
