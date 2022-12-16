@@ -17,7 +17,7 @@ const Gateway: React.FC = () => {
             title: '网关名称',
             hideInSearch:true,
             render: (dom, row) => {
-                return <Link key={'linkgateway' + row.id} style={{ color: 'blue', textDecorationLine: 'underline' }} to={'/networks/gateway/teams?id=' + row.id + '&name=' + row.name + `&clusterId=${row.clusterId}`}>{dom}</Link>
+                return <Link key={'linkgateway' + row.id} style={{  textDecorationLine: 'underline' }} to={'/networks/gateway/teams?id=' + row.id + '&name=' + row.name + `&clusterId=${row.clusterId}`}>{dom}</Link>
             }
         },
         {

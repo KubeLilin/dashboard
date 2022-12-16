@@ -136,7 +136,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             dataIndex:'title',
             width:400,
             render:(dom,item)=>(
-                <a style={{ color: 'blue', textDecorationLine: 'underline' }} onClick={()=>{
+                <a style={{  textDecorationLine: 'underline' }} onClick={()=>{
                     history.push(`/devops/pipeline?id=${item.id}&name=${item.title}&appid=${item.appId}&appname=${item.appName}`)
                 }}>{dom}</a>
             )
@@ -148,10 +148,10 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
         {
             title:'任务ID',
             dataIndex:'taskId',
-            render:(dom,row)=>(<span key={"task_"+row.id} style={{color:'blue',}}>#{dom}</span>)
+            render:(dom,row)=>( <Tag color="purple" key={"task_"+row.id}>#{dom}</Tag> )
         },
         {
-            title:'阶段',
+            title:'阶段(当前进行阶段及耗时)',
             dataIndex:'steps',
             render:(_,item)=>{
                 var currentStageIndex = 0
@@ -193,7 +193,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             }
         },
         {
-            title:'任务耗时',
+            title:'总任务耗时',
             width: 120,
             render:(_,item:BuildItem)=> {
                return <span key={"tasktimeout"+item.id}>{item.lastBuildRecords.time} </span>

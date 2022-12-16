@@ -13,6 +13,7 @@ export type ApplicationItem={
     sCID:number
     sources:number
     sourceType:string
+    deployCount:number
 }
 
 export type ApplicationLevel={
@@ -25,6 +26,7 @@ export type ApplicationLevel={
 export type ApplicationModel={
     id:number,
     name:string,
+    pid:number,
     tenantId:number,
     labels:string,
     remarks:string,

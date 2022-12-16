@@ -20,6 +20,15 @@ export async function getDeploymentList(
     
 }
 
+
+export async function DeleteDeployment(dpId:number) {
+    let req = await request<ApiResponse<string>>("/v1/deployment/deployment",{
+        method:'DELETE',
+        params:{dpId:dpId}
+    })
+    return req
+}
+
 export async function executeDeployment(dpId:any) {
     let req=await request<ApiResponse<any>>("/v1/deployment/executedeployment",{
         method:'POST',
@@ -198,4 +207,12 @@ export async function GetProjectDeployLevelCounts(projectId:number) {
         }
     })
     return resData
+}
+
+export async function getRouterList(params: any) {
+    let req= await request<ApiResponse<any>>('/v1/apigateway/routerlistBy',{
+        method:'GET',
+        params: params
+    })
+   return req
 }

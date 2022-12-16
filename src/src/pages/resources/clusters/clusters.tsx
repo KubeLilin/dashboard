@@ -29,7 +29,6 @@ const Clusters: React.FC = () => {
         {
             title: '集群标示',
             dataIndex: 'name',
-            copyable: true,
             render: (dom, row) => {
                 return <Link to={'/resources/nodes?cid=' + row.id}>{dom}</Link>
             }
@@ -110,12 +109,15 @@ const Clusters: React.FC = () => {
                 title="导入集群"
                 visible={formVisible}
                 onVisibleChange={formVisibleFunc}
-                onFinish={async () => {
+                onFinish={async (formData:any) => {
                     console.log(configFile)
-                    let res = await importConfigFile(configFile)
+                    let res = await importConfigFile(configFile,formData.name)
                     return res.data
                 }}
             >
+                <ProForm.Item name="name" label="集群名称" rules={[{ required: true, message: '请输入集群名称' }]} >
+                    <Input placeholder="请输入应用名称(仅限英文)"  />
+                </ProForm.Item>
                 <ProForm.Item>
                     <Upload
                         accept=".yaml"

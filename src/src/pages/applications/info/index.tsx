@@ -1,16 +1,18 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Tabs,Layout,Badge,Dropdown,Menu } from 'antd';
+import { Tabs,Layout,Badge,Dropdown,Menu,Divider,Space,Modal ,message} from 'antd';
 import React, { useEffect } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProDescriptions from '@ant-design/pro-descriptions';
 
 import { history, Link } from 'umi';
 import { Button, Tag, Typography } from 'antd';
-import { PlusOutlined, LoadingOutlined,CloudUploadOutlined, PushpinOutlined } from '@ant-design/icons';
+import { PlusOutlined, LoadingOutlined,CloudUploadOutlined, PushpinOutlined,ExclamationCircleOutlined } from '@ant-design/icons';
 import { useState, useRef } from 'react'
 import DevlopmentFormentForm from '../devlopmentForm';
+import AdvancedDevlopment from '../advancedDeployment';
+
 import { DeploymentItem } from './data'
-import {  getDeploymentList, getPodList ,GetApplicationInfo,GetDeployLevelCounts } from './deployment.service'
+import {  getDeploymentList, getPodList ,GetApplicationInfo,GetDeployLevelCounts,getRouterList,DeleteDeployment } from './deployment.service'
 import { BindCluster } from '../devlopmentForm/service'
 import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
@@ -35,6 +37,9 @@ const AppInfo: React.FC = () => {
     const actionRef = useRef<ActionType>();
     const [tableListDataSource, setTableListDataSource] = useState<DeploymentItem[]>([]);
     const [stepFormVisible, setStepFormVisible] = useState(false);
+    const [advancedDeployFormVisible, setAdvancedDeployFormVisible] = useState(false);
+
+
     const [execFormVisible, setExecFormVisible] = useState(false);
     const [probeFormVisible, setProbeFormVisible] = useState(false);
     const [stepFormEdit, setStepFormEdit] = useState(false);
@@ -157,25 +162,6 @@ const AppInfo: React.FC = () => {
             width: 200,
             valueType: 'option',
             render: (dom, record, _, action) => {
-                // <Button key="depoly"   icon={<CloudUploadOutlined />} onClick={() => {
-                //     tableListDataSource[0].namespace = 'n' + Math.random()
-                //     setTableListDataSource(tableListDataSource)
-                //     stepDpId(record.id)
-                //     setDeployImage(record.lastImage)
-                //     setExecFormVisible(true)
-                // }}>部署应用</Button>,
-                // <Button key="edit" onClick={() => {
-                //     stepDpId(record.id)
-                //     setStepFormEdit(true)
-                //     setStepFormVisible(true)
-                // }}>编辑部署</Button>,
-                // <Button key='probe' icon={<PushpinOutlined />} onClick={()=>{
-                //     stepDpId(record.id)
-                //     setProbeFormVisible(true)
-                // }}>
-                //     设置探针
-                // </Button>,
-
                 const menu = (
                     <Menu items={[
                         { key:1,icon:<CloudUploadOutlined /> ,label: '部署应用',onClick:()=>{
@@ -189,15 +175,34 @@ const AppInfo: React.FC = () => {
                                 stepDpId(record.id)
                                 setProbeFormVisible(true)
                         }},
+                        { key:3,icon:<PushpinOutlined />,label: '删除部署环境',danger:true,onClick:()=>{
+                            Modal.confirm({
+                                title: 'Confirm',
+                                icon: <ExclamationCircleOutlined />,
+                                content: `确认要删除${record.name}部署环境吗?`,
+                                okText: '确认',
+                                cancelText: '取消',
+                                onOk:async ()=>{
+                                    const resp = await DeleteDeployment(record.id)
+                                    if (resp.success) {
+                                            message.success('删除部署成功');
+                                    } else {
+                                            message.error('删除部署失败！');
+                                    }
+                                    actionRef.current?.reload()
+                                }
+                              });
+                        }},
                       ]} />
                   );
 
                 return (
-                <Dropdown.Button type="primary"  overlay={menu}
+                <Dropdown.Button type="primary"  overlay={menu} 
                     onClick={() =>{
                         stepDpId(record.id)
                         setStepFormEdit(true)
-                        setStepFormVisible(true)
+                        setAdvancedDeployFormVisible(true)
+                        //setStepFormVisible(true)
                     }}>编辑部署
                 </Dropdown.Button>)
             }
@@ -251,11 +256,19 @@ const AppInfo: React.FC = () => {
                                 }
                             },
                             actions: [
-                                <Button key='button' type="primary" icon={<PlusOutlined />}
-                                    onClick={() => {
+
+
+                                <Dropdown.Button type="primary"  overlay={ <Menu items={[
+                                    { key:1,icon:<CloudUploadOutlined /> ,label: '创建部署环境(高级)',onClick:()=>{
+                                        setStepFormEdit(false)
+                                        setAdvancedDeployFormVisible(true)
+                                    }},
+                                   
+                                    ]}/> }
+                                    onClick={() =>{
                                         setStepFormEdit(false)
                                         setStepFormVisible(true)
-                                    }}>创建部署环境</Button>
+                                    }}> 创建部署环境(快速) </Dropdown.Button>,
                             ]
                         }}
                         request={async (params, sort) => {
@@ -302,8 +315,8 @@ const AppInfo: React.FC = () => {
                         }}
                     ></ProTable>
                 </TabPane>
-                <TabPane tab="基本信息" key="2" >
-                    <ProDescriptions request={ async () => GetApplicationInfo(Number(appId)) } style={{ padding:35, }} 
+                <TabPane tab="详情&路由" key="2" >
+                    <ProDescriptions title="应用详情" request={ async () => GetApplicationInfo(Number(appId)) } style={{ padding:35, }} 
                         column={2}  bordered	
                         columns={[
                             { title: '所属团队', dataIndex: 'tenantName'},
@@ -315,6 +328,26 @@ const AppInfo: React.FC = () => {
                             { title: '应用标签', dataIndex: 'labels' },
                             { title: '应用状态', dataIndex: 'status',valueEnum:{ 1: "生效",0:"失效" } }
                         ]}/>
+                    <ProTable  rowKey={"id"} search={false} headerTitle="应用路由"
+                        columns={ [
+                        { dataIndex: 'id', title: 'ID', hideInSearch:true,},
+                        { dataIndex: 'name', title: '路由名称',},
+                        { dataIndex: 'host',title: '域名',},
+                        { dataIndex: 'uri',title: '路径',hideInSearch:true,},
+                        { dataIndex: 'desc',title: '描述',},
+                        { dataIndex:'liveness',title:'探针', render: (dom, row) => (<a key={'livenesslink' + row.id} href={row.liveness} target="_blank">{dom}</a>)},
+                        { dataIndex: 'nodes',title: '绑定负载',hideInSearch:true,},]}
+                    request={ (params)=>{
+                        params.appId = Number(appId)
+                        return getRouterList(params)
+                    } } 
+                    toolBarRender={() => [
+                        <Button key='button' icon={<PlusOutlined />} type="primary"
+                            onClick={() => {
+                              history.push('/networks/gateway')
+                            }}>网关路由设置</Button>
+                    ]}
+                    ></ProTable>
                 </TabPane>
                 <TabPane tab="应用流水线" key="3">
                     <AppBuildList AppId={Number(appId)} AppName={String(appName)} AutoLoad={autoLoadPipelineData} />
@@ -330,8 +363,12 @@ const AppInfo: React.FC = () => {
                 </TabPane>
             </Tabs>
          
-            <DevlopmentFormentForm visibleFunc={[stepFormVisible, setStepFormVisible]}
+            <DevlopmentFormentForm visibleFunc={[stepFormVisible ,setStepFormVisible ]}
                 appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+
+            <AdvancedDevlopment visibleFunc={[advancedDeployFormVisible, setAdvancedDeployFormVisible]}
+                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+
 
             <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} 
               deploymentId={dpId} deployImage={deployImage} tableRef={null} ></ExecDeployment>

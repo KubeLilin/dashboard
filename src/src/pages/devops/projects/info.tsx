@@ -11,6 +11,7 @@ import { AppsColumns } from './components/project_apps'
 import ProjectDeployList from './components/project_deploys'
 import ProjectPipelineList from './components/project_pipeline'
 import ProjectResource from './components/project_resource'
+import ProjectAppList from './components/project_apps';
 
 const ProjectInfo: React.FC = () => {
     var projectId = Number(history.location.query?.id)
@@ -39,10 +40,7 @@ const ProjectInfo: React.FC = () => {
                     }
                 }}>
                 <TabPane tab="应用列表" key="1" >
-                    <ProTable<ApplicationItem>  headerTitle="项目应用列表"  rowKey={record => record.id} columns={AppsColumns}
-                        request={async (p, s, f) => {  p.pid = projectId
-                            return getApps(p,s, f) }} >       
-                    </ProTable>
+                    <ProjectAppList projectId={projectId}/>
                 </TabPane>
                 <TabPane tab="部署环境" key="2" >
                     <ProjectDeployList projectId={projectId} />

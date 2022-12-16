@@ -3,7 +3,7 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Input, Button, Form,Transfer ,message,Popconfirm ,Divider} from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { Link } from 'umi';
+import { history ,Link} from 'umi';
 import ProForm, { DrawerForm,  ProFormText } from '@ant-design/pro-form';
 import { RecordType } from './data'
 import { getApps  } from '../../applications/apps/apps_service';
@@ -58,9 +58,8 @@ const Projects: React.FC = () => {
         {
             title: '项目名称',
             dataIndex: 'name',
-            copyable: true,
             render: (dom, row) => {
-                return <Link key={'linkapp' + row.id} style={{ color: 'blue', textDecorationLine: 'underline' }} to={'/devops/projects/info?id=' + row.id + '&name=' + row.name}>{dom}</Link>
+                return <Link key={'linkapp' + row.id} style={{  textDecorationLine: 'underline' }} to={'/devops/projects/info?id=' + row.id + '&name=' + row.name}>{dom}</Link>
             }
         },
         {
@@ -78,8 +77,7 @@ const Projects: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
-                <Link key={"link-id" + record.id} to={'/devops/projects/info?id=' + record.id + '&name=' + record.name}>配置</Link>,
-                <a key={"edit" + record.id} onClick={ async () => { 
+                <Button type='primary' key={"edit" + record.id} onClick={ async () => { 
                     const jsAppList = JSON.parse( '['+ record.appList + ']')
                     await getAppList()
                     setTargetKeys(jsAppList)
@@ -89,12 +87,13 @@ const Projects: React.FC = () => {
                     })
                     projectEditedHandler(record.id)
                     formVisibleHandler(true)
-                }}>编辑</a>,
+                }}>编辑</Button>,
                 <span key={"del-id" + record.id}>
-                    <Popconfirm title="是否要删除此项目吗？" onConfirm={() =>{
-                         deleteProject(record.id) 
+                    <Popconfirm title="是否要删除此项目吗？" onConfirm={async() =>{
+                        await deleteProject(record.id) 
                          actionRef.current?.reload()
-                    }}><a>删除</a>
+                    }}>
+                        <Button danger>删除</Button>
                     </Popconfirm>
                 </span>
             ]
@@ -151,7 +150,7 @@ const Projects: React.FC = () => {
                 </ProForm.Item>
                 <ProForm.Item label="应用列表"  rules={[{ required: true, message: '请选择应用' }]} >
                     <Transfer dataSource={modelAppListData} showSearch  listStyle={{ width: 360, height: 700, }} 
-                        filterOption={filterOption} targetKeys={targetKeys} onChange={handleChange} render={item => item.title}
+                        filterOption={filterOption} targetKeys={targetKeys} onChange={handleChange} render={item => <span style={{color:'ButtonHighlight'}}>{item.title}</span> }
                     />
                 </ProForm.Item>
             </DrawerForm>
