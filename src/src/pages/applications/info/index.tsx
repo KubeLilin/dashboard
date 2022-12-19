@@ -168,13 +168,16 @@ const AppInfo: React.FC = () => {
                                 tableListDataSource[0].namespace = 'n' + Math.random()
                                 setTableListDataSource(tableListDataSource)
                                 stepDpId(record.id)
-                                setDeployImage(record.lastImage)
+                                if (record.lastImage != '无') {
+                                    setDeployImage(record.lastImage)
+                                }
+                               
                                 setExecFormVisible(true)
                         }},
-                        { key:2,icon:<PushpinOutlined />,label: '生命周期',onClick:()=>{
-                                stepDpId(record.id)
-                                setProbeFormVisible(true)
-                        }},
+                        // { key:2,icon:<PushpinOutlined />,label: '生命周期',onClick:()=>{
+                        //         stepDpId(record.id)
+                        //         setProbeFormVisible(true)
+                        // }},
                         { key:3,icon:<PushpinOutlined />,label: '删除部署环境',danger:true,onClick:()=>{
                             Modal.confirm({
                                 title: 'Confirm',

@@ -362,7 +362,7 @@ const Pods: React.FC = (props) => {
                                     } else {
                                             message.error('删除部署失败！');
                                     }
-                                }}> <Button key='button' type="primary" danger style={{ display: did > 0 ? 'block' : 'none' }}>删除Deployment</Button></Popconfirm>,
+                                }}> <Button key='button' type="primary" danger style={{ display: did > 0 ? 'block' : 'none' }}>删除集群资源</Button></Popconfirm>,
                             <Button key="3"
                                 onClick={() => { if (polling) { setPolling(undefined); return; } setPolling(2000); }} >
                                 {polling ? <LoadingOutlined /> : <ReloadOutlined />}

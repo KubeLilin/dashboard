@@ -41,11 +41,11 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
                 }
             }} 
             onFinish={async (x)=>{
-                console.log(props.deploymentId)
                 x.dpId=props.deploymentId
                 x.isDiv=enableDivImage
                 x.opsType='manual'
                 x.tenantId = tenantId
+                x.wholeImage = x.wholeImage.trim()
                 console.log(x)
                 let res=await RequestDeployment(x)
                 if(res.success){
@@ -68,7 +68,7 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
                 }
             }}
         >
-            <ProForm.Item >
+            <ProForm.Item hidden>
                 <Checkbox name='isDiv' checked={enableDivImage} onChange={(x)=>{setEnableDivImage(x.target.checked)}}>自定义镜像</Checkbox>
             </ProForm.Item>
             <ProForm.Item name='image' label='镜像仓库' hidden={enableDivImage}>
@@ -77,8 +77,8 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
             <ProForm.Item name='imageTag' label='TAG' hidden={enableDivImage}>
                 <Select></Select>
             </ProForm.Item>
-            <ProForm.Item name='wholeImage' label='完整镜像地址' hidden={!enableDivImage}>
-               <Input/>
+            <ProForm.Item name='wholeImage' label='完整镜像地址' hidden={!enableDivImage} rules={[  { required: true, message: '镜像地址为必填项'} ]}>
+               <Input placeholder='请输入完整的镜像地址'/>
             </ProForm.Item>
         </ModalForm>
 
