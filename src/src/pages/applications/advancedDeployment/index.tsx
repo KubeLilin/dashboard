@@ -191,8 +191,9 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                 <ProForm formRef={instanceForm} submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
                  onReset={()=>{ props.visibleFunc[1](false) }}
                  onFinish={async (value) => {
-                    value.id = dpStep?.id;
+                    value.id = props.id;
                     value.appId = props.appId;
+                    console.log(value)
                     let res = await CreateDeploymnetLimit(value)
                     if (res.success) {
                         message.success('实例信息保存成功')
