@@ -13,6 +13,8 @@ import { DeploymentStep,DeploymentLevel } from './devlopment_data';
 import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 import ProbeForm from './forms/probe' 
 import RouteForm from './forms/route';
+import { getProBe } from './forms/probe/service';
+import { ProbeFormData } from './forms/probe/probe_data';
 
 export interface Props {
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>],
@@ -54,6 +56,8 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
     const baseForm = useRef<ProFormInstance>();
     const instanceForm = useRef<ProFormInstance>();
 
+    const [probeFormData,probeFormDataHandler]=useState<ProbeFormData>();
+
     function BindClusterSelect() {
         let req = BindCluster()
         req.then(x => { clusterHandler(x) })
@@ -78,10 +82,22 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     BindNamespaceSelect(x.data.clusterId, namespcaeHandler)
                     openScvHandler(x.data.serviceEnable)
                     openScvHandler(true)
-                    console.log(x.data)
                     baseForm.current?.setFieldsValue(x.data)
                     instanceForm.current?.setFieldsValue(x.data)
                 }, 150)
+            })
+            let res = getProBe(props.id)
+            res.then(x => {
+                if (x.success) {
+                    console.log("获取probe")
+                    console.log(x)
+                    probeFormDataHandler(x.data)
+                } else {
+                    notification.open({
+                        message: "获取生命周期信息失败",
+                        icon: <CloseCircleTwoTone />,
+                    });
+                }
             })
         } else {
             openScvHandler(true)
@@ -268,7 +284,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                 </ProForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="生命周期" key="3" disabled={!formEditable}>
-               <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]}></ProbeForm>
+               <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} isEdit={props.isEdit} formData={probeFormData}></ProbeForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="负载路由" key="4" disabled={!formEditable}>
                 <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]}></RouteForm>

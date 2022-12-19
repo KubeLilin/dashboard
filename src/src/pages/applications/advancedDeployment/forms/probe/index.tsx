@@ -8,7 +8,7 @@ import { Checkbox, Divider, InputNumber, Switch, Input, notification } from 'ant
 import Form from 'antd/lib/form';
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
 import { ProbeFormData } from './probe_data';
-import { saveProbe } from './service';
+import { getProBe, saveProbe } from './service';
 
 const { TextArea } = Input;
 
@@ -16,39 +16,47 @@ const { TextArea } = Input;
 export interface Props {
     deploymentId: number,
     tableRef: any,
-    visibleFunc: Function
+    visibleFunc: Function,
+    formData:ProbeFormData|undefined
+    isEdit:boolean
 }
 
 const ProbeForm: React.FC<Props> = (props: Props) => {
     const [lifecycleChecked, lifecycleCheckedHandler] = useState<boolean>(false);
     const [livenessChecked, livenessCheckedHandler] = useState<boolean>(false);
     const [readnessChecked, readnessCheckedHandler] = useState<boolean>(false);
-
     const actionRef = useRef<ProFormInstance>();
     const [form] = Form.useForm();
+
+    useEffect(()=>{
+        if(props.isEdit){
+            if(props.formData!=undefined){
+                lifecycleCheckedHandler(props.formData.enableLifecycle)
+                livenessCheckedHandler(props.formData.enableLiveness)
+                readnessCheckedHandler(props.formData.enableReadiness)
+            }
+            form.setFieldsValue(props.formData)
+        }
+    })
+
     return (
         <ProForm<ProbeFormData> title="生命周期设置"
             submitter={{ resetButtonProps: {}, searchConfig: { resetText: '取消', submitText: '提交' } }}
             onReset={() => { props.visibleFunc(false) }}
             form={form} formRef={actionRef}
             onFinish={async (formData) => {
-                console.log(props);
                 formData.dpId = props.deploymentId;
-                console.log("保存probe");
                 let res = await saveProbe(formData);
-                console.log(res);
                 if (res.success) {
                     notification.open({
                         message: res.message,
                         icon: <SmileOutlined style={{ color: '#108ee9' }} />,
                     });
-                    return true
                 } else {
                     notification.open({
                         message: res.message,
                         icon: <CloseCircleTwoTone />,
                     });
-                    return false;
                 }
             }}  >
             <ProCard title="生命周期管理" bordered headerBordered
@@ -150,7 +158,6 @@ sleep 30" />
                         <ProForm.Item name='readinessPeriodSeconds' initialValue={20} label='间隔时间(秒)' required={readnessChecked}>
                             <InputNumber min={0} ></InputNumber>
                         </ProForm.Item>
-
                     </div>
                 </ProFormGroup>
             </ProCard>
