@@ -17,7 +17,6 @@ export interface Props {
     deploymentId: number,
     tableRef: any,
     visibleFunc: Function,
-    formData:ProbeFormData|undefined
     isEdit:boolean
 }
 
@@ -27,15 +26,19 @@ const ProbeForm: React.FC<Props> = (props: Props) => {
     const [readnessChecked, readnessCheckedHandler] = useState<boolean>(false);
     const actionRef = useRef<ProFormInstance>();
     const [form] = Form.useForm();
-
     useEffect(()=>{
         if(props.isEdit){
-            if(props.formData!=undefined){
-                lifecycleCheckedHandler(props.formData.enableLifecycle)
-                livenessCheckedHandler(props.formData.enableLiveness)
-                readnessCheckedHandler(props.formData.enableReadiness)
-            }
-            form.setFieldsValue(props.formData)
+            let res = getProBe(props.deploymentId)
+            res.then(x => {
+                if (x.success) {
+                    form.setFieldsValue(x.data)
+                } else {
+                    notification.open({
+                        message: "获取生命周期信息失败",
+                        icon: <CloseCircleTwoTone />,
+                    });
+                }
+            })
         }
     })
 

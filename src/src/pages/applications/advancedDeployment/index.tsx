@@ -86,19 +86,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     instanceForm.current?.setFieldsValue(x.data)
                 }, 150)
             })
-            let res = getProBe(props.id)
-            res.then(x => {
-                if (x.success) {
-                    console.log("获取probe")
-                    console.log(x)
-                    probeFormDataHandler(x.data)
-                } else {
-                    notification.open({
-                        message: "获取生命周期信息失败",
-                        icon: <CloseCircleTwoTone />,
-                    });
-                }
-            })
+
         } else {
             openScvHandler(true)
             const arrays = [baseForm,instanceForm]
@@ -285,7 +273,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                 </ProForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="生命周期" key="3" disabled={!formEditable}>
-               <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} isEdit={props.isEdit} formData={probeFormData}></ProbeForm>
+               <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} isEdit={props.isEdit}></ProbeForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="负载路由" key="4" disabled={!formEditable}>
                 <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]}></RouteForm>
