@@ -145,7 +145,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                 <ProCard title="部署目标" bordered headerBordered
                         collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                     <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }]}>
-                        <Input  disabled={props.isEdit}></Input>
+                        <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, '') }}  disabled={props.isEdit}></Input>
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level' rules={[{ required: true, message: '请选择环境级别' }]}>
                         <Select options={deploymentLevels}  disabled={props.isEdit}></Select>
@@ -168,7 +168,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     </ProForm.Item>
                     </ProCard>
 
-                    <ProCard title="网络配置" bordered headerBordered defaultCollapsed
+                    <ProCard title="网络配置" bordered headerBordered 
                         collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                         < ProForm.Item name='serviceEnable'>
                             <Checkbox disabled onChange={(value) => { openScvHandler(value.target.checked) }} checked={openScv}>开启服务访问</Checkbox>
@@ -177,11 +177,8 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                         <ProForm.Item label="服务方式" name='serviceAway' rules={[{ required: true, message: '请输入网络服务方式' }]}>
                             <ProFormSelect options={[
                                 { value: 'ClusterPort', label: 'ClusterPort', },
-                                { value: 'NodePort', label: 'NodePort' },
-                            ]
-
-                            } disabled={props.isEdit}
-                            ></ProFormSelect>
+                                // { value: 'NodePort', label: 'NodePort' },
+                            ] } disabled={props.isEdit} ></ProFormSelect>
                         </ProForm.Item>
                         <ProForm.Item label="服务端口  (应与服务启动端口保持一致,多容器端口应当不同)" name='servicePort' rules={[{ required: true, message: '请输入服务端口' }]}>
                             <Input></Input>
