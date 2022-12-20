@@ -9,11 +9,14 @@ import Form from 'antd/lib/form';
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
 
 import { getRouterByName,createOrEditRoute } from './service'
+import { DeploymentStep } from '../../devlopment_data'
+
 
 export interface RouteFormProps {
     deploymentId: number,
     tableRef: any,
-    visibleFunc:Function
+    visibleFunc:Function,
+    deployment?:DeploymentStep
 }
 
 const RouteForm: React.FC<RouteFormProps> = (props: RouteFormProps) => {
@@ -23,8 +26,16 @@ const RouteForm: React.FC<RouteFormProps> = (props: RouteFormProps) => {
     return (
         <ProForm submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
         request={async(r)=>{
-            const routeName = 'default:route:deploy:' + props.deploymentId
-            const res = await getRouterByName({ deployId: props.deploymentId,routeName:routeName })
+            let deployId = 0
+            console.log(props.deployment)
+            if(props.deploymentId > 0) {
+                deployId = props.deploymentId
+            } else {
+                deployId = Number(props.deployment?.id)
+            }
+
+            const routeName = 'default:route:deploy:' + deployId
+            const res = await getRouterByName({ deployId: deployId,routeName:routeName })
             if(res.success){
                 console.log(res.data)
                 if (res.data.rewrite) {

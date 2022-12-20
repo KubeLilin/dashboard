@@ -13,7 +13,6 @@ import { DeploymentStep,DeploymentLevel } from './devlopment_data';
 import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 import ProbeForm from './forms/probe' 
 import RouteForm from './forms/route';
-import { getProBe } from './forms/probe/service';
 import { ProbeFormData } from './forms/probe/probe_data';
 
 export interface Props {
@@ -49,14 +48,12 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
     const [openScv, openScvHandler] = useState<boolean>(false);
     const [dpStep, dpStepHandler] = useState<DeploymentStep>();
     const [clusterName, clusterNameHandler] = useState<string>("")
-    const [deployment, deploymentHandler] = useState<DeploymentStep>()
+    // const [deployment, deploymentHandler] = useState<DeploymentStep>()
     const [deploymentLevels, deploymentLevelsHandler] = useState<any>()
     const [formEditable, formEditableHandler] = useState<boolean>(props.isEdit);
 
     const baseForm = useRef<ProFormInstance>();
     const instanceForm = useRef<ProFormInstance>();
-
-    const [probeFormData,probeFormDataHandler]=useState<ProbeFormData>();
 
     function BindClusterSelect() {
         let req = BindCluster()
@@ -77,7 +74,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     props.visibleFunc[1](false)
                 }
                 setTimeout(() => {
-                    deploymentHandler(x.data)
+                    dpStepHandler(x.data)
                     BindClusterName(x.data.clusterId, cluster, clusterNameHandler)
                     BindNamespaceSelect(x.data.clusterId, namespcaeHandler)
                     openScvHandler(x.data.serviceEnable)
@@ -118,12 +115,15 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     value.clusterId = clusterId;
                     value.serviceEnable = openScv;
                     if (props.isEdit) {
-                        value.appId = deployment?.appId;
+                        value.appId = dpStep?.appId;
                         //value.name = deployment?.name;
                         value.id = props.id;
                     } else {
                         value.appId = parseInt(props.appId);
                         value.clusterId = clusterId;
+                        if(dpStep?.id){
+                            value.id = dpStep?.id
+                        }
                         //value.name = (`${value.nickname}-${props.appName}-${clusterName}`).trim();
                     }
                     value.name = (`${value.nickname}-${props.appName}-${clusterName}`).trim();
@@ -195,8 +195,13 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                 <ProForm formRef={instanceForm} submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
                  onReset={()=>{ props.visibleFunc[1](false) }}
                  onFinish={async (value) => {
-                    value.id = props.id;
-                    value.appId = props.appId;
+                    console.log(dpStep)
+                    value.id = props.id
+                    value.appId = Number(props.appId)
+                    if(dpStep){
+                        value.id = dpStep.id
+                        value.appId = dpStep.appId
+                    }
                     console.log(value)
                     let res = await CreateDeploymnetLimit(value)
                     if (res.success) {
@@ -276,7 +281,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} isEdit={props.isEdit}></ProbeForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="负载路由" key="4" disabled={!formEditable}>
-                <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]}></RouteForm>
+                <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep}></RouteForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="配置存储" key="5" disabled >
             </Tabs.TabPane>
