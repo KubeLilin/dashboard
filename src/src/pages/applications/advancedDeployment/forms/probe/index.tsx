@@ -26,27 +26,26 @@ const ProbeForm: React.FC<Props> = (props: Props) => {
     const [readnessChecked, readnessCheckedHandler] = useState<boolean>(false);
     const actionRef = useRef<ProFormInstance>();
     const [form] = Form.useForm();
-    useEffect(()=>{
-        if(props.isEdit){
-            let res = getProBe(props.deploymentId)
-            res.then(x => {
-                if (x.success) {
-                    form.setFieldsValue(x.data)
-                } else {
-                    notification.open({
-                        message: "获取生命周期信息失败",
-                        icon: <CloseCircleTwoTone />,
-                    });
-                }
-            })
-        }
-    })
 
     return (
         <ProForm<ProbeFormData> title="生命周期设置"
             submitter={{ resetButtonProps: {}, searchConfig: { resetText: '取消', submitText: '提交' } }}
             onReset={() => { props.visibleFunc(false) }}
             form={form} formRef={actionRef}
+            request={async(x)=>{
+                let res =await getProBe(props.deploymentId)
+                if (!res.success) {
+                    notification.open({
+                        message: "获取生命周期信息失败",
+                        icon: <CloseCircleTwoTone />,
+                    });
+                } 
+                lifecycleCheckedHandler(res.data.enableLifecycle)
+                livenessCheckedHandler(res.data.enableLiveness)
+                readnessCheckedHandler(res.data.enableReadiness)
+                return res.data
+
+            }}
             onFinish={async (formData) => {
                 formData.dpId = props.deploymentId;
                 let res = await saveProbe(formData);
@@ -65,13 +64,13 @@ const ProbeForm: React.FC<Props> = (props: Props) => {
             <ProCard title="生命周期管理" bordered headerBordered
                 style={{ marginBlockEnd: 16, maxWidth: '100%', }} >
                 <ProFormGroup label='滚动更新策略' >
-                    <ProForm.Item name='maxSurge' initialValue={30} label='maxSurge(额外Pod)' required>
-                        <InputNumber min={1} max={100} value={25}></InputNumber> %
+                    <ProForm.Item name='maxSurge' label='maxSurge(额外Pod)' required>
+                        <InputNumber min={1} max={100} ></InputNumber> %
                     </ProForm.Item>
-                    <ProForm.Item name='maxUnavailable' initialValue={30} label='maxUnavailable(最大不可用)' required >
-                        <InputNumber min={1} max={100} value={25}></InputNumber> %
+                    <ProForm.Item name='maxUnavailable'  label='maxUnavailable(最大不可用)' required >
+                        <InputNumber min={1} max={100} ></InputNumber> %
                     </ProForm.Item>
-                    <ProForm.Item name='terminationGracePeriodSeconds' initialValue={30} label='延时终止(秒)' required={lifecycleChecked}>
+                    <ProForm.Item name='terminationGracePeriodSeconds'label='延时终止(秒)' required={lifecycleChecked}>
                         <InputNumber min={0}></InputNumber>
                     </ProForm.Item>
                 </ProFormGroup>
