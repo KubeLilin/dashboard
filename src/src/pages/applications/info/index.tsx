@@ -262,7 +262,7 @@ const AppInfo: React.FC = () => {
 
 
                                 <Dropdown.Button type="primary"  overlay={ <Menu items={[
-                                    { key:1,icon:<CloudUploadOutlined /> ,label: '创建部署环境(高级)',onClick:()=>{
+                                    { key:1,icon:<CloudUploadOutlined /> ,label: '创建部署(高级)',onClick:()=>{
                                         setStepFormEdit(false)
                                         setAdvancedDeployFormVisible(true)
                                     }},
@@ -271,7 +271,7 @@ const AppInfo: React.FC = () => {
                                     onClick={() =>{
                                         setStepFormEdit(false)
                                         setStepFormVisible(true)
-                                    }}> 创建部署环境(快速) </Dropdown.Button>,
+                                    }}> 创建部署 </Dropdown.Button>,
                             ]
                         }}
                         request={async (params, sort) => {
