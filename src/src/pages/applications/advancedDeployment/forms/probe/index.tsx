@@ -65,10 +65,10 @@ const ProbeForm: React.FC<Props> = (props: Props) => {
                 style={{ marginBlockEnd: 16, maxWidth: '100%', }} >
                 <ProFormGroup label='滚动更新策略' >
                     <ProForm.Item name='maxSurge' label='maxSurge(额外Pod)' required>
-                        <InputNumber min={1} max={100} ></InputNumber> %
+                        <InputNumber min={1} max={100}  formatter={(value) => `${value}%`}></InputNumber>
                     </ProForm.Item>
                     <ProForm.Item name='maxUnavailable'  label='maxUnavailable(最大不可用)' required >
-                        <InputNumber min={1} max={100} ></InputNumber> %
+                        <InputNumber min={1} max={100} formatter={(value) => `${value}%`}></InputNumber>
                     </ProForm.Item>
                     <ProForm.Item name='terminationGracePeriodSeconds'label='延时终止(秒)' required={lifecycleChecked}>
                         <InputNumber min={0}></InputNumber>
