@@ -26,6 +26,7 @@ const RouteForm: React.FC<RouteFormProps> = (props: RouteFormProps) => {
     
 
     return (
+        <ProCard title="部署负载路由(网关)" bordered headerBordered style={{ marginBlockEnd: 16, maxWidth: '100%', }} >
         <ProForm submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
         request={async(r)=>{
             let deployId = 0
@@ -55,7 +56,6 @@ const RouteForm: React.FC<RouteFormProps> = (props: RouteFormProps) => {
             return false
         }}
         onReset={()=>{ props.visibleFunc(false) }}>
-            <ProCard>
             <Divider orientation="left"  orientationMargin="0">基本信息</Divider>
                 <ProFormText name='id' hidden></ProFormText> 
                 <ProFormText name='name' label='路由名称' disabled  placeholder="请输入路由名称" rules={[{ required: true, message: "请输入路由名称" }]}></ProFormText>
@@ -93,8 +93,8 @@ const RouteForm: React.FC<RouteFormProps> = (props: RouteFormProps) => {
                 <ProFormText name='regexUri'  label='匹配正则表达式' placeholder="请输入匹配正则表达式"></ProFormText>
                 <ProFormText name='regexTmp' label='转发路径模版' placeholder="请输入转发路径模版" ></ProFormText>
                 </div>
-            </ProCard>
         </ProForm>
+        </ProCard>
     )
 }
 

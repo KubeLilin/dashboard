@@ -12,8 +12,9 @@ import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, Ge
 import { DeploymentStep,DeploymentLevel } from './devlopment_data';
 import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 import ProbeForm from './forms/probe' 
-import RouteForm from './forms/route';
-import { ProbeFormData } from './forms/probe/probe_data';
+import RouteForm from './forms/route'
+import ConfigMapForm from './forms/configmap'
+
 
 export interface Props {
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>],
@@ -280,11 +281,14 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
             <Tabs.TabPane tab="负载路由" key="4" disabled={!formEditable}>
                 <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep}></RouteForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="配置存储" key="5" disabled >
+            <Tabs.TabPane tab="部署配置" key="5" disabled={!formEditable} >
+                <ConfigMapForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep}></ConfigMapForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="日志采集" key="6" disabled >
+            <Tabs.TabPane tab="卷&挂接点" key="6"  >
             </Tabs.TabPane>
-            <Tabs.TabPane tab="应用监控" key="7" disabled >
+            <Tabs.TabPane tab="日志采集" key="7" disabled >
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="应用监控" key="8" disabled >
             </Tabs.TabPane>
         </Tabs>
     </Drawer>
