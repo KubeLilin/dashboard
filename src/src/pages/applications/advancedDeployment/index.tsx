@@ -43,6 +43,9 @@ function BindClusterName(clusterId: number, clusterArr: any, nameHandler: any) {
 }
 
 const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
+    const [tabActiveKey, tabActiveKeyHandler] = useState<string>();
+
+
     const [namespace, namespcaeHandler] = useState<any>();
     const [cluster, clusterHandler] = useState<any>();
     const [clusterId, clusterIdHandler] = useState<any>();
@@ -108,9 +111,12 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
         <Drawer title="高级部署环境配置" width="88%"
             onClose={() => { props.visibleFunc[1](false) }}
             visible={props.visibleFunc[0]} destroyOnClose={true} maskClosable={false} >
-        <Tabs defaultActiveKey="1" tabPosition='left'>
-            <Tabs.TabPane tab="基本信息" key="1" forceRender={true}>
-                <ProForm formRef={baseForm} submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
+        <Tabs defaultActiveKey="1" tabPosition='left' activeKey={tabActiveKey}
+            onChange={(activeKey=>{
+                tabActiveKeyHandler(activeKey)
+            })} >
+            <Tabs.TabPane tab="基本信息(必填)" key="1" forceRender={true}>
+                <ProForm formRef={baseForm} submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'下一步'} }}
                  onReset={()=>{ props.visibleFunc[1](false) }}
                  onFinish={async (value) => {
                     value.clusterId = clusterId;
@@ -135,15 +141,16 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                             icon: <CloseCircleTwoTone />,
                         });
                     } else {
-                        message.success("保存成功")
+                        message.success("部署基础信息保存成功")
                         formEditableHandler(true)
                         props.tableRef.current?.reload()
                     }
                     dpStepHandler(res.data)
+                    tabActiveKeyHandler("2")
                     return res.success
                 }}
                 >
-                <ProCard title="部署目标" bordered headerBordered
+                <ProCard title="部署目标(必填)" bordered headerBordered
                         collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                     <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }]}>
                         <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, '') }}  disabled={props.isEdit}></Input>
@@ -189,8 +196,8 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                    
                 </ProForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="实例配置" key="2" forceRender={true} disabled={!formEditable}>
-                <ProForm formRef={instanceForm} submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
+            <Tabs.TabPane tab="实例配置(必填)" key="2" forceRender={true} disabled={!formEditable}>
+                <ProForm formRef={instanceForm} submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'下一步'} }}
                  onReset={()=>{ props.visibleFunc[1](false) }}
                  onFinish={async (value) => {
                     console.log(dpStep)
@@ -203,12 +210,13 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     console.log(value)
                     let res = await CreateDeploymnetLimit(value)
                     if (res.success) {
-                        message.success('实例信息保存成功')
+                        message.success('实例信息保存成功!')
                     }
                     props.tableRef.current?.reload()
+                    tabActiveKeyHandler("3")
                     return res.success
                 }}>
-                    <ProCard title="实例配置" bordered headerBordered
+                    <ProCard title="实例配置(必填)" bordered headerBordered
                             collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                         <ProForm.Item name='replicas' rules={[{ required: true, message: "请输入副本数量" }]}>
                             <InputNumber addonBefore="实例数" addonAfter="个"  min={1} max={20}></InputNumber>
@@ -275,20 +283,20 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     </ProCard>        
                 </ProForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="生命周期" key="3" disabled={!formEditable}>
+            <Tabs.TabPane tab="生命周期(选填)" key="3" disabled={!formEditable}>
                <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} isEdit={props.isEdit}></ProbeForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="负载路由" key="4" disabled={!formEditable}>
+            <Tabs.TabPane tab="负载路由(选填)" key="4" disabled={!formEditable}>
                 <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep}></RouteForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="部署配置" key="5" disabled={!formEditable} >
+            <Tabs.TabPane tab="部署配置(选填)" key="5" disabled={!formEditable} >
                 <ConfigMapForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep}></ConfigMapForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="卷&挂接点" key="6"  >
+            <Tabs.TabPane tab="卷&挂接点(选填)" key="6"  >
             </Tabs.TabPane>
-            <Tabs.TabPane tab="日志采集" key="7" disabled >
+            <Tabs.TabPane tab="日志采集(选填)" key="7" disabled >
             </Tabs.TabPane>
-            <Tabs.TabPane tab="应用监控" key="8" disabled >
+            <Tabs.TabPane tab="应用监控(选填)" key="8" disabled >
             </Tabs.TabPane>
         </Tabs>
     </Drawer>
