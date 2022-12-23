@@ -228,7 +228,6 @@ const AppInfo: React.FC = () => {
                 extra: [
                     <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
-            <Content  > 
             <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ paddingLeft:25 }} 
                 onChange={(key)=>{
                     if(key=="3") {
@@ -379,7 +378,6 @@ const AppInfo: React.FC = () => {
             <Probe visibleFunc={[probeFormVisible,setProbeFormVisible]} 
                 deploymentId={dpId} tableRef={actionRef} ></Probe>
               
-            </Content>
         </PageContainer>
     )
 
