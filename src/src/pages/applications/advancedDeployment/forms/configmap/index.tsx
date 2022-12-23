@@ -11,7 +11,7 @@ const { TextArea } = Input;
 
 
 import { DeploymentStep } from '../../devlopment_data'
-
+import { applyConfigmap,getConfigmap } from './service'
 
 export interface ConfigMapFormProps {
     deploymentId: number,
@@ -44,22 +44,34 @@ const ConfigMapForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) 
                 } else {
                     deployId = Number(props.deployment?.id)
                 }
-                return {
-                    name: props.deployment?.name + '-configmap',
+                const configmapName = props.deployment?.name + '-configmap'
+
+                const res = await getConfigmap({ name:configmapName, clusterId:props.deployment?.clusterId , namespaceId:props.deployment?.namespaceId })
+
+                let result = {
+                    name: configmapName,
                     items: [{
                         key:'',value:''
                     }]
                 }
+
+                if (res.success) {
+                    result.items = res.data!=''?res.data.items:[{ key:'',value:'' }]
+                }
+
+                return result
             }}
             onFinish={async(fromData)=>{
                 fromData.deployId =  props.deployment?.id
                 fromData.clusterId = props.deployment?.clusterId
+                fromData.appId = props.deployment?.appId
                 fromData.namespaceId = props.deployment?.namespaceId
                 console.log(fromData)
-                // if (res.success){
-                //     message.success("路由已生效,请联系管理员对域名进行DNS解析.")
-                //     return true
-                // }
+                const res = await applyConfigmap(fromData)
+                if (res.success){
+                    message.success("部署配置已生效.")
+                    return true
+                }
                 return false
             }}
             onReset={()=>{ props.visibleFunc(false) }}>
@@ -67,7 +79,7 @@ const ConfigMapForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) 
                             collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                         <ProForm.Group>
                             <Form.Item name="name" label="配置名称">
-                                <Input value={props.deployment?.name + '-configmap'} disabled style={{width:400}} ></Input>
+                                <Input value={props.deployment?.name + '-configmap'} disabled style={{width:500}} ></Input>
                             </Form.Item>
                         </ProForm.Group>
                         <ProForm.Group>
@@ -90,7 +102,7 @@ const ConfigMapForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) 
                                                     name={[name, 'value']} 
                                                     rules={[{ required: true, message: 'value 不可为空' }]}
                                                 >
-                                                    <TextArea rows={1} placeholder="value" style={{width:600}} />
+                                                    <TextArea rows={1} placeholder="value" style={{width:700}} />
                                                 </Form.Item>
                                                 <MinusCircleOutlined onClick={() => remove(name)} />
                                             </Space>
@@ -120,6 +132,7 @@ const ConfigMapForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) 
                                                     <Button icon={<UploadOutlined />}>文件导入</Button>
                                                 </Upload>
 
+                                                <Button danger onClick={() => {}} block > 清空配置 </Button>
                                             </Space>
                          
                                         </Form.Item>

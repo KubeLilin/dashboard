@@ -18,7 +18,7 @@ import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
 import ReleaseRecord from '../releaseRecord';
 import Probe from '../probe';
-
+import AppConifigMaps from '../appConfigmaps'
 
 const { TabPane } = Tabs;
 const { Content } = Layout;
@@ -358,8 +358,8 @@ const AppInfo: React.FC = () => {
                 <TabPane tab="发布记录" key="4" >
                    <ReleaseRecord AppId={Number(appId)}></ReleaseRecord>
                 </TabPane>
-                <TabPane tab="应用配置" key="5" disabled>
-                    Content of Tab Pane 5
+                <TabPane tab="应用配置" key="5" >
+                    <AppConifigMaps  AppId={Number(appId)}></AppConifigMaps>
                 </TabPane>
                 <TabPane tab="应用监控" key="6" disabled>
                     Content of Tab Pane 6
