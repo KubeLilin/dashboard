@@ -96,7 +96,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
     }, props.visibleFunc)
     return (
 
-        <ProCard>
+       
             <StepsForm<DeploymentStep>
                 formMapRef={formMapRef}
                 onFinish={async (value) => {
@@ -279,7 +279,6 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                    </ProCard>                         
                 </StepsForm.StepForm>
             </StepsForm>
-        </ProCard>
     )
 }
 
