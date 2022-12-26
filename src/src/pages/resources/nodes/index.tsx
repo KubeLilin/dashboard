@@ -26,6 +26,11 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         }
     },
     {
+        width:100,
+        dataIndex: 'role',
+        title:'Role'
+    },
+    {
         width:120,
         title:'状态',
         dataIndex: 'status',

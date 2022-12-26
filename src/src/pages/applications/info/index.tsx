@@ -153,7 +153,11 @@ const AppInfo: React.FC = () => {
                         <Paragraph copyable>{row.serviceName}</Paragraph>
                         <Paragraph>ClusterIP: {row.serviceIP} </Paragraph>
                         <Paragraph>Port: {row.servicePort} </Paragraph>
-                    </span> : <span><LoadingOutlined /> / {dom}</span>}
+                    </span> : <span>
+                        <Paragraph copyable>Service Name:<LoadingOutlined /></Paragraph>
+                        <Paragraph>ClusterIP: <LoadingOutlined /> </Paragraph>
+                        <Paragraph>Port: <LoadingOutlined /> </Paragraph>
+                    </span>  }
                 </span>)
             }
         },
@@ -303,7 +307,7 @@ const AppInfo: React.FC = () => {
                                     } else {
                                         list[podSet.index].lastImage = '无'
                                         list[podSet.index].running = 0
-                                        list[podSet.index].serviceName ='no services'
+                                        list[podSet.index].serviceName ='No Service'
                                         list[podSet.index].serviceIP = 'x.x.x.x'
                                     }
                                 })

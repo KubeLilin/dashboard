@@ -87,7 +87,7 @@ const AppConifigMaps: React.FC<Props> = (props) => {
             >
             </ProTable>
         
-            <Drawer title="应用配置管理(ConfigMap)" width="88%"
+            <Drawer title="应用配置管理(ConfigMap)" width="68%"
                 onClose={() => { setConfigmapFormVisible(false) }}
                 visible={configmapFormVisible} destroyOnClose={true} >
                  <ConfigMapForm deploymentId={Number(deployment?.id)} tableRef={ref} visibleFunc={setConfigmapFormVisible} deployment={deployment}>
