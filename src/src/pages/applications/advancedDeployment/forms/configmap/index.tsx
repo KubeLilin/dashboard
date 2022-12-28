@@ -15,6 +15,7 @@ import { applyConfigmap,getConfigmap } from './service'
 
 export interface ConfigMapFormProps {
     deploymentId: number,
+    isEdit:boolean,
     tableRef: any,
     visibleFunc:Function,
     deployment?:DeploymentStep
@@ -46,8 +47,6 @@ const ConfigMapForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) 
                 }
                 const configmapName = props.deployment?.name + '-configmap'
 
-                const res = await getConfigmap({ name:configmapName, clusterId:props.deployment?.clusterId , namespaceId:props.deployment?.namespaceId })
-
                 let result = {
                     name: configmapName,
                     items: [{
@@ -55,8 +54,11 @@ const ConfigMapForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) 
                     }]
                 }
 
-                if (res.success) {
-                    result.items = res.data!=''?res.data.items:[{ key:'',value:'' }]
+                if(props.isEdit) {
+                    const res = await getConfigmap({ name:configmapName, clusterId:props.deployment?.clusterId , namespaceId:props.deployment?.namespaceId })
+                    if (res.success) {
+                        result.items = res.data!=''?res.data.items:[{ key:'',value:'' }]
+                    }
                 }
 
                 return result

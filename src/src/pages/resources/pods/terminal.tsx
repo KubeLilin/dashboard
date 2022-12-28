@@ -12,23 +12,47 @@ export interface TerminalProps {
     namespace?: string;
     pod_Name?: string;
     container_Name?: string;
+    terminalShell?:string;
 }
 
 const WebTerminal: React.FC<TerminalProps> = props => {
     const divRef: any = useRef(null); 
     let socket: WebSocket;
     const initTerminal = () => {  
-        const { tenantId,clusterId, namespace, pod_Name, container_Name } = props;
+        const { tenantId,clusterId, namespace, pod_Name, container_Name,terminalShell } = props;
         //var url = "ws://localhost:8080/v1/pod/terminal?tenantId=1&clusterId=2&namespace=yoyogo&podName=yoyogo-867678b49b-ldtr5&containerName=sm"
-        const reUri = API_SERVER.ws + `/v1/pod/terminal?tenantId=${tenantId}&clusterId=${clusterId}&namespace=${namespace}&podName=${pod_Name}&containerName=${container_Name}`
+        const reUri = API_SERVER.ws + `/v1/pod/terminal?tenantId=${tenantId}&clusterId=${clusterId}&namespace=${namespace}&podName=${pod_Name}&containerName=${container_Name}&shell=${terminalShell}`
         console.log(reUri)
+        const cols = Math.ceil((divRef.current.clientWidth)/ 10 + 100 )
+        const rows = 100
+
+        console.log(props.terminalShell)
+        console.log({ cols:cols,rows:rows })
+
         const terminal = new Terminal({
             cursorBlink: true, // 光标闪烁
+            rendererType:'canvas',
+            convertEol:true,
+            scrollback: 10,
+            disableStdin: false,
         });
+
+        const webLinksAddon = new WebLinksAddon();
+        const fitAddon = new FitAddon();
+        terminal.loadAddon(webLinksAddon);
+        terminal.loadAddon(fitAddon);
+        terminal.open(divRef.current);
+
+        fitAddon.fit();
+        terminal.focus()
       
         socket = new WebSocket(reUri);
         socket.onopen = () => {
+            fitAddon.fit();
             console.log('connection success');
+            let msg = {operation: "resize", cols: cols, rows: rows}
+            socket.send(JSON.stringify(msg))
+            terminal.focus()
         };
 
         socket.onerror = () => {
@@ -59,12 +83,8 @@ const WebTerminal: React.FC<TerminalProps> = props => {
                 terminal.write("error: "+error.eventPhase.toString());
                 terminal.dispose()
         };
-        const webLinksAddon = new WebLinksAddon();
-        const fitAddon = new FitAddon();
-        terminal.loadAddon(webLinksAddon);
-        terminal.loadAddon(fitAddon);
-        terminal.open(divRef.current);
-        fitAddon.fit();
+     
+
         terminal.write("connecting to pod "+ pod_Name + "...\r\n")
 		// term.toggleFullScreen(true);
         terminal.onData(function (data) {
@@ -83,10 +103,12 @@ const WebTerminal: React.FC<TerminalProps> = props => {
       if (socket) {
         socket.close();
       }
-      initTerminal();
+      setTimeout(() => {
+        initTerminal();
+      }, 500);
     }, [props.namespace, props.pod_Name, props.container_Name]);
   
-    return <div style={{  width: '100%', height: 960 }} ref={divRef} />;
+    return <div className="xterm-viewport" style={{  width: '100%', height: 960 }} ref={divRef} />;
   };
   
   export default WebTerminal;

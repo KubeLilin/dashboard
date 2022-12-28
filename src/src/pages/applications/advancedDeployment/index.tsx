@@ -71,6 +71,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
         formEditableHandler(props.isEdit)
         BindDeploymentLevels()
         BindClusterSelect()
+        tabActiveKeyHandler("1")
         if (props.isEdit) {
             let req = GetDeploymentFormInfo(props.id)
             req.then(x => {
@@ -89,6 +90,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
             })
 
         } else {
+            //dpStepHandler(undefined)
             openScvHandler(true)
             const arrays = [baseForm,instanceForm]
             arrays.forEach((formInstanceRef) => {
@@ -109,7 +111,10 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
     }, props.visibleFunc)
     return (
         <Drawer title="高级部署环境配置" width="88%"
-            onClose={() => { props.visibleFunc[1](false) }}
+            onClose={() => { 
+                props.visibleFunc[1](false)
+                tabActiveKeyHandler("1")
+             }}
             visible={props.visibleFunc[0]} destroyOnClose={true} maskClosable={false} >
         <Tabs defaultActiveKey="1" tabPosition='left' activeKey={tabActiveKey}
             onChange={(activeKey=>{
@@ -128,9 +133,9 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     } else {
                         value.appId = parseInt(props.appId);
                         value.clusterId = clusterId;
-                        if(dpStep?.id){
-                            value.id = dpStep?.id
-                        }
+                        // if(dpStep?.id){
+                        //     value.id = dpStep?.id
+                        // }
                         //value.name = (`${value.nickname}-${props.appName}-${clusterName}`).trim();
                     }
                     value.name = (`${value.nickname}-${props.appName}-${clusterName}`).trim();
@@ -287,12 +292,12 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                <ProbeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} isEdit={props.isEdit}></ProbeForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="负载路由" key="4" disabled={!formEditable}>
-                <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep}></RouteForm>
+                <RouteForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep} isEdit={props.isEdit}></RouteForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="部署配置" key="5" disabled={!formEditable} >
-                <ConfigMapForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep}></ConfigMapForm>
+                <ConfigMapForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep} isEdit={props.isEdit}></ConfigMapForm>
             </Tabs.TabPane>
-            <Tabs.TabPane tab="卷&挂接点" key="6"  >
+            <Tabs.TabPane tab="卷&挂接点" key="6"  disabled={!formEditable} >
             </Tabs.TabPane>
             <Tabs.TabPane tab="日志采集" key="7" disabled >
             </Tabs.TabPane>

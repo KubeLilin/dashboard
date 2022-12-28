@@ -38,6 +38,8 @@ const Pods: React.FC = (props) => {
     const formScaleModalRef = useRef<ProFormInstance>();
     const [visibleTerminal, setVisibleTerminal] = useState(false);
     const [visibleWebConsole, setVisibleWebConsole] = useState(false);
+    const [terminalShellType,terminalShellTypeHandler] = useState<string>('/bin/bash');
+
 
     const [podListState, handePodListState] = useState<PodItem[]>([]);
     const [containerListState, handeContainerListState] = useState<ContainerItem[]>([]);
@@ -528,11 +530,18 @@ const Pods: React.FC = (props) => {
                               ]}
                      rowKey="id" headerTitle={false} search={false} options={false} pagination={false} />
                  <p>Shell环境（仅做默认环境，登录后可切换至其他环境）</p>
-                 <p><Radio checked>/bin/bash</Radio></p>
+                 <p> 
+                 <Radio.Group defaultValue={'/bin/bash'} onChange={(e) => {
+                    terminalShellTypeHandler(e.target.value)
+                 }}>
+                    <Radio checked value={'/bin/bash'}>/bin/bash</Radio>
+                    <Radio value={'/bin/sh'}>/bin/sh</Radio>
+                 </Radio.Group>
+                 </p>
             </Modal>
 
             <Modal title={`Web Console for KubeLilin --  Pod:${selectedPodName}, Container:${selectedContainerName}` } centered visible={visibleTerminal} width={1580}  destroyOnClose footer={[]} onCancel={()=>{ setVisibleTerminal(false) } } >
-                <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} 
+                <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} terminalShell={terminalShellType}
                         namespace={selectedNamespace} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
             </Modal>
             <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} deployImage={deploymentInfo?.lastImage} ></ExecDeployment>
