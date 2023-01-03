@@ -23,8 +23,8 @@ const WebTerminal: React.FC<TerminalProps> = props => {
         //var url = "ws://localhost:8080/v1/pod/terminal?tenantId=1&clusterId=2&namespace=yoyogo&podName=yoyogo-867678b49b-ldtr5&containerName=sm"
         const reUri = API_SERVER.ws + `/v1/pod/terminal?tenantId=${tenantId}&clusterId=${clusterId}&namespace=${namespace}&podName=${pod_Name}&containerName=${container_Name}&shell=${terminalShell}`
         console.log(reUri)
-        const cols = Math.ceil((divRef.current.clientWidth)/ 10 + 100 )
-        const rows = 100
+        const cols = 187
+        const rows = 68
 
         console.log(props.terminalShell)
         console.log({ cols:cols,rows:rows })
@@ -35,6 +35,9 @@ const WebTerminal: React.FC<TerminalProps> = props => {
             convertEol:true,
             scrollback: 10,
             disableStdin: false,
+            fontSize:14,
+            rows:rows,
+            cols:cols,
         });
 
         const webLinksAddon = new WebLinksAddon();
@@ -108,7 +111,7 @@ const WebTerminal: React.FC<TerminalProps> = props => {
       }, 500);
     }, [props.namespace, props.pod_Name, props.container_Name]);
   
-    return <div className="xterm-viewport" style={{  width: '100%', height: 960 }} ref={divRef} />;
+    return <div className="xterm-viewport" style={{  width: 1512, height: 960 }} ref={divRef} />;
   };
   
   export default WebTerminal;
