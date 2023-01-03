@@ -29,3 +29,11 @@ export async function getList(params: any) {
     })
    return req
 }
+
+export async function clearConfigmap(params: any) {
+    let req= await request<ApiResponse<any>>('/v1/configmap/configmap',{
+        method:'DELETE',
+        params: params
+    })
+   return req
+}

@@ -3,7 +3,7 @@ import ProForm, {
     ProFormSwitch, ProFormTextArea, ProFormSelect, ProFormText,ProFormRadio
 } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { Checkbox, Divider, InputNumber, Switch, Input, notification, message,Space,Button,Upload} from 'antd';
+import { Checkbox, Divider, InputNumber, Switch, Input, notification, message,Space,Button,Upload, Popconfirm} from 'antd';
 import Form from 'antd/lib/form';
 import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined,UploadOutlined} from '@ant-design/icons';
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
@@ -11,7 +11,7 @@ const { TextArea } = Input;
 
 
 import { DeploymentStep } from '../../devlopment_data'
-import { applyConfigmap,getConfigmap } from './service'
+import { applyConfigmap,getConfigmap,clearConfigmap } from './service'
 
 export interface ConfigMapFormProps {
     deploymentId: number,
@@ -133,8 +133,16 @@ const ConfigMapForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) 
                                                 >
                                                     <Button icon={<UploadOutlined />}>文件导入</Button>
                                                 </Upload>
-
-                                                <Button danger onClick={() => {}} block > 清空配置 </Button>
+                                                <Popconfirm title="确定要清除此配置吗?" onConfirm={async()=>{
+                                                     const configmapName = props.deployment?.name + '-configmap'
+                                                     const res = await clearConfigmap({ name:configmapName, clusterId:props.deployment?.clusterId , namespaceId:props.deployment?.namespaceId })
+                                                     if (res.success) {
+                                                        form.current?.setFieldsValue({ items:[{ key:'',value:'' }] })
+                                                        message.success('配置清除成功')
+                                                     }
+                                                }} >
+                                                <Button danger block > 清空配置 </Button>
+                                                </Popconfirm>
                                             </Space>
                          
                                         </Form.Item>
