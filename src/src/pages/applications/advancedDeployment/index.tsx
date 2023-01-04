@@ -14,7 +14,7 @@ import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined} f
 import ProbeForm from './forms/probe' 
 import RouteForm from './forms/route'
 import ConfigMapForm from './forms/configmap'
-
+import VolumeForm from './forms/volume'
 
 export interface Props {
     visibleFunc: [boolean, Dispatch<SetStateAction<boolean>>],
@@ -298,6 +298,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                 <ConfigMapForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep} isEdit={props.isEdit}></ConfigMapForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="卷&挂接点" key="6"  disabled={!formEditable} >
+                <VolumeForm deploymentId={Number(props.id)} tableRef={props.tableRef} visibleFunc={props.visibleFunc[1]} deployment={dpStep} isEdit={props.isEdit}></VolumeForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="日志采集" key="7" disabled >
             </Tabs.TabPane>
