@@ -12,6 +12,8 @@ const { TextArea } = Input;
 
 import { DeploymentStep } from '../../devlopment_data'
 
+import {saveVolumes ,getVolumeAndMounts} from './service'
+
 export interface ConfigMapFormProps {
     deploymentId: number,
     isEdit:boolean,
@@ -39,7 +41,8 @@ const VolumeForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) => 
                
 
                 if(props.isEdit) {
-                
+                    const res = await getVolumeAndMounts(deployId)
+                    return res.data
                 }
 
                 return {}
@@ -50,7 +53,11 @@ const VolumeForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) => 
                 fromData.appId = props.deployment?.appId
                 fromData.namespaceId = props.deployment?.namespaceId
                 console.log(fromData)
-
+                const res = await saveVolumes(fromData)
+                if (res.success){
+                    message.success("重启部署后,卷&挂载点将生效.")
+                    return true
+                }
                 return false
             }}
             onReset={()=>{ props.visibleFunc(false) }}>
@@ -71,7 +78,7 @@ const VolumeForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) => 
                                                             const volumes =  form.current?.getFieldValue('volumes')
                                                             volumes[field.name].volumeName = value
                                                             if(value == 'configmap'){
-                                                                volumes[field.name].configmap = configmapName
+                                                                volumes[field.name].value = configmapName
                                                             }
 
 
@@ -91,7 +98,7 @@ const VolumeForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) => 
 
                                                     
                                                 {form.current?.getFieldValue('volumes')[field.name].volumeType == 'configmap'?
-                                                <Form.Item name={[field.name, 'configmap']} >
+                                                <Form.Item name={[field.name, 'value']} >
                                                         <Input placeholder="请输入volume名称"  style={{ width:280 }} disabled/>
                                                 </Form.Item>:''}
                                         
