@@ -45,6 +45,7 @@ export type ContainerItem = {
 
 export type PipelineInfo  = {
     appid: number,
+    language:string,
     id: number,
     name: string,
     dsl: string,

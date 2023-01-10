@@ -97,16 +97,22 @@ const Pipeline : React.FC = () => {
                     onStepItemClick(stagesDSL[0].steps[0],0,0)
                 },50)
             } else {
+                // new pipeline or no saved
                 setCurrentStageName(initStages[0].name)
                 setAllStages([...initStages])
             }
             setLoaded(true)
+            return resp.data.language
+        }).then((language)=>{
+            getAppLanguages().then((languages)=>{
+                setAppLanuages(languages)
+                console.log(language)
+                buildForm.current?.setFieldsValue({buildEnv:language})
+                selectedLanguageComilpeImages(languages,language)
+            })
         })
 
-        getAppLanguages().then((x)=>{
-            setAppLanuages(x)
-            console.log(x)
-        })
+       
         
     },[onLoaded])
 
@@ -167,6 +173,20 @@ const Pipeline : React.FC = () => {
     const onSavePipeline = async () => {        
         const key = "savePipeline"
         message.loading({ content: '保存中...', key });
+        //验证流水线信息必须所有子任务都保存才能保存流水线
+        var noStepSave = false
+        allStages.forEach(stage => {
+            stage.steps.forEach(step=>{
+                if(!step.save) {
+                    noStepSave = true
+                }
+            })
+        })
+        if (noStepSave) {
+            message.error({content:'保存流水线失败,请确认所有阶段的步骤都进行了保存！',key ,  style: { marginTop: '20vh' }})
+            return
+        }
+
         const res = await SavePipeline({
             appid: Number(appId),
             id: PipelineId,
@@ -194,6 +214,18 @@ const Pipeline : React.FC = () => {
         }
     }
 
+    const selectedLanguageComilpeImages = async (lanuages:[],languageName:string)=>{
+        const query:any = lanuages?.filter((v:any)=>v.name == languageName)
+        if (query && query.length > 0) {
+            const script = query[0].compileScripts
+            buildForm?.current?.setFieldsValue({buildScript: script})
+            const languageId = query[0].id
+            console.log(languageId)
+            const dataList = await getBuildImageByLanguageId(languageId)
+            setLanguageCompileOptions(dataList)
+            buildForm.current?.setFieldsValue({buildImage:dataList[0].value})
+        }
+    }
 
     const onStepItemClick = (item:StepItem,stageIndex:number,stepindex:number) => {
         if (allStages.length > 0 && allStages[stageIndex].steps.length > stepindex) {
@@ -348,7 +380,7 @@ const Pipeline : React.FC = () => {
                                 <div id="code_build" style={{ display: allStages.length>0&&allStages[currentStageIndex].steps.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="code_build"?"block":"none" :"none"}}>
                                     <ProForm onValuesChange={onFormValuesChanged} formRef={buildForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                         onFinish={onFormSave} >
-                                    <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"} rules={[{ required: true, message: '请选择构建环境' }]}>
+                                    <ProForm.Item name="buildEnv" label="构建环境" initialValue={""} rules={[{ required: true, message: '请选择构建环境' }]}>
                                         <CheckCard.Group style={{ width: '100%'  }} defaultValue={""}
                                             onChange={async (val)=>{
                                                 console.log(val)
