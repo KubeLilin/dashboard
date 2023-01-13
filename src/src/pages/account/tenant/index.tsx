@@ -79,14 +79,9 @@ const Tenant: React.FC = () => {
             valueType: 'option',
             render: (_, record) => [
                 <a key="id" onClick={async ()=>{
-                    let res=await changeTenantStatus(record);
-                    console.log(res);
-                    if ( res?.success){
-                        actionRef.current?.reload();
-                       
-                    }else{
-                       
-                    }
+                    let res=await changeTenantStatus(record)
+                    console.log(res)
+                    actionRef.current?.reload()
                 }}>{record.status==0?"启用":"停用"}</a>
             ]
 
