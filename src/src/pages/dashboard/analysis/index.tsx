@@ -72,7 +72,7 @@ const Analysis: FC = () => {
         </div>
         <div className={styles.content}>
           <div className={styles.contentTitle}>
-            KubeLilin Dashbroad
+            KubeLilin Dashboard
           </div>
           <div>
             KubeLilin is an PaaS Platform, An Cloud-Native Application Platform for Kubernetes.
