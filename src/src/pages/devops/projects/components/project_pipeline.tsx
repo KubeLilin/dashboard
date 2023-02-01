@@ -276,7 +276,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
     return (
     <div>
     <ProTable
-        rowKey={record => record.id}
+        rowKey={record => record.id + Date.now()}
         columns={columns}
         dateFormatter="string"
         pagination={{ pageSize: 1000 }}
@@ -286,10 +286,9 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
         dataSource={buildList}
         request={async(param)=> {
             const data = await LoadData(props.projectId)
-            clearInterval(timerId)
-            timerId = setTimeout(() => {
+            setTimeout(() => {
                 setBuildList(data)
-            }, 800);
+            }, 200)
             setTime(Date.now())
             return data
         }}
