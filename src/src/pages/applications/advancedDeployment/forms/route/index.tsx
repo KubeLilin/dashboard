@@ -27,7 +27,7 @@ const RouteForm: React.FC<RouteFormProps> = (props: RouteFormProps) => {
 
     return (
         <ProCard title="部署负载路由(网关)" bordered headerBordered style={{ marginBlockEnd: 16, maxWidth: '100%', }} >
-        <ProForm submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
+        <ProForm form={repoFormRef} submitter={{ resetButtonProps:{   },searchConfig:{ resetText:'取消',submitText:'提交'} }}
         request={async(r)=>{
             let deployId = 0
             console.log(props.deployment)
@@ -48,11 +48,12 @@ const RouteForm: React.FC<RouteFormProps> = (props: RouteFormProps) => {
             return res.data
         }}
         onFinish={async(fromData)=>{
-            const res = await createOrEditRoute(fromData)
-            if (res.success){
-                message.success("路由已生效,请联系管理员对域名进行DNS解析.")
-                return true
-            }
+            console.log(fromData)
+            // const res = await createOrEditRoute(fromData)
+            // if (res.success){
+            //     message.success("路由已生效,请联系管理员对域名进行DNS解析.")
+            //     return true
+            // }
             return false
         }}
         onReset={()=>{ props.visibleFunc(false) }}>
