@@ -171,6 +171,22 @@ export default defineConfig({
       ]
     },
     {
+      name:'runtime',
+      path:'/runtime',
+      routes:[
+        {
+          name: "namespace",
+          path: "/runtime/namespace",
+          component:"./runtime/namespace"
+        },
+        // {
+        //   name: "components",
+        //   path: "/runtime/components",
+        //   component:"./runtime/components"
+        // },
+      ]
+    },
+    {
       name:'devops',
       path:'/devops',
       routes:[
