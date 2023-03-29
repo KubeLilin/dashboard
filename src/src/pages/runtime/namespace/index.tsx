@@ -4,11 +4,12 @@ import {Modal, Button ,Divider ,Space, message, Typography,InputNumber,Progress,
 import React, { useState, useRef, useEffect } from 'react';
 import { PlusOutlined,CheckCircleOutlined ,ReloadOutlined,LoadingOutlined } from '@ant-design/icons';
 import Form,{ DrawerForm ,ProForm,ProFormCheckbox,ProFormInstance,ProFormSelect,ProFormText} from '@ant-design/pro-form';
-
 import { TenantTableListItem, TenantTableListPagination,NamespaceInfo } from './data'
-import { GetClusterList,GetNameSpaceList,GetResourceQuota , PutUpateRuntime,IsInstalledDaprRuntime } from './service';
-import { Link } from 'umi';
-import { validateLngLat } from '@antv/l7';
+import { GetClusterList,GetNameSpaceList,GetResourceQuota , 
+    PutUpateRuntime,IsInstalledDaprRuntime,GetTeamDeployLevelCounts,GetResourceMetrics } from './service';
+import { Link,useModel } from 'umi';
+import ProDescriptions from '@ant-design/pro-descriptions';
+
 const { confirm } = Modal;
 const { Paragraph } = Typography;
 
@@ -23,17 +24,54 @@ const namespace: React.FC = () => {
     const [selectNsRow,selectNsRowSet] = useState<NamespaceInfo|undefined>(undefined);
     const [quotaInfo,quotaInfoSet] = useState<any>(undefined);
     const [isInstalledDapr,setInstalledDapr] = useState<boolean>(false);
-
     const [onLoaded,_] = useState<boolean>(false);
+    const [teamResourceInfo,teamResourceInfoHandler] = useState<any>()
 
+
+    const { initialState } = useModel('@@initialState')
+    const currentUser = initialState?.currentUser
+    const teamName = currentUser?.title
+    const tenantId = Number(currentUser?.group)
     useEffect(()=>{
-        // GetClusterList().then((res)=>{
-        //     if (res && res.length > 0){
-        //         ref.current?.setFieldsValue({clusterId:res[0].value})
-        //         setTimeout(() => ref.current?.submit(), 500)                   
-        //     }
-        // })
-       
+        GetTeamDeployLevelCounts(tenantId).then(res=>{
+            var datasource:any = { teamName: teamName }
+            var allCount = 0
+            res.data.insCounts.forEach(val=>{ 
+                allCount += val.count
+                switch (val.value) {
+                    case 'dev':
+                        datasource.devCount = val.count
+                        break
+                    case 'test':
+                        datasource.testCount = val.count
+                        break
+                    case 'release':
+                        datasource.releaseCount = val.count
+                        break
+                    case 'prod':
+                        datasource.prodCount = val.count
+                        break
+                } 
+            })
+            datasource.projectCount = res.data.proCount
+            datasource.namespaceCount = res.data.namespaceCount
+            datasource.appCount = res.data.appCount
+            datasource.allCount = allCount
+            teamResourceInfoHandler(datasource)
+            return datasource
+        }).then(info=>{
+            GetResourceMetrics(tenantId).then(res=>{
+                console.log(info)
+                var copyInfo = {
+                    ...info,
+                    totalCpu: res.data.totalCpu,
+                    totalMemory: res.data.totalMemory
+                }
+                console.log(copyInfo)
+                teamResourceInfoHandler(copyInfo)
+
+            })
+        })
     },[onLoaded])
 
 
@@ -75,7 +113,7 @@ const namespace: React.FC = () => {
             dataIndex: 'clusterName',
             search:false,
             render:(_,record)=>(
-                <Tag style={{fontSize:13}} icon={<CheckCircleOutlined />} color="gold" key={record.id}>无</Tag>
+                <Tag style={{fontSize:14}} icon={<CheckCircleOutlined />} color={record.enableRuntime?'blue':'gold'} key={record.id}>{record.enableRuntime?record.runtimeName:'未启用'}</Tag>
             )
         },
     
@@ -114,14 +152,37 @@ const namespace: React.FC = () => {
 
 
     return (
-        <PageContainer title="团队空间"
-            subTitle="每个团队都与Kubernetes集群中的命名空间相对应,可以在团队空间中为团队创建一个与之对应的集群Namespace.">
+        <PageContainer title={'团队空间 - ' + teamName}
+            subTitle="(每个团队都与Kubernetes集群中的命名空间相对应,可以在团队空间中为团队创建一个与之对应的集群Namespace)">
+            <Card title="团队资源详情" bordered={false}   >
+
+            <ProDescriptions   dataSource={teamResourceInfo}
+                column={3}  bordered
+                columns={[
+                    { title: '团队名称', dataIndex: 'teamName',span:3 },
+                    { title: '项目总数', dataIndex: 'projectCount' ,span:1,
+                        render:(dom,record)=>{
+                            return <Link to={`/devops/projects`} >{record.projectCount} (进入项目管理)</Link>
+                        }},
+                    { title: '应用总数', dataIndex: 'appCount',span:1 ,
+                        render:(dom,record)=>{ 
+                            return <Link to={`/applications/apps`} >{record.appCount} (进入应用管理)</Link> 
+                        }},
+                    { title: '实例总数', dataIndex: 'allCount',span:1  },
+                    { title: '(生产环境)实例',  dataIndex: 'prodCount',span:1  },
+                    { title: '(预生产环境)实例',  dataIndex: 'releaseCount',span:2  },
+                    { title: '(开发环境)实例',  dataIndex: 'devCount',span:1  },
+                    { title: '(测试环境)实例',  dataIndex: 'testCount' ,span:2},
+                    { title: '申请CPU数量(Core)',  dataIndex: 'totalCpu' ,render:(dom,record)=>{ return record.totalCpu + ' (Core)' } },
+                    { title: '申请内存数量(MBi)',  dataIndex: 'totalMemory' , render:(dom,record)=>{ return record.totalMemory + ' (MBi)' } },
+                ]}/>
+            </Card>
             <ProTable<NamespaceInfo>
                 columns={NamespaceColumns}
                 formRef={ref}
                 actionRef={actionRef}
                 rowKey="id"
-                headerTitle="命名空间管理"
+                headerTitle="空间资源详情"
                 form={{  ignoreRules: false, }}
                 search={false}
                 request={async (params, sort) => { 
@@ -152,6 +213,7 @@ const namespace: React.FC = () => {
                     if(res.success){
                         message.info('更新运行时设置成功!')
                     }
+                    actionRef.current?.reload()
                     return true
                 }} >
             

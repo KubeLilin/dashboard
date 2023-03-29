@@ -31,7 +31,7 @@ const GlobalHeaderRight: React.FC = () => {
         defaultValue="Lilin"
         options={[
           {
-            label: <a href="http://sgr.yoyogo.run">sgr</a>,
+            label: <a href="">kubelilin</a>,
             value: 'Lilin',
           },
       

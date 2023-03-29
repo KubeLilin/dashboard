@@ -93,3 +93,22 @@ export async function GetResourceQuota(clusterId:number,namespace:string ) :Prom
     return resData
 }
 
+
+export async function GetTeamDeployLevelCounts(tenantId:number) {
+    let resData = await request<ApiResponse<{proCount:number,appCount:number,namespaceCount:number,insCounts:{label:string,value:string,count:number}[]}>>("/v1/application/teamdeploylevelcounts",{
+        method:'GET',
+        params: {
+            tenantId:tenantId
+        }
+    })
+    return resData
+}
+
+
+export async function GetResourceMetrics(tenantId:number) {
+    let resData = await request<ApiResponse<any>>("/v1/devops/resourcemetrics",{
+        method:'GET',
+        params:{ tenantId: tenantId }
+    })
+    return resData
+} 
