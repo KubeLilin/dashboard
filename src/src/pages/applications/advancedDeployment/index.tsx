@@ -2,13 +2,16 @@ import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'r
 import ProForm, {
     StepsForm,
     ProFormSelect,
-    ProFormInstance
+    ProFormInstance,
+    ProFormCheckbox,
+    ProFormRadio
 } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
 import { Select, Input, Checkbox, Modal, InputNumber, Space, Alert, notification, Drawer,
     Form,  Button,Tabs, message } from 'antd';
 import ProFormItem from '@ant-design/pro-form/lib/components/FormItem';
-import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, GetDeploymentFormInfo, GetDeploymentLevels } from './service';
+import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, 
+    GetDeploymentFormInfo, GetDeploymentLevels,IsInstalledRuntime } from './service';
 import { DeploymentStep,DeploymentLevel } from './devlopment_data';
 import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined} from '@ant-design/icons';
 import ProbeForm from './forms/probe' 
@@ -55,6 +58,9 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
     // const [deployment, deploymentHandler] = useState<DeploymentStep>()
     const [deploymentLevels, deploymentLevelsHandler] = useState<any>()
     const [formEditable, formEditableHandler] = useState<boolean>(props.isEdit);
+    //runtime可用性状态
+    const [runtimeStatus, runtimeStatusHandler] = useState<string>('');
+    // 可用的运行时
 
     const baseForm = useRef<ProFormInstance>();
     const instanceForm = useRef<ProFormInstance>();
@@ -62,6 +68,15 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
     function BindClusterSelect() {
         let req = BindCluster()
         req.then(x => { clusterHandler(x) })
+    }
+
+    const setNamespaceRuntimeStates = async(id:number) => {
+        const res = await IsInstalledRuntime(id)
+        if (res && res.success && res.data != "") {
+            runtimeStatusHandler(res.data)
+        } else {
+            runtimeStatusHandler('')
+        }
     }
 
     const BindDeploymentLevels = ()=> GetDeploymentLevels().then(res=> deploymentLevelsHandler(res))
@@ -84,6 +99,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                     BindNamespaceSelect(x.data.clusterId, namespcaeHandler)
                     openScvHandler(x.data.serviceEnable)
                     openScvHandler(true)
+                    setNamespaceRuntimeStates(x.data.namespaceId)
                     baseForm.current?.setFieldsValue(x.data)
                     instanceForm.current?.setFieldsValue(x.data)
                 }, 150)
@@ -138,6 +154,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                         // }
                         //value.name = (`${value.nickname}-${props.appName}-${clusterName}`).trim();
                     }
+                    console.log(value)
                     value.name = (`${value.nickname}-${props.appName}-${clusterName}`).trim();
                     let res = await CreateDeploymnet(value)
                     if (res.success == false) {
@@ -176,12 +193,25 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                         </Select>
                     </ProForm.Item>
                     <ProForm.Item label="命名空间" name='namespaceId' rules={[{ required: true, message: '请选择命名空间' }]} >
-                        <Select allowClear disabled={props.isEdit} options={namespace} >
+                        <Select allowClear disabled={props.isEdit} options={namespace} 
+                            onChange={async(id)=>{
+                                console.log(id)
+                                await setNamespaceRuntimeStates(id)
+                            }} >
                         </Select>
                     </ProForm.Item>
                     </ProCard>
-
-                    <ProCard title="网络配置" bordered headerBordered 
+                    <ProCard title="运行时(Runtime Engine)" bordered headerBordered  
+                            collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
+                                <ProFormRadio.Group name="runtime"  initialValue={''}
+                                    options={[
+                                        { label: '未配置', value: '',  },
+                                        { label: 'Dapr', value: 'Dapr',disabled: runtimeStatus!='Dapr' },
+                                        { label: 'Istio', value: 'Istio',disabled: runtimeStatus!='Istio'  },
+                                    ]} />
+                                提示: 运行时引擎需要在团队空间中开通，并且在集群中安装相应的运行时引擎组件，如有疑问请联系管理员。
+                    </ProCard>
+                    <ProCard title={`网络配置 (服务端口号:${baseForm.current?.getFieldValue('servicePort')})`} bordered headerBordered defaultCollapsed
                         collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                         < ProForm.Item name='serviceEnable'>
                             <Checkbox disabled onChange={(value) => { openScvHandler(value.target.checked) }} checked={openScv}>开启服务访问</Checkbox>
@@ -198,7 +228,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                         </ProForm.Item>
                        
                     </ProCard>
-                   
+          
                 </ProForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="实例配置(必填)" key="2" forceRender={true} disabled={!formEditable}>
@@ -285,7 +315,7 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                                 )}
                             </Form.List>
                         </ProForm.Group>
-                    </ProCard>        
+                    </ProCard>       
                 </ProForm>
             </Tabs.TabPane>
             <Tabs.TabPane tab="生命周期" key="3" disabled={!formEditable}>

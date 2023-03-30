@@ -134,7 +134,7 @@ const VolumeForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) => 
                                         {fields.map((field) => { 
                                             console.log(field)
                                             return (
-                                            <Space key={field.key} style={{ marginBottom: 8 ,width:700 }} align='start' >
+                                            <Space key={field.key} style={{ marginBottom: 8}} align='start' >
                                                 <Form.Item  name={[field.name, 'volume']} rules={[{ required: true, message: '数据卷类型不可为空' }]} >
                                                     <ProFormSelect placeholder={'请选择'} width='sm' disabled ></ProFormSelect>
                                                 </Form.Item> 

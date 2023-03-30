@@ -16,7 +16,8 @@ export interface RouteFormProps {
     deploymentId: number,
     tableRef: any,
     visibleFunc:Function,
-    deployment?:DeploymentStep
+    deployment?:DeploymentStep,
+    isEdit:boolean,
 }
 
 const RouteForm: React.FC<RouteFormProps> = (props: RouteFormProps) => {
