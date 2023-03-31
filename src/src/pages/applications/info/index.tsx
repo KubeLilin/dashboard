@@ -168,7 +168,7 @@ const AppInfo: React.FC = () => {
             render: (dom, record, _, action) => {
                 const menu = (
                     <Menu items={[
-                        { key:1,icon:<CloudUploadOutlined /> ,label: '部署应用',onClick:()=>{
+                        { key:1,icon:<CloudUploadOutlined /> ,label: '更新部署',onClick:()=>{
                                 tableListDataSource[0].namespace = 'n' + Math.random()
                                 setTableListDataSource(tableListDataSource)
                                 stepDpId(record.id)

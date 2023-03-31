@@ -29,7 +29,7 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
     const [form] = Form.useForm();
 
     return (
-        <ModalForm<ExecDeploymentData> title="部署实例" visible={props.visibleFunc[0]} width={500} 
+        <ModalForm<ExecDeploymentData> title="更新部署" visible={props.visibleFunc[0]} width={500} 
             form={form} formRef={actionRef} modalProps={{ destroyOnClose:true }}
             onVisibleChange={ (visible)=>{
                const setVisible = props.visibleFunc[1]
@@ -77,7 +77,7 @@ const ExecDeployment: React.FC<Props> = (props:Props) => {
             <ProForm.Item name='imageTag' label='TAG' hidden={enableDivImage}>
                 <Select></Select>
             </ProForm.Item>
-            <ProForm.Item name='wholeImage' label='完整镜像地址' hidden={!enableDivImage} rules={[  { required: true, message: '镜像地址为必填项'} ]}>
+            <ProForm.Item name='wholeImage' label='最后一次部署的镜像 (可修改)' hidden={!enableDivImage} rules={[  { required: true, message: '镜像地址为必填项'} ]}>
                <Input placeholder='请输入完整的镜像地址'/>
             </ProForm.Item>
         </ModalForm>

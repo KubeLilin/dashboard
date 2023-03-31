@@ -246,6 +246,11 @@ const namespace: React.FC = () => {
                 </ProForm.Item>
             </Card>
 
+            <Divider  />
+
+            <Card title="Dapr Runtime Components 管理">
+                  <Link to={`/runtime/dapr-components?namespaceId=${selectNsRow?.id}`}>运行时组件管理</Link>
+            </Card>
             </DrawerForm>
 
             <DrawerForm title="空间配额" width={460} visible={quotaVisible} formRef={quotaActionRef}

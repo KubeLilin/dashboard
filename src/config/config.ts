@@ -179,11 +179,11 @@ export default defineConfig({
           path: "/runtime/namespace",
           component:"./runtime/namespace"
         },
-        // {
-        //   name: "components",
-        //   path: "/runtime/components",
-        //   component:"./runtime/components"
-        // },
+        {
+          name: "components",
+          path: "/runtime/dapr-components",
+          component:"./runtime/dapr-components"
+        },
       ]
     },
     {
