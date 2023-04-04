@@ -249,7 +249,7 @@ const namespace: React.FC = () => {
             <Divider  />
 
             <Card title="Dapr Runtime Components 管理">
-                  <Link to={`/runtime/dapr-components?namespaceId=${selectNsRow?.id}`}>运行时组件管理</Link>
+                  <Link to={`/runtime/dapr-components?cid=${selectNsRow?.clusterId}&namespaceId=${selectNsRow?.id}&namespace=${selectNsRow?.namespace}`}>运行时组件管理</Link>
             </Card>
             </DrawerForm>
 

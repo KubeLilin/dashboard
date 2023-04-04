@@ -141,7 +141,12 @@ export default defineConfig({
           name: "buildimagelist",
           path: "/resources/buildimagelist",
           component:"./resources/buildimagelist"
-        }
+        },
+        {
+          name: "components",
+          path: "/resources/dapr-components",
+          component:"./resources/dapr-components"
+        },
       ]
     },
     {
