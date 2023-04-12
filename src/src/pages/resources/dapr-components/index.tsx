@@ -30,6 +30,7 @@ const DaprComponents: React.FC = () => {
         {
             title: '文档',
             dataIndex: 'doc',
+            render:(dom,row) => <a href={row.doc} target='_blank'>{dom}</a>
         },
         {
             title: '操作',

@@ -75,12 +75,11 @@ const AppInfo: React.FC = () => {
         },
         {
             title: '环境名称',
-            width: 320,
             dataIndex: 'nickname',
             render: (_, row) => {
                 return <span>
                     <Paragraph><Link to={{ pathname:'/resources/pods' ,  search: '?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId + '&ns=' + row.namespace ,  state:row } }  >{row.name}</Link></Paragraph>
-                    <Paragraph>{row.nickname}</Paragraph>
+                    <Paragraph><Tag color="yellow" style={{fontSize:13}}>{row.nickname}</Tag></Paragraph>
                 </span>
             }
         },
@@ -95,46 +94,12 @@ const AppInfo: React.FC = () => {
                 '预发布环境': { text: '预发布环境', status: 'Default' },
                 '生产环境': { text: '生产环境', status: 'Success' },
 
-            }
-        },
-        {
-            title: '集群',
-            dataIndex: 'clusterName',
-            width: 180,
-            hideInForm: true,
-            hideInSearch: true
-        },
-        {
-            title: '命名空间',
-            dataIndex: 'namespace',
-            width: 180,
-            hideInForm: true,
-            hideInSearch: true
-        },
-        {
-            title: '部署状态',
-            dataIndex: 'status',
-            width: 110,
-            hideInForm: true,
-            hideInSearch: true,
-            render: (_, row) => {
-                return <span>  {row.running > 0 ? <Tag color='blue'>已部署</Tag> : <Tag color='red'>未部署</Tag>} </span>
-            }
-        },
-        {
-            title: '镜像(last)',
-            dataIndex: 'lastImage',
-            width: 330,
-            hideInForm: true,
-            hideInSearch: true,
-            render: (_, row) => {
-                return <span>  {row.lastImage != '' ? row.lastImage : <LoadingOutlined />} </span>
-            }
+            },
+            hideInTable:true,
         },
         {
             title: '实例数',
             dataIndex: 'runningNumber',
-            width: 80,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
@@ -142,21 +107,59 @@ const AppInfo: React.FC = () => {
             }
         },
         {
-            title: '服务名 / IP / Port',
+            title: '部署状态',
+            dataIndex: 'status',
+            hideInForm: true,
+            hideInSearch: true,
+            render: (_, row) => {
+                return <span>  {row.running > 0 ? <Tag color='green' style={{fontSize:13}}>已部署</Tag> : <Tag color='red' style={{fontSize:13}}>未部署</Tag>} </span>
+            }
+        },
+        {
+            title: '运行时',
+            dataIndex: 'runtime',
+            hideInForm: true,
+            hideInSearch: true,
+            render: (dom, row) => {
+                return   row.runtime != ''? <Tag color='blue' style={{fontSize:13}}>{row.runtime}</Tag>:<Tag color='red' style={{fontSize:13}}>无</Tag>
+            }
+        },
+        {
+            title: '集群',
+            dataIndex: 'clusterName',
+            hideInForm: true,
+            hideInSearch: true,
+            render: (dom, row) => {
+                return (<span>
+                        <Paragraph >Cluster: {row.clusterName}</Paragraph>
+                        <Paragraph>Namespace: {row.namespace}</Paragraph>
+                </span>)
+            }
+        },      
+        {
+            title: '镜像(last)',
+            dataIndex: 'lastImage',
+            hideInForm: true,
+            hideInSearch: true,
+            render: (_, row) => {
+                return <Paragraph copyable>  {row.lastImage != '' ? row.lastImage : <LoadingOutlined />} </Paragraph>
+            }
+        },
+
+        {
+            title: '服务名 / ClusterIP',
             dataIndex: 'serviceIP',
-            width: 520,
+            width: 400,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
                 return (<span>
                     {row.serviceIP != '0.0.0.0' ? <span>
                         <Paragraph copyable>{row.serviceName}</Paragraph>
-                        <Paragraph>ClusterIP: {row.serviceIP} </Paragraph>
-                        <Paragraph>Port: {row.servicePort} </Paragraph>
+                        <Paragraph>ClusterIP: {row.serviceIP}:{row.servicePort}  </Paragraph>
                     </span> : <span>
                         <Paragraph copyable>Service Name:<LoadingOutlined /></Paragraph>
                         <Paragraph>ClusterIP: <LoadingOutlined /> </Paragraph>
-                        <Paragraph>Port: <LoadingOutlined /> </Paragraph>
                     </span>  }
                 </span>)
             }
