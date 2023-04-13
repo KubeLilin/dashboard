@@ -35,6 +35,11 @@ type BuildItem = {
         time: string
         task: string
         start: string
+    },
+    dsl:string,
+    lastCommit: {
+        Message:string,
+        Sha:string
     }
 }
 
@@ -59,7 +64,12 @@ const AppBuildList : React.FC<Props> = (props) => {
             if(res) {
                 appBuildList = res.data.map((v,i)=>{
                     var buildItem:BuildItem
-                    buildItem = { id:v.id, title: v.name ,taskId:Number(v.taskid) , lastBuildRecords:undefined }
+                    var commit = { Message:'--',Sha:'' }
+                    if (v.lastCommit != '') {
+                        commit = JSON.parse(v.lastCommit)
+                    }
+
+                    buildItem = { id:v.id, title: v.name ,taskId:Number(v.taskid) , lastBuildRecords:undefined ,lastCommit:commit,dsl:v.dsl }
                     return buildItem
                 })
                 console.log(appBuildList)
@@ -239,22 +249,37 @@ const AppBuildList : React.FC<Props> = (props) => {
                             {/* <a href=''>立即构建  </a> */}
                             </Empty>
 
-                            <Space direction='vertical' size={8} style={{ height:95, display: item.lastBuildRecords?'block':'none' }}>
+                            <Space direction='vertical' size={8} style={{ height:110, display: item.lastBuildRecords?'block':'none' }}>
                                 <div style={{ display: (item.lastBuildRecords?.status=='completed' && item.lastBuildRecords?.success)?'block':'none' }}>
-                                    <CheckCircleTwoTone style={{ fontSize:20}} twoToneColor="#52c41a" />
-                                    <span style={{marginLeft: 8,fontSize:16 , color:"green"}}>构建成功</span>
+                                    <CheckCircleTwoTone style={{ fontSize:18}} twoToneColor="#52c41a" />
+                                    <span style={{marginLeft: 8,fontSize:18 , color:"green"}}>构建成功</span>
                                 </div>
                                 <div style={{ display: (item.lastBuildRecords?.status=='completed' && !(item.lastBuildRecords?.success))?'block':'none' }}>
-                                    <CloseCircleTwoTone style={{ fontSize:20}} twoToneColor="red" /> 
-                                    <span style={{marginLeft: 8,fontSize:16 , color:"red"}}>构建失败</span>
+                                    <CloseCircleTwoTone style={{ fontSize:18}} twoToneColor="red" /> 
+                                    <span style={{marginLeft: 8,fontSize:18 , color:"red"}}>构建失败</span>
                                 </div>
                                 <div style={{ display: item.lastBuildRecords?.status=='running'?'block':'none' }}>
-                                    <SyncOutlined style={{ fontSize:20 }}  twoToneColor="#06f"  spin /> 
-                                    <span style={{marginLeft: 8,fontSize:16 ,fontWeight:"bold", color:"#06f"}}>正在构建</span>
+                                    <SyncOutlined style={{ fontSize:18 }}  twoToneColor="#06f"  spin /> 
+                                    <span style={{marginLeft: 8,fontSize:18 ,fontWeight:"bold", color:"#06f"}}>正在构建</span>
                                 </div>
-                                <span>管理员: 手动触发 </span>
-                                <span>耗时: {item.lastBuildRecords?.time} </span>
-                                <span>任务: <a href=''> #{item.lastBuildRecords?.task} </a> </span>
+                                <span>当前任务: <a > #{item.lastBuildRecords?.task} </a> </span>
+                                <span>执行耗时: {item.lastBuildRecords?.time} </span>
+                                <span onClick={(e)=>{
+                                    const jobj = JSON.parse(item.dsl)
+                                    var gitAddr:string = jobj[0]?.steps[0]?.content.git
+                                    if (gitAddr.length > 0){
+                                        gitAddr = gitAddr.replace('.git','')
+                                        console.log(gitAddr)
+                                        gitAddr = gitAddr + '/-/commit/' + item.lastCommit.Sha
+                                        window.open(gitAddr,'_blank')
+
+                                    }
+                                    e.stopPropagation()
+                                }}>代码提交:<Tooltip title={item.lastCommit?.Message}>
+                                <img style={{width:14,height:14}}  src='../git_v2.png'  />
+                                <Tag color='blue'>{JSON.parse(item.dsl)[0]?.steps[0]?.content.branch}</Tag>
+                                </Tooltip>
+                                </span>
                             </Space>
                         
                         </Card>

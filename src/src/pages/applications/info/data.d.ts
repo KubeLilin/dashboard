@@ -52,4 +52,5 @@ export type PipelineInfo  = {
     dsl: string,
     status: number,
     taskid: string,
+    lastCommit: string,
 }
