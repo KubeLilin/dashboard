@@ -216,3 +216,10 @@ export async function getRouterList(params: any) {
     })
    return req
 }
+
+export async function GetDeploymentFormInfo(id?:number) {
+    let req=await request<ApiResponse<any>>(`/v1/deployment/deploymentById?dpId=${id}`,{
+        method:'GET',
+    })
+    return req
+}

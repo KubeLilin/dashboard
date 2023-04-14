@@ -14,7 +14,7 @@ import ProDescriptions from '@ant-design/pro-descriptions';
 
 
 import { NewPipeline,GetPipelineList,RunPipeline,AbortPipeline,DeletePipeline,
-        GetPipelineDetails,GetPipelineLogs } from '../info/deployment.service'
+        GetPipelineDetails,GetPipelineLogs,GetDeploymentFormInfo } from '../info/deployment.service'
 
 
 interface Props{
@@ -262,8 +262,8 @@ const AppBuildList : React.FC<Props> = (props) => {
                                     <SyncOutlined style={{ fontSize:18 }}  twoToneColor="#06f"  spin /> 
                                     <span style={{marginLeft: 8,fontSize:18 ,fontWeight:"bold", color:"#06f"}}>正在构建</span>
                                 </div>
-                                <span>当前任务: <a > #{item.lastBuildRecords?.task} </a> </span>
-                                <span>执行耗时: {item.lastBuildRecords?.time} </span>
+                                <span>当前任务:  <a > #{item.lastBuildRecords?.task} </a> </span>
+                                <span>执行耗时:  {item.lastBuildRecords?.time} </span>
                                 <span onClick={(e)=>{
                                     const jobj = JSON.parse(item.dsl)
                                     var gitAddr:string = jobj[0]?.steps[0]?.content.git
@@ -275,10 +275,38 @@ const AppBuildList : React.FC<Props> = (props) => {
 
                                     }
                                     e.stopPropagation()
-                                }}>代码提交:<Tooltip title={item.lastCommit?.Message}>
+                                }}>代码提交: <Tooltip title={item.lastCommit?.Message}>
                                 <img style={{width:14,height:14}}  src='../git_v2.png'  />
                                 <Tag color='blue'>{item.dsl?JSON.parse(item.dsl)[0]?.steps[0]?.content.branch:'unkown'}</Tag>
                                 </Tooltip>
+                                </span>
+                                <span>当前部署:
+                                <a style={{  textDecorationLine: 'underline' }} onClick={async(e)=>{
+                                    e.stopPropagation()
+                                    var deploymentId = 0
+                                    const itemDsl = JSON.parse(item.dsl)
+                                    const deployStage =  itemDsl.filter((x:any)=>x.name=="部署")
+                                    if (deployStage.length > 0) {
+                                        const deployStep = deployStage[0].steps.filter((x:any)=>x.key=="app_deploy")
+                                        if (deployStep.length > 0) {
+                                            console.log(deployStep[0].content)
+                                            if (deployStep[0].content.depolyment) {
+                                                deploymentId = deployStep[0].content.depolyment
+                                            }
+                                        }
+                                    }
+                                    console.log(deploymentId)
+                                    if (deploymentId > 0) {
+                                        const res = await GetDeploymentFormInfo(deploymentId)
+                                        if (res.success) {
+                                            console.log(res.data)
+                                             // history.push(`/resources/pods?did=${deploymentId}`)
+                                            history.push(`/resources/pods?did=${deploymentId}&app=${res.data.name}&cid=${res.data.clusterId}&ns=${res.data.namespace}`)
+                                        }
+                                    } else {
+                                        message.error("无部署实例")
+                                    }
+                                }}>  查看部署实例</a>
                                 </span>
                             </Space>
                         
