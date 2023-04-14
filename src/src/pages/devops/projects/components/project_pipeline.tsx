@@ -12,7 +12,7 @@ import moment from 'moment';
 const { Step } = Steps;
 import ProDescriptions from '@ant-design/pro-descriptions';
 
-import { GetPipelineList,GetPipelineDetails,RunPipeline,AbortPipeline,GetPipelineLogs } from '../service'
+import { GetPipelineList,GetPipelineDetails,RunPipeline,AbortPipeline,GetPipelineLogs,GetDeploymentFormInfo } from '../service'
 
 type BuildItem = {
     id:number,
@@ -27,6 +27,10 @@ type BuildItem = {
         time: string
         task: string
         start: string
+    },
+    lastCommit: {
+        Message:string,
+        Sha:string
     }
 }
 
@@ -65,7 +69,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             if(res) {
                 var build = { success:false,status:'', action:'管理员: 手动触发', time:'-- 分钟', task:'' ,start:'',  } 
                 appBuildList = res.data.map((v:any,i)=>
-                     ({ id:v.id, title: v.name ,appId:v.appid,appName:v.appName,taskId:Number(v.lastTaskId),lastBuildRecords:build ,dsl:v.dsl?JSON.parse(v.dsl):undefined  }))
+                     ({ id:v.id, title: v.name ,appId:v.appid,appName:v.appName,taskId:Number(v.lastTaskId),lastBuildRecords:build ,dsl:v.dsl?JSON.parse(v.dsl):undefined,lastCommit:v.lastCommit?JSON.parse(v.lastCommit):undefined  }))
                 //console.log(appBuildList)
             }      
             const cpBuildList:BuildItem[] = [...appBuildList]
@@ -134,7 +138,6 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
         {
             title:'流水线名称',
             dataIndex:'title',
-            width:400,
             render:(dom,item)=>(
                 <a style={{  textDecorationLine: 'underline' }} onClick={()=>{
                     history.push(`/devops/pipeline?id=${item.id}&name=${item.title}&appid=${item.appId}&appname=${item.appName}`)
@@ -149,6 +152,26 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             title:'任务ID',
             dataIndex:'taskId',
             render:(dom,row)=>( <Tag color="purple" key={"task_"+row.id}>#{dom}</Tag> )
+        },
+        {
+            title:'代码分支',
+            dataIndex:'git',
+            render:(dom,row)=>(
+                <span onClick={(e)=>{
+                    var gitAddr:string = row.dsl[0]?.steps[0]?.content.git
+                    if (gitAddr.length > 0 && row.lastCommit){
+                        gitAddr = gitAddr.replace('.git','')
+                        gitAddr = gitAddr + '/-/commit/' + row.lastCommit.Sha
+                        window.open(gitAddr,'_blank')
+                    }
+                    e.stopPropagation()
+                }}><Tooltip title={row.lastCommit?row.lastCommit.Message:'无,重要执行任务后会拉取最新提交记录。'}>
+                <img style={{width:14,height:14}}  src='../../git_v2.png'  />
+                <Tag color='blue'>{row.dsl?row.dsl[0]?.steps[0]?.content?.branch : 'unknow'}</Tag>
+                </Tooltip>
+                </span>
+            )
+            
         },
         {
             title:'阶段(当前进行阶段及耗时)',
@@ -194,9 +217,8 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
         },
         {
             title:'总任务耗时',
-            width: 120,
             render:(_,item:BuildItem)=> {
-               return <span key={"tasktimeout"+item.id}>{item.lastBuildRecords.time} </span>
+               return <span key={"tasktimeout"+item.id}>耗时: {item.lastBuildRecords.time} </span>
             }
         },
         {
@@ -206,22 +228,52 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             render:(_,item)=>(
                 <div key={"task_status"+item.id}>
                        <div style={{ display: (item.lastBuildRecords?.status=='completed' && item.lastBuildRecords?.success)?'block':'none' }}>
-                            <CheckCircleTwoTone style={{ fontSize:14}} twoToneColor="#52c41a" />
+                            <CheckCircleTwoTone style={{ fontSize:15}} twoToneColor="#52c41a" />
                             <span style={{marginLeft: 8,fontSize:15 , color:"green"}}>构建成功</span>
                         </div>
                         <div style={{ display: (item.lastBuildRecords?.status=='completed' && !(item.lastBuildRecords?.success))?'block':'none' }}>
-                            <CloseCircleTwoTone style={{ fontSize:14}} twoToneColor="red" /> 
+                            <CloseCircleTwoTone style={{ fontSize:15}} twoToneColor="red" /> 
                             <span style={{marginLeft: 8,fontSize:15 , color:"red"}}>构建失败</span>
                         </div>
                         <div style={{ display: (item.lastBuildRecords?.status=='aborted' && !(item.lastBuildRecords?.success))?'block':'none' }}>
-                            <CloseCircleTwoTone style={{ fontSize:14}} twoToneColor="red" /> 
+                            <CloseCircleTwoTone style={{ fontSize:15}} twoToneColor="red" /> 
                             <span style={{marginLeft: 8,fontSize:15 , color:"red"}}>停止构建</span>
                         </div>
                         <div style={{ display: item.lastBuildRecords?.status=='running'?'block':'none' }}>
-                            <SyncOutlined style={{ fontSize:14 }}  twoToneColor="#06f"  spin /> 
+                            <SyncOutlined style={{ fontSize:15 }}  twoToneColor="#06f"  spin /> 
                             <span style={{marginLeft: 8,fontSize:15 ,fontWeight:"bold", color:"#06f"}}>正在构建</span>
                         </div>
                 </div>
+            )
+        },
+        {
+            title:'部署实例',
+            dataIndex:'title',
+            render:(dom,item)=>(
+                <a style={{  textDecorationLine: 'underline' }} onClick={async()=>{
+                    var deploymentId = 0
+                    const deployStage =  item.dsl.filter((x:any)=>x.name=="部署")
+                    if (deployStage.length > 0) {
+                        const deployStep = deployStage[0].steps.filter((x:any)=>x.key=="app_deploy")
+                        if (deployStep.length > 0) {
+                            console.log(deployStep[0].content)
+                            if (deployStep[0].content.depolyment) {
+                                deploymentId = deployStep[0].content.depolyment
+                            }
+                        }
+                    }
+                    console.log(deploymentId)
+                    if (deploymentId > 0) {
+                        const res = await GetDeploymentFormInfo(deploymentId)
+                        if (res.success) {
+                            console.log(res.data)
+                             // history.push(`/resources/pods?did=${deploymentId}`)
+                            history.push(`/resources/pods?did=${deploymentId}&app=${res.data.name}&cid=${res.data.clusterId}&ns=${res.data.namespace}`)
+                        }
+                    } else {
+                        message.error("无部署实例")
+                    }
+                }}>查看部署实例</a>
             )
         },
         {

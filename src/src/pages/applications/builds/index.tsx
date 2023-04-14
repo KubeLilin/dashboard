@@ -277,7 +277,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                                     e.stopPropagation()
                                 }}>代码提交:<Tooltip title={item.lastCommit?.Message}>
                                 <img style={{width:14,height:14}}  src='../git_v2.png'  />
-                                <Tag color='blue'>{JSON.parse(item.dsl)[0]?.steps[0]?.content.branch}</Tag>
+                                <Tag color='blue'>{item.dsl?JSON.parse(item.dsl)[0]?.steps[0]?.content.branch:'unkown'}</Tag>
                                 </Tooltip>
                                 </span>
                             </Space>

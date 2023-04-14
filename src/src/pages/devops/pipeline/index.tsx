@@ -123,6 +123,11 @@ const Pipeline : React.FC = () => {
 
     const removeStage = () => {
         if(allStages.length > 0){
+            if (allStages[currentStageIndex].name == '代码'){
+                message.error("不能删除代码阶段")
+                return 
+            }
+
             allStages.splice(currentStageIndex,1)
             bindAllStages()
         }
@@ -130,6 +135,10 @@ const Pipeline : React.FC = () => {
 
     const removeStep = (stepIndex:number) => {
         if(allStages[currentStageIndex].steps.length > 0) {
+            if (allStages[currentStageIndex].steps[stepIndex].key == 'git_pull') {
+                message.error("不能删除拉取代码步骤")
+                return
+            }
             allStages[currentStageIndex].steps.splice(stepIndex,1)
             setAllStages([...allStages])
             setCurrentStageSetpIndex(0)
@@ -452,6 +461,10 @@ const Pipeline : React.FC = () => {
                             <div>
                                 <span>{item.name} </span>
                                 <Button type="primary" onClick={()=>{
+                                    if (item.key== 'git_pull') {
+                                        message.error("不能重复添加代码拉取步骤！")
+                                        return
+                                    }
                                     allStages[currentStageIndex].steps.push(item)
                                     setVisableStepsSelected(false)
                                 }}>创建</Button>

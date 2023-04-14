@@ -123,3 +123,10 @@ export async function GetResourceMetrics(projectId:number) {
     })
     return resData
 } 
+
+export async function GetDeploymentFormInfo(id?:number) {
+    let req=await request<ApiResponse<any>>(`/v1/deployment/deploymentById?dpId=${id}`,{
+        method:'GET',
+    })
+    return req
+}
