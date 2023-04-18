@@ -79,4 +79,38 @@ export async function deleteApp(appId:number) {
    return req
 }
 
+export async function GetGitBranches(scid:number,git:string,sourcetype:number) {
+    let resData = await request<ApiResponse< {git:string,branches:string[]}  >>("/v1/application/gitbranches",{
+        method:'GET',
+        params:{ git: git,gitType:sourcetype,scid:scid} 
+    })
+    return resData
+}
 
+
+export async function SearchDockerfile(scid:number,sourcetype:number,git:string,ref:string) {
+    let resData = await request<ApiResponse< {git:string,branches:string[]}  >>("/v1/application/searchDockerfile",{
+        method:'GET',
+        params:{ git: git,gitType:sourcetype,scid:scid,ref:ref} 
+    })
+    return resData
+}
+
+
+export async function BindCluster() :Promise<any>{
+    let resData = await request<ApiResponse<any[]>>("/v1/cluster/list", {
+        method: 'GET',
+    })
+    let data=  resData.data?.map(x=>{return  {value:x.id,label:x.name}})
+    return new Promise(x=>x(data))
+}
+
+export async function BindNameSpace(clusterId:number) :Promise<any[]>{
+    let resData = await request<ApiResponse<any[]>>("/v1/cluster/namespacesfromdb", {
+        method: 'GET',
+        params:{'cid':clusterId}
+    })
+    console.log(resData)
+    let data =  resData.data.map(x=>{return  {value:x.id,label:x.namespace}})
+    return new Promise(x=>x(data))
+}

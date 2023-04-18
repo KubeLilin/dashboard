@@ -23,7 +23,9 @@ const AppDrawForm: React.FC<AppDrawFormProps> = (props) => {
     function bindRepo(repoType: string,selectedRecord:any) {
         let res = queryRepoConnections(repoType)
         res.then(x => {    
+            console.log(x)
             repoOptionsHandler(x)
+            props.form.setFieldsValue({ sources:x.value })
             if (selectedRecord){
                 props.form.setFieldsValue({ sources:selectedRecord.sources }) 
             }           
@@ -78,7 +80,7 @@ const AppDrawForm: React.FC<AppDrawFormProps> = (props) => {
                 <Radio value="github"><GithubOutlined style={{ fontSize: '25px' }} />Github</Radio>
                 <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '25px' }} />Gitee</Radio>
                 <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '25px' }} />Gitlab</Radio>
-                <Radio value="gogs"><SettingFilled style={{ fontSize: '25px' }} />Gogs</Radio>
+                {/* <Radio value="gogs"><SettingFilled style={{ fontSize: '25px' }} />Gogs</Radio> */}
             </Radio.Group>
         </ProForm.Item>
         <ProForm.Item name="sources" label="代码源" initialValue={0} rules={[{ required: true, message: '请选择代码源' }]}>
