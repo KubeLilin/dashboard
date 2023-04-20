@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { ApplicationModel } from './apps_data';
 import ProForm, { DrawerForm, ProFormSelect, ProFormTextArea, ProFormText, ProFormGroup } from '@ant-design/pro-form';
-import { Input, Button, Form, Checkbox, Radio, Select,Modal, message,Divider,Table, Space,Avatar } from 'antd';
+import { Input, Button, Form, Checkbox, Radio, Select,Modal, message,Divider,Table, Space,Avatar,Spin } from 'antd';
 import { ClearOutlined,SearchOutlined,GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled,ExclamationCircleOutlined, ContactsOutlined } from '@ant-design/icons';
 import ProCard,{CheckCard} from '@ant-design/pro-card';
 import EditableProTable,{ProColumns} from '@ant-design/pro-table';
-import { getAppLanguage, getAppLevel, createApp, updateApp,GetGitBranches,SearchDockerfile,BindCluster,BindNameSpace } from './apps_service';
+import { getAppLanguage, getAppLevel, createApp, updateApp,
+    GetGitBranches,SearchDockerfile,BindCluster,BindNameSpace,ImportApp } from './apps_service';
 import { queryRepoConnections } from '@/pages/resources/serviceConnection/service';
 import { GetAppGitBranches } from '../info/deployment.service';
 
@@ -25,7 +26,8 @@ const ImportAppForm: React.FC<ImportAppFormProps> = (props) => {
     const [ selectedMenuIds,setSelectedMenuIds ] = useState<number[]>([])
 
     const [namespace, namespcaeHandler] = useState<any>();
-
+    const [loading, setLoading] = useState(false)
+    const key = 'loading'
 
 
     function bindRepo(repoType: string,selectedRecord:any) {
@@ -64,15 +66,38 @@ const ImportAppForm: React.FC<ImportAppFormProps> = (props) => {
                 props.visbleAble[1](vis)
             } }
             onFinish={async (formData) => {
+                setLoading(true)
+                message.open({ key, type: 'loading', content: '正在导入应用,请稍等 .......', duration: 2,style: {  marginTop: '30vh' } })
+ 
                 formData.projectId = props.projectId
                 formData.deployList =  deployDockerfileDataSource?.filter((item:any)=>{return selectedMenuIds.includes(item.id)})
                 console.log(formData)
                 if(formData.deployList.length > 0){
                 //submit
+                    let res = await ImportApp(formData)
+                    if (res && res.success) {
+                        setTimeout(() => {
+                            message.open({ key, type: 'success', content: '应用导入成功!', duration: 2,style: {  marginTop: '30vh' } })
+                        }, 1000);
+                        return true
+                    } else {
+                        message.error("应用导入失败")
+                        return false
+                    }
                 } else {
                     message.error("请选择部署的Dockefile")
                 }
+
+                setTimeout(() => {
+                    setLoading(false)
+                }, 500)
+
+                if (props.onFinish) {
+                    props.onFinish();
+                }
+
             }} >
+        <Spin spinning={loading} tip="正在导入应用,请稍等 ......." size="large">
         <ProForm.Item name="name" label="应用名称" rules={[{ required: true, message: '请输入应用名' }]} >
             <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, ''); appNamehandler(e.currentTarget.value) }}  />
         </ProForm.Item>
@@ -196,6 +221,7 @@ const ImportAppForm: React.FC<ImportAppFormProps> = (props) => {
             </EditableProTable>
           </ProForm.Item>
         </ProCard>
+        </Spin>
     </DrawerForm>
     </div>)
 }

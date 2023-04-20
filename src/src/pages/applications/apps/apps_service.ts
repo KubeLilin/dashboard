@@ -114,3 +114,15 @@ export async function BindNameSpace(clusterId:number) :Promise<any[]>{
     let data =  resData.data.map(x=>{return  {value:x.id,label:x.namespace}})
     return new Promise(x=>x(data))
 }
+
+//ImportApp
+export async function ImportApp(params:any){
+    let req=await request<ApiResponse<ApplicationModel>>('/v1/application/importapp',{
+        method:'POST',
+        data:params,
+        headers:{
+            'Content-Type': 'application/json',
+          },
+    })
+    return req
+}

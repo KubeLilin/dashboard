@@ -136,7 +136,7 @@ const Apps: React.FC = () => {
                 headerTitle="应用列表"
                 toolBarRender={() => [
                     <Dropdown.Button type="primary"  overlay={ <Menu items={[
-                        { key:1,icon:<PlusOutlined /> ,label: '导入应用(Dockerfile)',onClick:()=>{
+                        { key:1,icon:<PlusOutlined /> ,label: '导入应用 (代码仓库)',onClick:()=>{
                             importAppForm.resetFields()
                             importAppFormVisibleHandler(true);
                         }},
