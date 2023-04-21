@@ -30,7 +30,8 @@ const Clusters: React.FC = () => {
             title: '集群标示',
             dataIndex: 'name',
             render: (dom, row) => {
-                return <Link to={'/resources/nodes?cid=' + row.id}>{dom}</Link>
+                // return <Link to={'/resources/nodes?cid=' + row.id}>{dom}</Link>
+                return <Link to={`/resources/clusterinfo?cid=${row.id}&name=${row.name}&nickname=${row.nickname}`}>{dom}</Link>
             }
         },
         {
