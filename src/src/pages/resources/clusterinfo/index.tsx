@@ -3,7 +3,7 @@ import { Menu,Space } from 'antd';
 import { BrowserRouter as Router, Route, Link,useHistory } from 'react-router-dom';
 import { LeftCircleFilled } from '@ant-design/icons';
 import { ProCard } from '@ant-design/pro-card';
-import { history } from 'umi';
+import { history, Link as UmiLink } from 'umi';
 
 import Nodes from '../nodes'
 
@@ -24,7 +24,9 @@ const ClusterInfo: React.FC = () => {
         
         <div style={{height:70,fontSize:16 }}>
           <Space direction='vertical'>
-          <a   href='/resources/clusters'> <LeftCircleFilled /> 返回集群</a>
+          <a   onClick={()=>{
+            history.push('/resources/clusters')
+          }}> <LeftCircleFilled /> 返回集群</a>
           <span> {clusterNickName}{clusterName}</span>
           </Space>
 

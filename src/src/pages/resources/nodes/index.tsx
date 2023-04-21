@@ -24,7 +24,9 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         dataIndex:'name',
         title:'节点名称',
         render: (dom,row) =>{
-            return <a href={'/resources/pods?node='+ row.name +'&cid='+clusterId }>{dom}</a>
+             return <a  onClick={()=>{
+                 history.push('/resources/pods?node='+ row.name +'&cid='+clusterId )
+             }}>{dom}</a>
         //    return   <Link key="nodelink" style={{  textDecorationLine: 'underline'}} to={'/resources/pods?node='+ row.name +'&cid='+clusterId }>{dom}</Link> 
         }
     },
