@@ -192,6 +192,7 @@ const ImportAppForm: React.FC<ImportAppFormProps> = (props) => {
             </ProForm.Item>
             <Divider/>
             <ProForm.Item >
+                <span style={{color:'red'}}>重要提示: 构建目录为git根目录,请编写Dockerfile时考虑此种情况！</span>
             <EditableProTable search={false} toolBarRender={false}  pagination={false}
                 columns={columns}  rowKey="id"  dataSource={deployDockerfileDataSource}  onChange={deployDockerfileDataSourceHandler} 
                 editable={{
