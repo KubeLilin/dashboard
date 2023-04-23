@@ -1,6 +1,6 @@
 import React, { useState,useRef } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import { Input, Button, Form, Checkbox, Radio, Select,Modal, message } from 'antd';
+import { Input, Button, Form, Checkbox, Radio, Select,Modal, message,Dropdown,Menu } from 'antd';
 import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled,ExclamationCircleOutlined } from '@ant-design/icons';
 import { Link } from 'umi';
 
@@ -9,6 +9,7 @@ import {  getAppLevel } from '../../../applications/apps/apps_service';
 import { getApps } from '../service'
 
 import AppDrawForm from '../../../applications/apps/new_app_form'
+import ImportAppForm from '../../../applications/apps/import_app_form'
 
 export type ProjectAppsProps = {
     projectId : number;
@@ -95,8 +96,11 @@ const ProjectAppList: React.FC<ProjectAppsProps> = ( props ) => {
         }
     ]
 
+    // 导入应用
+    const [importAppFormVisible, importAppFormVisibleHandler] = useState<boolean>(false)
+    const [importAppForm] = Form.useForm()
 
-
+    // 创建应用
     const [formVisible, formVisibleHandler] = useState<boolean>(false)
     const [appForm] = Form.useForm()
     const [edit, editHandler] = useState<boolean>(false)
@@ -109,17 +113,37 @@ const ProjectAppList: React.FC<ProjectAppsProps> = ( props ) => {
             request={async (p, s, f) => {  p.pid = props.projectId
                 return getApps(p,s, f) }}
             toolBarRender={() => [
-                <Button key='button' icon={<PlusOutlined />} type="primary"
-                    onClick={() => {
+                // <Button key='button' icon={<PlusOutlined />} type="primary"
+                //     onClick={() => {
+                //         appForm.resetFields()
+                //         formVisibleHandler(true);
+                //         editHandler(false)
+                //         appForm.setFieldsValue({ status: 1 })
+                //     }}>创建应用</Button>
+                <Dropdown.Button type="primary"  overlay={ <Menu items={[
+                    { key:1,icon:<PlusOutlined /> ,label: '导入应用 (代码仓库)',onClick:()=>{
+                        importAppForm.resetFields()
+                        importAppFormVisibleHandler(true);
+                    }},
+                   
+                    ]}/> }
+                    onClick={() =>{
                         appForm.resetFields()
                         formVisibleHandler(true);
                         editHandler(false)
                         appForm.setFieldsValue({ status: 1 })
-                    }}>创建应用</Button>
+                    }}  > 创建应用 </Dropdown.Button>,  
             ]}
                 >       
         </ProTable>
         <AppDrawForm projectId={props.projectId} visbleAble={[formVisible,formVisibleHandler]} editable={edit} form={appForm}
+                onFinish={(success:boolean)=>{
+                    if (success){
+                        actionRef.current?.reload()
+                    }
+                }} />
+
+        <ImportAppForm projectId={props.projectId} visbleAble={[importAppFormVisible,importAppFormVisibleHandler]} form={importAppForm}
                 onFinish={(success:boolean)=>{
                     if (success){
                         actionRef.current?.reload()

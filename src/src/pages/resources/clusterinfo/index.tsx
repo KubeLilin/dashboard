@@ -6,6 +6,7 @@ import { ProCard } from '@ant-design/pro-card';
 import { history, Link as UmiLink } from 'umi';
 
 import Nodes from '../nodes'
+import Workload from '../workloads'
 
 const { SubMenu } = Menu;
 
@@ -43,20 +44,20 @@ const ClusterInfo: React.FC = () => {
             <SubMenu key="wordload" title="工作负载 (Workload)"  >
 
               <Menu.Item key="deployment">
-                <Link to="/product2">Deployment</Link>
+                <Link to={`/resources/clusterinfo/workload?cid=${cid}&wtype=Deployment`} >Deployment</Link>
               </Menu.Item>
               <Menu.Item key="statefulset">
-                <Link to="/product2">StatefulSet</Link>
+                <Link to={`/resources/clusterinfo/workload?cid=${cid}&wtype=StatefulSet`}>StatefulSet</Link>
               </Menu.Item>
               <Menu.Item key="daemonset">
-                <Link to="/product2">DaemonSet</Link>
+              <Link to={`/resources/clusterinfo/workload?cid=${cid}&wtype=DaemonSet`}>DaemonSet</Link>
               </Menu.Item>
-              <Menu.Item key="cronjob">
+              {/* <Menu.Item key="cronjob">
                 <Link to="/product2">CronJob</Link>
               </Menu.Item>
               <Menu.Item key="job">
                 <Link to="/product2">Job</Link>
-              </Menu.Item>
+              </Menu.Item> */}
 
 
             </SubMenu>
@@ -68,7 +69,7 @@ const ClusterInfo: React.FC = () => {
 
            <Route exact  path="/" component={Home} />
 
-           <Route exact path="/product2" component={Product2} />
+           <Route exact path="/resources/clusterinfo/workload" component={Workload} />
      
       </ProCard>
     </ProCard>    

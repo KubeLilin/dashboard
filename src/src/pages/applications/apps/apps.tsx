@@ -147,16 +147,7 @@ const Apps: React.FC = () => {
                             formVisibleHandler(true);
                             editHandler(false)
                             appForm.setFieldsValue({ status: 1 })
-                        }}  > 创建应用 </Dropdown.Button>,
-                    // <Button key='button' icon={<PlusOutlined />} type="primary"
-                    //     onClick={() => {
-            
-                    //     }}>创建应用</Button>,
-                    //     <Button key='button' icon={<PlusOutlined />} type="primary"
-                    // onClick={() => {
-                  
-                    // }}>导入应用</Button>
-                    
+                        }}  > 创建应用 </Dropdown.Button>,                    
                 ]}
                 request={getApps}
             ></ProTable>
