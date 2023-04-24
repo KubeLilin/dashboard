@@ -20,7 +20,10 @@ const Workloads: React.FC = (prop:any) => {
             title:'名称',
             dataIndex:'name',
             hideInSearch:true,
-            render:(dom,item)=> <Link to={''} >{item.name}</Link>
+             
+            render:(dom,item)=> ( <a  onClick={()=>{
+                history.push(`/resources/pods?did=-99&app=${item.name}&cid=${clusterId}&ns=${item.namespace}`)
+            }}>{dom}</a> )
         },
         {
             title:'命名空间',

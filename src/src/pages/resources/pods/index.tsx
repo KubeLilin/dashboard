@@ -18,6 +18,7 @@ import 'codemirror/lib/codemirror.js'
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/yaml/yaml';
 import './monokai-bright.css'
+import 'codemirror/theme/ayu-dark.css';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import EventListComponent from './events';
 import WebTerminal from './terminal';
@@ -73,7 +74,7 @@ const Pods: React.FC = (props) => {
    
 
     function bindYaml() {
-        let res = getYaml(deployId)
+        let res = getYaml(deployId,Number(clusterId),namespace,appName)
         res.then((x) => {
             if (x?.success) {
                 setyamlContent(x.data)
@@ -415,16 +416,16 @@ const Pods: React.FC = (props) => {
                     <EventListComponent clusterId={ Number(clusterId) } deployment={ appName?.toString() } namespace={ namespace?.toString() } ></EventListComponent>
                 </TabPane>
                 <TabPane tab="YAML" key="4"  disabled={ namespace==undefined || did==0?true:false } >
-                    <div style={{  height: 890 }}>
-                    <CodeMirror
-                        editorDidMount={editor => { editor.setSize('auto','780') }}
+                    <div >
+                    <CodeMirror className="code-mirror"
+                        editorDidMount={editor => {  editor.setSize('auto',document.body.clientHeight - 400) }}
                         value={yamlContent}
-                        options={{ mode:{name:'text/yaml'}, theme: 'monokai-bright',
+                        options={{ mode:{name:'text/yaml'}, theme: 'ayu-dark',
                             readOnly: true, lineNumbers:true, }} >
                     </CodeMirror>
                     </div>
                 </TabPane>
-                <TabPane tab="详情&路由" key="5"  disabled={ namespace==undefined || did==0?true:false } >
+                <TabPane tab="详情&路由" key="5"  disabled={ namespace==undefined || did<=0?true:false } >
                 <ProDescriptions title="部署详情"  style={{ padding:15, } } dataSource={deploymentInfo} bordered  column={3} 
                   columns={[
                     { title: '应用名称', dataIndex: 'appName' },
@@ -544,7 +545,7 @@ const Pods: React.FC = (props) => {
                 <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} terminalShell={terminalShellType}
                         namespace={selectedNamespace} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
             </Modal>
-            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} deployImage={deploymentInfo?.lastImage} ></ExecDeployment>
+            <ExecDeployment tableRef={false} visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} deployImage={deploymentInfo?.lastImage} ></ExecDeployment>
         </PageContainer>)
 
 }
