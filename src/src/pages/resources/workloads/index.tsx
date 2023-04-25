@@ -17,7 +17,7 @@ import 'codemirror/theme/ayu-dark.css';
 import { UnControlled as CodeMirror } from 'react-codemirror2'
 
 import { getNameSpaceList ,getWorkloads,ApplyYaml } from './service'
-import { getYaml } from '../pods/service'
+import { getYaml,deleteDeployment } from '../pods/service'
 
 const { Paragraph, Text } = Typography;
 
@@ -103,7 +103,11 @@ const Workloads: React.FC = (prop:any) => {
                     }}>查看YAML</a>,
                     <Popconfirm key="confirm_delete" title="确定要删除这个工作负载吗?"
                     onConfirm={async () => {
-                       console.log(record)
+                        const res = await deleteDeployment(0,clusterId,record.namespace,record.name)
+                        if (res && res.success){
+                            message.success('删除成功！')
+                        }
+                        actionRef.current?.reload()
                     }}>
                     <a key="delete">删除</a></Popconfirm>,
                 ]
@@ -202,6 +206,7 @@ const Workloads: React.FC = (prop:any) => {
                         message.error('查看模式下,YAML为只读资源,不可编辑！')
                         return false
                     }
+                    actionRef.current?.reload()
                     return true
                }}
                >

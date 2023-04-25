@@ -8,7 +8,7 @@ import { Table,Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, mes
 
 import { getPodList, getNamespaceList, setReplicasByDeployId, 
     GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , 
-    DeleteDeploymentWithOutDB,getServiceInfo , getGatewayRouterList } from './service'
+    deleteDeployment,getServiceInfo , getGatewayRouterList } from './service'
 
 import React, { useState, useRef, useEffect } from 'react';
 import ProDescriptions from '@ant-design/pro-descriptions';
@@ -365,7 +365,7 @@ const Pods: React.FC = (props) => {
                                     console.log(appName)
 
                                     setPolling(1000)
-                                    const resp = await DeleteDeploymentWithOutDB(did,Number(clusterId),String(namespace),String(appName))
+                                    const resp = await deleteDeployment(did,Number(clusterId),String(namespace),String(appName))
                                     if (resp.success) {
                                             message.success('删除部署成功');
                                     } else {
