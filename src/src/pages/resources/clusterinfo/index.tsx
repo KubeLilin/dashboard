@@ -16,23 +16,24 @@ const ClusterInfo: React.FC = () => {
   const clusterNickName = history.location.query?.nickname
 
   let routeHistory = useHistory()
-
+  console.log(history.location.query)
+  
   return (
     <div style={{height:'100%',width:'100%'}}>
     <Router History={routeHistory}>
       <ProCard split="vertical" style={{height:'100%'}}>
       <ProCard colSpan="16%" style={{height:'100%'}} bordered={false}>
         
-        <div style={{height:70,fontSize:16 }}>
-          <Space direction='vertical'>
-          <a   onClick={()=>{
+        <div style={{height:40,fontSize:16 }}>
+          <Space>
+          <a onClick={()=>{
             history.push('/resources/clusters')
-          }}> <LeftCircleFilled /> 返回集群</a>
-          <span> {clusterNickName}{clusterName}</span>
+          }}> <LeftCircleFilled /> 返回列表</a>
+          <span>{clusterNickName}</span>
           </Space>
 
         </div>
-        <Menu mode="inline"   defaultOpenKeys={["base","wordload"]} defaultSelectedKeys={['node']} >
+        <Menu style={{fontSize:15}} mode="inline"   defaultOpenKeys={["base","wordload"]} defaultSelectedKeys={['node']} >
             <SubMenu key="base" title="基本信息">
               {/* <Menu.Item key="home">
                 <Link to="/">基本信息</Link>
@@ -44,13 +45,13 @@ const ClusterInfo: React.FC = () => {
             <SubMenu key="wordload" title="工作负载 (Workload)"  >
 
               <Menu.Item key="deployment">
-                <Link to={`/resources/clusterinfo/workload?cid=${cid}&wtype=Deployment`} >Deployment</Link>
+                <Link to={`/resources/workloads?cid=${cid}&wtype=Deployment`} >Deployment</Link>
               </Menu.Item>
               <Menu.Item key="statefulset">
-                <Link to={`/resources/clusterinfo/workload?cid=${cid}&wtype=StatefulSet`}>StatefulSet</Link>
+                <Link to={`/resources/workloads?cid=${cid}&wtype=StatefulSet`}>StatefulSet</Link>
               </Menu.Item>
               <Menu.Item key="daemonset">
-              <Link to={`/resources/clusterinfo/workload?cid=${cid}&wtype=DaemonSet`}>DaemonSet</Link>
+              <Link to={`/resources/workloads?cid=${cid}&wtype=DaemonSet`}>DaemonSet</Link>
               </Menu.Item>
               {/* <Menu.Item key="cronjob">
                 <Link to="/product2">CronJob</Link>
@@ -69,7 +70,7 @@ const ClusterInfo: React.FC = () => {
 
            <Route exact  path="/" component={Home} />
 
-           <Route exact path="/resources/clusterinfo/workload" component={Workload} />
+           <Route path="/resources/workloads" component={Workload} />
      
       </ProCard>
     </ProCard>    

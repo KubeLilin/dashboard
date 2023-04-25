@@ -51,6 +51,7 @@ const Pods: React.FC = (props) => {
     const [autoLogs, setAutoLogs] = useState<boolean>(false)
     const [logContent, setLogContent] = useState<string[]>([]);
     const [yamlContent, setyamlContent] = useState<string>("");
+
     const [execFormVisible, setExecFormVisible] = useState(false);
     const [dpId, stepDpId] = useState<number>(0);
     var text1: any = undefined;
@@ -307,7 +308,7 @@ const Pods: React.FC = (props) => {
                         rowKey={record => record.name}
                         columns={podColumns}
                         dateFormatter="string"
-                        pagination={{ pageSize: 1000 }}
+                        pagination={{ pageSize: 13 }}
                         headerTitle={`实例列表 - 上次更新时间：${moment(time).format('HH:mm:ss')}`}
                         expandable={{ expandedRowRender }}
                         request={async (params, sort) => {
@@ -358,14 +359,20 @@ const Pods: React.FC = (props) => {
                                 }}> <Button key='button' danger style={{ display: did > 0 ? 'block' : 'none' }}>清空实例</Button></Popconfirm>,
                                 <Popconfirm title="确定要删除部署吗?删除部署后,集群中的Deployment将被删除,所有对应实例将全部清空,但平台元数据将保留！"
                                 onConfirm={async () => {
-                                    console.log(deploymentInfo)
-                                    const resp = await DeleteDeploymentWithOutDB(did)
+                                    console.log(did)
+                                    console.log(namespace)
+                                    console.log(clusterId)
+                                    console.log(appName)
+
+                                    setPolling(1000)
+                                    const resp = await DeleteDeploymentWithOutDB(did,Number(clusterId),String(namespace),String(appName))
                                     if (resp.success) {
                                             message.success('删除部署成功');
                                     } else {
                                             message.error('删除部署失败！');
                                     }
-                                }}> <Button key='button' type="primary" danger style={{ display: did > 0 ? 'block' : 'none' }}>删除集群资源</Button></Popconfirm>,
+                                    
+                                }}> <Button key='button' type="primary" danger style={{ display: did != 0 ? 'block' : 'none' }}>删除集群资源</Button></Popconfirm>,
                             <Button key="3"
                                 onClick={() => { if (polling) { setPolling(undefined); return; } setPolling(2000); }} >
                                 {polling ? <LoadingOutlined /> : <ReloadOutlined />}
@@ -421,7 +428,7 @@ const Pods: React.FC = (props) => {
                         editorDidMount={editor => {  editor.setSize('auto',document.body.clientHeight - 400) }}
                         value={yamlContent}
                         options={{ mode:{name:'text/yaml'}, theme: 'ayu-dark',
-                            readOnly: true, lineNumbers:true, }} >
+                            readOnly:true, lineNumbers:true, }} >
                     </CodeMirror>
                     </div>
                 </TabPane>

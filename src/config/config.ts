@@ -123,6 +123,11 @@ export default defineConfig({
           component:"./resources/clusterinfo",
         },
         {
+          name: "workloads",
+          path: "/resources/workloads",
+          component:"./resources/workloads",
+        },
+        {
           name: "namespaces",
           path:"/resources/namespaces",
           component:"./resources/namespaces"
