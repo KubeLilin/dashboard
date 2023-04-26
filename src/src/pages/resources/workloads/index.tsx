@@ -29,7 +29,7 @@ const Workloads: React.FC = (prop:any) => {
             dataIndex:'name',
             hideInSearch:true,
             render:(dom,item)=> ( <a  onClick={()=>{
-                history.push(`/resources/pods?did=-99&app=${item.name}&cid=${clusterId}&ns=${item.namespace}`)
+                history.push(`/resources/pods?did=-99&app=${item.name}&cid=${clusterId}&ns=${item.namespace}&workload=${workloadType.toLowerCase()}`)
             }}>{dom}</a> )
         },
         {
@@ -176,7 +176,7 @@ const Workloads: React.FC = (prop:any) => {
                             setyamlContent("# Yaml")
                         }, 100)
                         setYamlDrawFormVisible(true)
-                    }}>创建YAML资源</Button>
+                    }}>YAML资源</Button>
                     </Space>
                  
                 ]}
@@ -192,25 +192,23 @@ const Workloads: React.FC = (prop:any) => {
                 }}
             
             />
-            <DrawerForm title="创建YAML资源" width={1200 } form={formRef} visible={yamlDrawFormVisible}  onVisibleChange={setYamlDrawFormVisible} drawerProps={{ forceRender: true }}
-               submitter={{ searchConfig:{ resetText:'Cancal',submitText:'Apply'} }}
+            <DrawerForm title="YAML资源" width={1200 } form={formRef} visible={yamlDrawFormVisible}  onVisibleChange={setYamlDrawFormVisible} drawerProps={{ forceRender: true }}
+               submitter={{ searchConfig:{ resetText:'取消',submitText:'更新'} }}
                onFinish={async (values) => {
-                    if (yamlIsEdit){
                         console.log(values)
                         const res = await ApplyYaml(Number(clusterId),values.content)
                         if (res && res.success){
-                            message.success('创建成功')
+                            message.success('资源更新成功！')
                             actionRef.current?.reload()
+                        } else {
+                            message.error('资源更新失败' + res?.data + res?.message)
                         }
-                    } else{
-                        message.error('查看模式下,YAML为只读资源,不可编辑！')
-                        return false
-                    }
+
                     actionRef.current?.reload()
                     return true
                }}
                >
-                <ProForm.Item name="content">
+                <ProForm.Item name="content" hidden>
                     <ProFormText hidden></ProFormText>
                 </ProForm.Item>
                 <ProForm.Item>

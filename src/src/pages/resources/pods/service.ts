@@ -23,6 +23,7 @@ export const getPodList = async (
         pageSize?: number;
         cid?:number;
         node?: string;
+        workload?: string;
     }, 
     sort: Record<string, any>,
     options?: { [key: string]: any },)=> {
@@ -95,14 +96,15 @@ export const getPodList = async (
         return resData
     }
 
-    export async function getYaml(dpId:any,cid:number,namespace:string,dpName:string) {
+    export async function getYaml(dpId:any,cid:number,namespace:string,dpName:string,workload:string) {
         let req=await request<ApiResponse<string>>("/v1/deployment/yaml",{
             method:'GET',
             params:{
                 dpId:dpId,
                 cid:cid,
                 namespace:namespace,
-                dpName:dpName
+                dpName:dpName,
+                workload:workload
             }
         })
         return req

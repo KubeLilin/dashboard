@@ -64,6 +64,7 @@ const Pods: React.FC = (props) => {
     var appName = history.location.query?.app
     var clusterId = history.location.query?.cid
     var node = history.location.query?.node
+    var workload = history.location.query?.workload
     var did = 0
     if (deployId) {
         did = Number(deployId)
@@ -75,7 +76,7 @@ const Pods: React.FC = (props) => {
    
 
     function bindYaml() {
-        let res = getYaml(deployId,Number(clusterId),namespace,appName)
+        let res = getYaml(deployId,Number(clusterId),String(namespace),String(appName),String(workload))
         res.then((x) => {
             if (x?.success) {
                 setyamlContent(x.data)
@@ -313,6 +314,7 @@ const Pods: React.FC = (props) => {
                         expandable={{ expandedRowRender }}
                         request={async (params, sort) => {
                             params.cid = clusterId
+                            params.workload = workload
                             if(!params.namespace && namespace) {
                                 params.namespace = namespace
                             }
