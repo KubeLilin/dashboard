@@ -23,98 +23,7 @@ const { Paragraph, Text } = Typography;
 
 
 const Workloads: React.FC = (prop:any) => {
-    const nodeListColumns: ProColumns[] = [
-        {
-            title:'名称',
-            dataIndex:'name',
-            hideInSearch:true,
-            render:(dom,item)=> ( <a  onClick={()=>{
-                history.push(`/resources/pods?did=-99&app=${item.name}&cid=${clusterId}&ns=${item.namespace}&workload=${workloadType.toLowerCase()}`)
-            }}>{dom}</a> )
-        },
-        {
-            title:'命名空间',
-            dataIndex:'namespace',
-        },
-        {
-            title:'Labels',
-            dataIndex:'labels',
-            hideInSearch:true,
-            render:(dom,item)=>{
-                const labels  = getObjectKV(item.labels)
-                return  (
-                    <Paragraph key={item.name+'_selector'} ellipsis={{ rows: 2, tooltip: labels.map(s=> (<Tag color="purple">{s}</Tag>)) }} >
-                    {labels.map(s=> (<li>{s}</li>))}
-                    </Paragraph>
-                )
-            } 
-        },
-        {
-            title:'Selectors',
-            dataIndex:'selectors',
-            hideInSearch:true,
-            render:(dom,item)=>{
-                const labels  = getObjectKV(item.selectors)
-                return  (
-                    <Paragraph key={item.name+'_selector'} ellipsis={{ rows: 2, tooltip: labels.map(s=> (<Tag color="purple">{s}</Tag>)) }} >
-                    {labels.map(s=> (<li>{s}</li>))}
-                    </Paragraph>
-                )
-            } 
-        },
-        {
-            title:'运行/期望Pod数量',
-            dataIndex:'runningPods',
-            hideInSearch:true,
-            render:(dom,item)=> <span>{item.readyReplicas}/{item.replicas}</span>
-            
-        },
-        {
-            title:'Request/Limits',
-            dataIndex:'requestLimits',
-            hideInSearch:true,
-            render:(dom,item)=> (
-                <Space direction='vertical'>
-                    <span>CPU:{ getResourceVal(item.requestCPU) } / {getResourceVal(item.limitsCPU)} 核 </span>
-                    <span>内存:{ getResourceVal(item.requestMemory / 1024 /1024 /1024 ) } / {getResourceVal(item.limitsMemory / 1024 /1024 /1024)} Gi  </span>
-                </Space>
-            )
-        },
-
-        {
-            title: '操作',
-            dataIndex: 'x',
-            valueType: 'option',
-            render: (_, record) => {
-                return [
-                    <a key="remote" onClick={async()=>{
-                        const res = await getYaml(0,clusterId,record.namespace,record.name)
-                        console.log(res)
-                        if (res && res.success){
-                            setYamlIsEdit(false)
-                            setYamlDrawFormVisible(true)
-                            setTimeout(()=>{
-                            setyamlContent(res.data)
-                            },100)
-                        } else {
-                            message.error('获取YAML失败')
-                        }
-
-                    }}>查看YAML</a>,
-                    <Popconfirm key="confirm_delete" title="确定要删除这个工作负载吗?"
-                    onConfirm={async () => {
-                        const res = await deleteDeployment(0,clusterId,record.namespace,record.name)
-                        if (res && res.success){
-                            message.success('删除成功！')
-                        }
-                        actionRef.current?.reload()
-                    }}>
-                    <a key="delete">删除</a></Popconfirm>,
-                ]
-            },
-        },
-    ]
-
+   
     const getObjectKV = (obj:any)=> {
         if (!obj){
             return ['无']
@@ -156,7 +65,121 @@ const Workloads: React.FC = (prop:any) => {
         <ProCard title={<span> <a onClick={()=>{
             history.push(`/resources/clusterinfo?cid=${clusterId}`)
         }}>返回集群管理</a>  </span> }   bordered headerBordered >
-           <ProTable  columns={nodeListColumns} rowKey={record=>record.name} headerTitle={"工作负载类型:   " + workloadType}
+           <ProTable  columns={[
+                {
+                    title:'名称',
+                    dataIndex:'name',
+                    hideInSearch:true,
+                    render:(dom,item)=> ( <a  onClick={()=>{
+                        history.push(`/resources/pods?did=-99&app=${item.name}&cid=${clusterId}&ns=${item.namespace}&workload=${workloadType.toLowerCase()}`)
+                    }}>{dom}</a> )
+                },
+                {
+                    title:'命名空间',
+                    dataIndex:'namespace',
+                },
+                {
+                    title:'Labels',
+                    dataIndex:'labels',
+                    hideInTable: workloadType =='CronJob',
+                    hideInSearch:true,
+                    render:(dom,item)=>{
+                        const labels  = getObjectKV(item.labels)
+                        return  (
+                            <Paragraph key={item.name+'_selector'} ellipsis={{ rows: 2, tooltip: labels.map(s=> (<Tag color="purple">{s}</Tag>)) }} >
+                            {labels.map(s=> (<li>{s}</li>))}
+                            </Paragraph>
+                        )
+                    } 
+                },
+                {
+                    title:'Selectors',
+                    dataIndex:'selectors',
+                    hideInSearch:true,
+                    hideInTable: workloadType =='CronJob',
+                    render:(dom,item)=>{
+                        const labels  = getObjectKV(item.selectors)
+                        return  (
+                            <Paragraph key={item.name+'_selector'} ellipsis={{ rows: 2, tooltip: labels.map(s=> (<Tag color="purple">{s}</Tag>)) }} >
+                            {labels.map(s=> (<li>{s}</li>))}
+                            </Paragraph>
+                        )
+                    } 
+                },
+                {
+                    title:'并行度',
+                    dataIndex:'jobParallelism',
+                    hideInTable: workloadType!='CronJob',
+                },
+                {
+                    title:'完成次数',
+                    dataIndex:'jobCompletions',
+                    hideInTable: workloadType!='CronJob',
+                },
+                {
+                    title:'最后调度时间',
+                    dataIndex:'lastScheduleTime',
+                    hideInTable: workloadType!='CronJob',
+                },
+                {
+                    title:'最后完成时间',
+                    dataIndex:'lastSuccessfulTime',
+                    hideInTable: workloadType!='CronJob',
+                },
+                {
+                    title:'运行/期望Pod数量',
+                    dataIndex:'runningPods',
+                    hideInSearch:true,
+                    hideInTable: workloadType =='CronJob',
+                    render:(dom,item)=> <span>{item.readyReplicas}/{item.replicas}</span>
+                    
+                },
+                {
+                    title:'Request/Limits',
+                    dataIndex:'requestLimits',
+                    hideInSearch:true,
+                    render:(dom,item)=> (
+                        <Space direction='vertical'>
+                            <span>CPU:{ getResourceVal(item.requestCPU) } / {getResourceVal(item.limitsCPU)} 核 </span>
+                            <span>内存:{ getResourceVal(item.requestMemory / 1024 /1024 /1024 ) } / {getResourceVal(item.limitsMemory / 1024 /1024 /1024)} Gi  </span>
+                        </Space>
+                    )
+                },
+
+                {
+                    title: '操作',
+                    dataIndex: 'x',
+                    valueType: 'option',
+                    render: (_, record) => {
+                        return [
+                            <a key="remote" onClick={async()=>{
+                                const res = await getYaml(0,clusterId,record.namespace,record.name,workloadType)
+                                console.log(res)
+                                if (res && res.success){
+                                    setYamlIsEdit(false)
+                                    setYamlDrawFormVisible(true)
+                                    setTimeout(()=>{
+                                    setyamlContent(res.data)
+                                    },100)
+                                } else {
+                                    message.error('获取YAML失败')
+                                }
+
+                            }}>查看YAML</a>,
+                            <Popconfirm key="confirm_delete" title="确定要删除这个工作负载吗?"
+                            onConfirm={async () => {
+                                const res = await deleteDeployment(0,clusterId,record.namespace,record.name,workloadType)
+                                if (res && res.success){
+                                    message.success('删除成功！')
+                                }
+                                actionRef.current?.reload()
+                            }}>
+                            <a key="delete">删除</a></Popconfirm>,
+                        ]
+                    },
+                },
+            ]} 
+           rowKey={record=>record.name} headerTitle={"工作负载类型:   " + workloadType}
                 formRef={form}  search={false} actionRef={actionRef} pagination={{pageSize:9}}
                 toolBarRender={() => [
                     <Space>

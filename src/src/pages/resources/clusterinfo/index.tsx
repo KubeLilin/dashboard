@@ -53,10 +53,10 @@ const ClusterInfo: React.FC = () => {
               <Menu.Item key="daemonset">
               <Link to={`/resources/workloads?cid=${cid}&wtype=DaemonSet`}>DaemonSet</Link>
               </Menu.Item>
-              {/* <Menu.Item key="cronjob">
-                <Link to="/product2">CronJob</Link>
+              <Menu.Item key="cronjob">
+                <Link to={`/resources/workloads?cid=${cid}&wtype=CronJob`}>CronJob</Link>
               </Menu.Item>
-              <Menu.Item key="job">
+              {/* <Menu.Item key="job">
                 <Link to="/product2">Job</Link>
               </Menu.Item> */}
 

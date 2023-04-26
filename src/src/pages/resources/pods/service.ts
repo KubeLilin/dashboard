@@ -111,10 +111,10 @@ export const getPodList = async (
     }
 
 
-    export async function deleteDeployment(dpId:number,clusterId:number,namespace:string,appName:string) {
+    export async function deleteDeployment(dpId:number,clusterId:number,namespace:string,appName:string,workload:string) {
         let req=await request<ApiResponse<string>>("/v1/deployment/DeploymentWithOutDB",{
             method:'DELETE',
-            params:{dpId:dpId,cid:clusterId,namespace:namespace,dpName:appName}
+            params:{dpId:dpId,cid:clusterId,namespace:namespace,dpName:appName,workload:workload}
         })
         return req
     }

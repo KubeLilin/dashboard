@@ -236,6 +236,12 @@ const Pods: React.FC = (props) => {
 
     console.log(clusterId)
     console.log(node)
+    var subtitle = ""
+    if (workload) {
+        subtitle = "工作负载: " + workload
+    } else {
+        subtitle = '部署环境:  ' + appName
+    }
     var pageTitle = "实例管理     "
     var breadcrumb = [
         { path: '', breadcrumbName: '资源中心' },
@@ -243,7 +249,7 @@ const Pods: React.FC = (props) => {
     if (appName) {
         breadcrumb[0] = { path: '', breadcrumbName: '应用中心' }
         breadcrumb[1] = { path: '', breadcrumbName: '实例管理' }
-        pageTitle = pageTitle + ' - 部署环境:  ' + appName
+        pageTitle = pageTitle + subtitle
     } else if (node) {
         breadcrumb[0] = { path: '', breadcrumbName: '资源中心' }
         breadcrumb[1] = { path: '', breadcrumbName: '节点管理' }
