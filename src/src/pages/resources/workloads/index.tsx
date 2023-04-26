@@ -81,7 +81,7 @@ const Workloads: React.FC = (prop:any) => {
                 {
                     title:'Labels',
                     dataIndex:'labels',
-                    hideInTable: workloadType =='CronJob',
+                    hideInTable: workloadType =='CronJob'|| workloadType =='Job',
                     hideInSearch:true,
                     render:(dom,item)=>{
                         const labels  = getObjectKV(item.labels)
@@ -109,28 +109,28 @@ const Workloads: React.FC = (prop:any) => {
                 {
                     title:'并行度',
                     dataIndex:'jobParallelism',
-                    hideInTable: workloadType!='CronJob',
+                    hideInTable: workloadType!='CronJob' && workloadType !='Job',
                 },
                 {
                     title:'完成次数',
                     dataIndex:'jobCompletions',
-                    hideInTable: workloadType!='CronJob',
+                    hideInTable: workloadType!='CronJob' && workloadType !='Job',
                 },
                 {
                     title:'最后调度时间',
                     dataIndex:'lastScheduleTime',
-                    hideInTable: workloadType!='CronJob',
+                    hideInTable:  workloadType!='CronJob' && workloadType !='Job',
                 },
                 {
                     title:'最后完成时间',
                     dataIndex:'lastSuccessfulTime',
-                    hideInTable: workloadType!='CronJob',
+                    hideInTable:  workloadType!='CronJob' && workloadType !='Job',
                 },
                 {
                     title:'运行/期望Pod数量',
                     dataIndex:'runningPods',
                     hideInSearch:true,
-                    hideInTable: workloadType =='CronJob',
+                    hideInTable: workloadType =='CronJob' || workloadType =='Job',
                     render:(dom,item)=> <span>{item.readyReplicas}/{item.replicas}</span>
                     
                 },
