@@ -116,6 +116,9 @@ const BasicMonitor: React.FC<Props> = (props) => {
             var id: NodeJS.Timeout
             if (autoLoad) {
                 id = setInterval(()=>{
+                  const now = dayjs().unix()
+                  console.log(now)
+                  metricsRequest.endTime = now
                   loadDataset(metricsRequest)
                 }, 10000)
             }
