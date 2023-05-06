@@ -1,7 +1,7 @@
 
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import { Card, Col, Row,Drawer,Button, Modal ,notification,Space,DatePicker, Select, Checkbox} from 'antd';
+import { Card, Col, Row,Drawer,Button, Modal ,notification,Space,DatePicker, Select, Checkbox,Spin} from 'antd';
 import { CloseCircleTwoTone, ExclamationCircleOutlined, SmileOutlined, UndoOutlined,SyncOutlined } from '@ant-design/icons';
 import { Area } from '@ant-design/plots';
 import dayjs from 'dayjs';
@@ -22,6 +22,9 @@ interface Props {
 }
 
 const BasicMonitor: React.FC<Props> = (props) => {
+  console.log(props)
+  const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(0);
 
   const deploymentList = props.deployList.filter((item)=>item.running > 0)
 
@@ -103,7 +106,16 @@ const BasicMonitor: React.FC<Props> = (props) => {
   }
 
   useEffect(() => {
+    const deploymentList = props.deployList.filter((item)=>item.running > 0)
+    if (deploymentList.length > 0){
+      selectedDeploymentHandler(deploymentList[0])
+      setLoading(false)
+    }
+  }, [props.deployList])
+
+  useEffect(() => {
       if (selectedDeployment){
+            setLoading(true)
             var metricsRequest = {
               clusterId: selectedDeployment.clusterId,
               namespace: selectedDeployment.namespace,
@@ -112,6 +124,9 @@ const BasicMonitor: React.FC<Props> = (props) => {
               endTime: selectedDataRange[1].unix(),
             }
             loadDataset(metricsRequest)
+            setTimeout(()=>{
+              setLoading(false)
+            }, 400)
 
             var id: NodeJS.Timeout
             if (autoLoad) {
@@ -123,12 +138,14 @@ const BasicMonitor: React.FC<Props> = (props) => {
                 }, 10000)
             }
             return () => { clearInterval(id) }
-        }
+        } 
         return 
-    }, [selectedDeployment, selectedDataRange,autoLoad ]);
+    }, [selectedDeployment, selectedDataRange,autoLoad ,refresh ]);
 
     return (
-    <div> 
+      <Spin spinning={loading} size='large' tip='加载中......'>
+      <div> 
+      
       <Space style={{margin:25}}>
         部署环境:
         <Select style={{width:350}} defaultValue={0} options={ deploymentList.map((item,idx)=> ({ label: item.name, value: idx }))  }
@@ -175,14 +192,7 @@ const BasicMonitor: React.FC<Props> = (props) => {
           }}>自动刷新(10)s</Checkbox>
           <Button icon={<SyncOutlined   /> } type='ghost' 
             onClick={()=>{
-              var metricsRequest = {
-                clusterId: selectedDeployment.clusterId,
-                namespace: selectedDeployment.namespace,
-                workload: selectedDeployment.name,
-                startTime: selectedDataRange[0].unix(),
-                endTime: dayjs().unix(),
-              }
-              loadDataset(metricsRequest)
+              setRefresh(dayjs().unix())
             }}></Button>
       </Space>
 
@@ -206,11 +216,11 @@ const BasicMonitor: React.FC<Props> = (props) => {
     </Row>
 
     <Row gutter={16} style={{marginTop:18}}>
-    <Col span={8}>
+      {/* <Col span={8}>
       <Card title="Pod内存Swap使用率 (单位 Mi)" bordered={true}>
           <Area {...{ data:podMemorySwapData, xField: 'time', yField: 'value', seriesField: 'metric', }} />
       </Card>
-      </Col>
+      </Col> */}
       <Col span={8}>
       <Card title="Pod网络接收字节速率 (单位 KB/s)" bordered={true}>
           <Area {...{ data:podNetworkReceiveBytesData, xField: 'time', yField: 'value', seriesField: 'metric', }} />
@@ -223,6 +233,7 @@ const BasicMonitor: React.FC<Props> = (props) => {
       </Col>
     </Row>
     </div>
+    </Spin>
     )
 }
 
