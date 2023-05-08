@@ -103,10 +103,7 @@ const Pods: React.FC = (props) => {
             dataIndex: 'status',
             search: false,
             render: (dom, row) => {
-                if (row.status == 'Running') {
-                    return <span style={{ color: 'green' }}>{dom}</span>
-                }
-                return <span style={{ color: 'red' }}>{dom}</span>
+                    return <Space direction='horizontal'><Tag color={row.status=='Running'?'green':'red'}>{dom}</Tag>  <Tag color={  row.podCount == row.podReadyCount?'green':'red' }>Ready</Tag>  </Space>
             }
         },
         {
@@ -216,8 +213,8 @@ const Pods: React.FC = (props) => {
                             return [
                                 <Tooltip title={row.state} color="geekblue" key="status">
                                     <Space direction="vertical">
-                                        <span>Readly:  {row.ready ? <Tag color="geekblue">{String(row.ready)}</Tag> : <Tag color="#f50">String(row.ready)</Tag>}</span>
-                                        <span>Started:  {row.started ? <Tag color="geekblue">{String(row.started)}</Tag> : <Tag color="#f50">String(row.started)</Tag>}</span>
+                                        <span>Readly:  {row.ready ? <Tag color="green">true</Tag> : <Tag color="red">false</Tag>}</span>
+                                        <span>Started:  {row.started ? <Tag color="green">true</Tag> : <Tag color="red">false</Tag>}</span>
                                     </Space>
                                 </Tooltip>
                             ]

@@ -1,7 +1,7 @@
 
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import { Card, Col, Row,Drawer,Button, Modal ,notification,Space,DatePicker, Select, Checkbox,Spin} from 'antd';
+import { Card, Col, Row,Drawer,Button, Modal ,notification,Space,DatePicker, Select, Checkbox,Spin,Tabs} from 'antd';
 import { CloseCircleTwoTone, ExclamationCircleOutlined, SmileOutlined, UndoOutlined,SyncOutlined } from '@ant-design/icons';
 import { Area } from '@ant-design/plots';
 import dayjs from 'dayjs';
@@ -13,6 +13,7 @@ dayjs.extend(localeData)
 
 import { getPodCPUUsage,getPodMemoryUsage,getPodMemoryRss,
   getPodNetworkReceiveBytes,getPodNetworkTransmitBytes,getPodMemorySwap } from './service'
+import TabPane from 'antd/lib/tabs/TabPane';
 
 const { RangePicker } = DatePicker;
 
@@ -190,12 +191,15 @@ const BasicMonitor: React.FC<Props> = (props) => {
           <Checkbox onChange={(e)=>{
              setAutoLoad(e.target.checked)
           }}>自动刷新(10)s</Checkbox>
-          <Button icon={<SyncOutlined   /> } type='ghost' 
+          <Button icon={<SyncOutlined   /> } type='ghost'
             onClick={()=>{
               setRefresh(dayjs().unix())
-            }}></Button>
-      </Space>
+            }}>刷新</Button>
 
+      </Space>
+      
+      <Tabs size="large" type="line" tabBarStyle={{ paddingLeft:25 }} >
+      <TabPane  tab="应用监控" key="app">
       <Row gutter={16}>
       <Col span={8}>
         <Card title="Pod CPU利用率 (单位 %)" bordered={true} >
@@ -232,6 +236,10 @@ const BasicMonitor: React.FC<Props> = (props) => {
       </Card>
       </Col>
     </Row>
+    </TabPane>
+    <TabPane  tab="服务监控 (Service Monitor)" key="sm">
+    </TabPane>
+    </Tabs>
     </div>
     </Spin>
     )

@@ -64,7 +64,6 @@ const AppInfo: React.FC = () => {
         {
             title: 'ID',
             dataIndex: 'id',
-            width: 48,
             hideInForm: true,
             hideInSearch: true
         },
@@ -77,6 +76,7 @@ const AppInfo: React.FC = () => {
         {
             title: '环境名称',
             dataIndex: 'nickname',
+            width: 280,
             render: (_, row) => {
                 return <span>
                     <Paragraph><Link to={{ pathname:'/resources/pods' ,  search: '?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId + '&ns=' + row.namespace ,  state:row } }  >{row.name}</Link></Paragraph>
@@ -88,7 +88,6 @@ const AppInfo: React.FC = () => {
             title: '环境级别',
             dataIndex: 'level',
             hideInSearch: true,
-            width: 140,
             valueEnum:{
                 '测试环境': { text: '测试环境', status: 'Warning' },
                 '开发环境': { text: '开发环境', status: 'Processing' },
@@ -100,6 +99,7 @@ const AppInfo: React.FC = () => {
         },
         {
             title: '实例数',
+            width: 80,
             dataIndex: 'runningNumber',
             hideInForm: true,
             hideInSearch: true,
@@ -110,19 +110,24 @@ const AppInfo: React.FC = () => {
         {
             title: '部署状态',
             dataIndex: 'status',
+            width: 80,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
-                return <span>  {row.running > 0 ? <Tag color='green' style={{fontSize:13}}>已部署</Tag> : <Tag color='red' style={{fontSize:13}}>未部署</Tag>} </span>
+                return <Space> 
+                            <span>  {row.running > 0 ? <Tag color='green' style={{fontSize:13}}>已部署</Tag> : <Tag color='red' style={{fontSize:13}}>未部署</Tag>} </span>
+                            {row.ready?<Tag color='green' style={{fontSize:13}} >就绪</Tag>:<Tag color='red' style={{fontSize:13}}>未就绪</Tag>} 
+                        </Space>
             }
         },
         {
             title: '运行时',
             dataIndex: 'runtime',
+            width: 80,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
-                return   row.runtime != ''? <Tag color='blue' style={{fontSize:13}}>{row.runtime}</Tag>:<Tag color='red' style={{fontSize:13}}>无</Tag>
+                return   row.runtime != ''? <Tag color='blue' style={{fontSize:13}}>{row.runtime}</Tag>:<Tag color='blue' style={{fontSize:13}}>None</Tag>
             }
         },
         {
@@ -132,8 +137,8 @@ const AppInfo: React.FC = () => {
             hideInSearch: true,
             render: (dom, row) => {
                 return (<span>
-                        <Paragraph >Cluster: {row.clusterName}</Paragraph>
-                        <Paragraph>Namespace: {row.namespace}</Paragraph>
+                        <Paragraph>集群: {row.clusterName}</Paragraph>
+                        <Paragraph>命名空间: {row.namespace}</Paragraph>
                 </span>)
             }
         },      
@@ -308,6 +313,7 @@ const AppInfo: React.FC = () => {
                                         list[podSet.index].lastImage = podSet.data[0].containers[0].image
                                         list[podSet.index].running = podSet.data.length
                                         list[podSet.index].serviceIP = podSet.data[0].ip
+                                        list[podSet.index].ready = podSet.data[0].podReadyCount == podSet.data[0].podCount
                                     } else {
                                         list[podSet.index].lastImage = '无'
                                         list[podSet.index].running = 0
@@ -324,6 +330,9 @@ const AppInfo: React.FC = () => {
                             return datasource
                         }}
                     ></ProTable>
+                </TabPane>
+                <TabPane tab="性能监控" key="6" >
+                    <BasicMonitor AppId={Number(appId)} deployList={tableListDataSource}></BasicMonitor>
                 </TabPane>
                 <TabPane tab="详情&路由" key="2" >
                     <ProDescriptions title="应用详情" request={ async () => GetApplicationInfo(Number(appId)) } style={{ padding:35, }} 
@@ -365,12 +374,14 @@ const AppInfo: React.FC = () => {
                 <TabPane tab="发布记录" key="4" >
                    <ReleaseRecord AppId={Number(appId)}></ReleaseRecord>
                 </TabPane>
-                <TabPane tab="应用配置" key="5" >
+                <TabPane tab="服务监控配置 (Service Monitor)" key="7" >
+                </TabPane>
+                <TabPane tab="应用配置列表 (Configmap)" key="5" >
                     <AppConifigMaps  AppId={Number(appId)}></AppConifigMaps>
                 </TabPane>
-                <TabPane tab="应用监控" key="6" >
-                    <BasicMonitor AppId={Number(appId)} deployList={tableListDataSource}></BasicMonitor>
-                </TabPane>
+              
+              
+
             </Tabs>
          
             <DevlopmentFormentForm visibleFunc={[stepFormVisible ,setStepFormVisible ]}

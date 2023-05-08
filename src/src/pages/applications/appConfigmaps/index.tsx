@@ -74,6 +74,7 @@ const AppConifigMaps: React.FC<Props> = (props) => {
     return (
         <div>
             <ProTable columns={columns}
+                headerTitle='Configmap列表 (用于显示编辑应用配置信息，请需添加请移步部署编辑)'
                 rowKey="creationTime"
                 style={{marginLeft:20,marginRight:20}}
                 cardProps={{bordered: true}}
