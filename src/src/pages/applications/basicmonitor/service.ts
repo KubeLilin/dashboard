@@ -1,6 +1,23 @@
 import { request } from 'umi'
 import { ApiResponse } from '@/services/public/service'
 
+export interface ServiceMonitorProps {
+    clusterId:number,
+    namespace:string,
+    serviceName:string,
+    startTime:any,
+    endTime:any,
+    refresh:number,
+}
+
+export async function getCustomMetrics(params:any)  {
+    let resData = await request<ApiResponse<any>>("/v1/metrics/customMetrics", {
+        method: 'GET',
+        params: params
+    })
+    return resData
+}
+
 export async function getPodCPUUsage(params:any)  {
     let resData = await request<ApiResponse<any>>("/v1/metrics/podCPUUsage", {
         method: 'GET',

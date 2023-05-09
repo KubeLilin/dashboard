@@ -29,7 +29,7 @@ const ProjectAppList: React.FC<ProjectAppsProps> = ( props ) => {
             title: '应用名称',
             dataIndex: 'name',
             render: (dom, row) => {
-                return <Link key={'linkapp' + row.id} style={{  textDecorationLine: 'underline' }} to={'/applications/info?id=' + row.id + '&name=' + row.name}>{dom}</Link>
+                return <Link key={'linkapp' + row.id} style={{  textDecorationLine: 'underline' }} to={'/applications/info?id=' + row.id + '&name=' + row.name + '&language=' + row.languageName}>{dom}</Link>
             }
         },
         {

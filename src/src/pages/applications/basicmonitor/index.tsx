@@ -4,6 +4,7 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { Card, Col, Row,Drawer,Button, Modal ,notification,Space,DatePicker, Select, Checkbox,Spin,Tabs} from 'antd';
 import { CloseCircleTwoTone, ExclamationCircleOutlined, SmileOutlined, UndoOutlined,SyncOutlined } from '@ant-design/icons';
 import { Area } from '@ant-design/plots';
+import { history } from 'umi';
 import dayjs from 'dayjs';
 import moment from 'moment';
 import weekday from 'dayjs/plugin/weekday'
@@ -14,20 +15,25 @@ dayjs.extend(localeData)
 import { getPodCPUUsage,getPodMemoryUsage,getPodMemoryRss,
   getPodNetworkReceiveBytes,getPodNetworkTransmitBytes,getPodMemorySwap } from './service'
 import TabPane from 'antd/lib/tabs/TabPane';
-
 const { RangePicker } = DatePicker;
+import GolangServiceMonitor  from './servicemonitor/golang'
+
 
 interface Props {
-    AppId: number,
+    AppId: number,  
     deployList: any[],
 }
 
 const BasicMonitor: React.FC<Props> = (props) => {
-  console.log(props)
+
+  var appLanguage = history.location.query?.language?.toString().toUpperCase()
+
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
 
   const deploymentList = props.deployList.filter((item)=>item.running > 0)
+
+  const [selectedDataRangeIndex, selectedDataRangeIndexHandler] = useState<number>(0)
 
   const [selectedDataRange, selectedDataRangeHandler] = useState<any>([dayjs().add(-15, 'minute'), dayjs()])
   const [selectedDeployment, selectedDeploymentHandler] = useState<any>(deploymentList?.[0] )
@@ -121,8 +127,8 @@ const BasicMonitor: React.FC<Props> = (props) => {
               clusterId: selectedDeployment.clusterId,
               namespace: selectedDeployment.namespace,
               workload: selectedDeployment.name,
-              startTime: selectedDataRange[0].unix(),
-              endTime: selectedDataRange[1].unix(),
+              startTime: dataTimeRange[selectedDataRangeIndex][0].unix(),
+              endTime: dataTimeRange[selectedDataRangeIndex][1].unix(),
             }
             loadDataset(metricsRequest)
             setTimeout(()=>{
@@ -151,6 +157,8 @@ const BasicMonitor: React.FC<Props> = (props) => {
         部署环境:
         <Select style={{width:350}} defaultValue={0} options={ deploymentList.map((item,idx)=> ({ label: item.name, value: idx }))  }
           onChange={(v)=>{
+            selectedDataRangeHandler(dataTimeRange[selectedDataRangeIndex])
+            setRefresh(dayjs().unix())
             selectedDeploymentHandler(deploymentList[v])
           }}
         />
@@ -169,6 +177,7 @@ const BasicMonitor: React.FC<Props> = (props) => {
         onChange={(v)=>{
             console.log(v)
             console.log( dayjs().add(v, 'd'))
+            selectedDataRangeIndexHandler(v)
             selectedDataRangeHandler(dataTimeRange[v])
 
             const st = Number(dataTimeRange[v]?.[0]?.unix())
@@ -193,6 +202,7 @@ const BasicMonitor: React.FC<Props> = (props) => {
           }}>自动刷新(10)s</Checkbox>
           <Button icon={<SyncOutlined   /> } type='ghost'
             onClick={()=>{
+              selectedDataRangeHandler(dataTimeRange[selectedDataRangeIndex])
               setRefresh(dayjs().unix())
             }}>刷新</Button>
 
@@ -237,7 +247,15 @@ const BasicMonitor: React.FC<Props> = (props) => {
       </Col>
     </Row>
     </TabPane>
-    <TabPane  tab="服务监控 (Service Monitor)" key="sm">
+    <TabPane  tab={`服务监控 (${appLanguage})`} key="sm">
+      { appLanguage == 'GOLANG'?
+        <GolangServiceMonitor 
+          clusterId={selectedDeployment?.clusterId} 
+          startTime={selectedDataRange[0]} endTime={selectedDataRange[1]} 
+          namespace={selectedDeployment?.namespace}
+          serviceName={selectedDeployment?.serviceName}
+          refresh={refresh}
+        /> : '' }
     </TabPane>
     </Tabs>
     </div>

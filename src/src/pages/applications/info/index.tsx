@@ -26,6 +26,7 @@ const { Content } = Layout;
 const { Paragraph } = Typography;
 
 const AppInfo: React.FC = () => {
+    
     var appId = history.location.query?.id
     var appName = history.location.query?.name
     var returnKey = history.location.query?.returnkey
