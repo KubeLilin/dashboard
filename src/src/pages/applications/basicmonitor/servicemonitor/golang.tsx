@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Col, Row,Drawer,Button, Modal ,notification,Space,DatePicker, Select, Checkbox,Spin,Tabs} from 'antd'
 import { ServiceMonitorProps } from '../service' 
-import ServiceMonitor from './index'
+import ServiceMonitor from './servicemonitor'
 
 
 const GolangServiceMonitor: React.FC<ServiceMonitorProps> = (props) => {

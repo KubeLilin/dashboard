@@ -20,6 +20,7 @@ import ReleaseRecord from '../releaseRecord';
 import Probe from '../probe';
 import AppConifigMaps from '../appConfigmaps'
 import BasicMonitor from '../basicmonitor'
+import AppServiceMonitor from '../appServiceMonitor'
 
 const { TabPane } = Tabs;
 const { Content } = Layout;
@@ -376,6 +377,7 @@ const AppInfo: React.FC = () => {
                    <ReleaseRecord AppId={Number(appId)}></ReleaseRecord>
                 </TabPane>
                 <TabPane tab="服务监控配置 (Service Monitor)" key="7" >
+                    <AppServiceMonitor appId={Number(appId)} appName={String(appName)} deployList={tableListDataSource} ></AppServiceMonitor>
                 </TabPane>
                 <TabPane tab="应用配置列表 (Configmap)" key="5" >
                     <AppConifigMaps  AppId={Number(appId)}></AppConifigMaps>

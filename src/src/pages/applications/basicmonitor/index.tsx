@@ -78,36 +78,48 @@ const BasicMonitor: React.FC<Props> = (props) => {
       if (res && res.success){
         const dataList = JSON.parse(res.data)
         setPodCPUUsage(processDataFunc(dataList,'pod',null))
+      } else {
+        setPodCPUUsage([])
       }
     })
     getPodMemoryUsage(metricsRequest).then((res)=>{ 
       if (res && res.success){
         const dataList = JSON.parse(res.data)
         setPodMemoryUsage(processDataFunc(dataList,'pod',(value:number)=>value/1024/1024))
+      } else {
+        setPodMemoryUsage([])
       }
     })
     getPodMemoryRss(metricsRequest).then((res)=>{
       if (res && res.success){
         const dataList = JSON.parse(res.data)
         setPodMemoryRss(processDataFunc(dataList,'pod',(value:number)=>value/1024/1024))
+      } else {
+        setPodMemoryRss([])
       }
     })
     getPodMemorySwap(metricsRequest).then((res)=>{
       if (res && res.success){
         const dataList = JSON.parse(res.data)
         setPodMemorySwap(processDataFunc(dataList,'pod',(value:number)=>value/1024/1024))
+      } else {
+        setPodMemorySwap([])
       }
     })
     getPodNetworkReceiveBytes(metricsRequest).then((res)=>{
       if (res && res.success){
         const dataList = JSON.parse(res.data)
         setPodNetworkReceiveBytes(processDataFunc(dataList,'pod',(value:number)=>value/1024))
+      } else {
+        setPodNetworkReceiveBytes([])
       }
     })
     getPodNetworkTransmitBytes(metricsRequest).then((res)=>{
       if (res && res.success){
         const dataList = JSON.parse(res.data)
         setPodNetworkTransmitBytes(processDataFunc(dataList,'pod',(value:number)=>value/1024))
+      } else {
+        setPodNetworkTransmitBytes([])
       }
     })
   }

@@ -32,11 +32,15 @@ const ServiceMonitor: React.FC<Props> = (props) => {
 
     useEffect(() => {
         if (props.clusterId) {
-            getCustomMetrics({ clusterId:props.clusterId, pql:props.pql,startTime:props.startTime.unix(),endTime:props.endTime.unix() }).then((res:any)=>{
-                var chartDataset:any[] = []
-                const dataList = JSON.parse(res.data)
-                chartDataset = processDataFunc(dataList,'instance',props.valueConverter)
-                serviceMonitorDataHandler(chartDataset)
+            getCustomMetrics({ clusterId:props.clusterId, pql:props.pql,startTime:props.startTime.unix(),endTime:props.endTime.unix() }).then((res)=>{
+                if (res && res.success){
+                    var chartDataset:any[] = []
+                    const dataList = JSON.parse(res.data)
+                    chartDataset = processDataFunc(dataList,'instance',props.valueConverter)
+                    serviceMonitorDataHandler(chartDataset)
+                } else {
+                    serviceMonitorDataHandler([])
+                }
             })
         }
 
