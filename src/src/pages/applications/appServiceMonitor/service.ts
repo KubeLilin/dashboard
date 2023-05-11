@@ -8,7 +8,7 @@ export async function getServiceByLabel(clusterId:number,namespace:string,labels
         params:{
             clusterId:clusterId,
             namespace:namespace,
-            labels:labels
+            label:labels
         },
     });
     return req;
