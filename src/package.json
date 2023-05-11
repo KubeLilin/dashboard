@@ -80,7 +80,7 @@
     "react-fittext": "^1.0.0",
     "react-helmet-async": "^1.0.4",
     "react-json-view": "^1.21.3",
-    "react-router": "^6.2.2",
+    "react-router": "^4.3.1",
     "umi": "^3.5.0",
     "umi-serve": "^1.9.10",
     "xterm": "^4.15.0",
