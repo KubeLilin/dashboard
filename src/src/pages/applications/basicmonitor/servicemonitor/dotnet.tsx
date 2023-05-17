@@ -22,7 +22,7 @@ const DotNETServiceMonitor: React.FC<ServiceMonitorProps> = (props) => {
         <Col span={8}>
           <ServiceMonitor title='GC Time rate ( bp/s )'
             clusterId={props.clusterId} 
-            pql={`sum(increase(dotnet_collection_count_total{ namespace="${props.namespace}", service="${props.serviceName}" }[30s])) by (generation,instance)`}
+            pql={`sum(increase(dotnet_collection_count_total{ namespace="${props.namespace}", service="${props.serviceName}" }[30s])) by (instance)`}
             startTime={props.startTime} endTime={props.endTime}
             refresh={props.refresh}
             />
