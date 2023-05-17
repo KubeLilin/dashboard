@@ -35,3 +35,13 @@ export async function getServiceMonitorList(appId:number) {
         },
     });
 }
+
+// delete service monitor
+export async function deleteServiceMonitor(id:number) {
+    return request<ApiResponse<any>>('/v1/service/serviceMonitor', {
+        method: 'DELETE',
+        params: {
+            id:id
+        },
+    })
+}

@@ -8,7 +8,7 @@ import { history } from 'umi';
 const { Text, Paragraph } = Typography;
 import { DeploymentItem } from '../info/data'
 import { ServiceMonitorRequestData } from './data'
-import { getServiceByLabel,createOrUpdateServiceMonitor,getServiceMonitorList } from './service'
+import { getServiceByLabel,createOrUpdateServiceMonitor,getServiceMonitorList,deleteServiceMonitor } from './service'
 
 
 interface Props {
@@ -92,7 +92,27 @@ const AppServiceMonitor: React.FC<Props> = (props) => {
                     }
                 
 
-                }}>查看</Button>
+                }}>查看</Button>,
+                <Button key="delete" type="primary" danger 
+                 onClick={async () => {
+                    console.log(record)
+                    Modal.confirm({
+                        title: '删除确认',
+                        icon: <ExclamationCircleOutlined />,
+                        content: '确定删除该 ServiceMonitor ?',
+                        okText: '确认',
+                        cancelText: '取消',
+                        onOk: async () => {
+                           const res = await deleteServiceMonitor(record.id)
+                           if (res && res.success) {
+                                notification.success({ message: '删除成功' })
+                                ref.current?.reload()
+                           } else {
+                                notification.error({ message: '删除失败' })
+                           }
+                        },
+                    })
+                 }}>删除</Button>
             ]
         }
     ]
@@ -160,21 +180,33 @@ const AppServiceMonitor: React.FC<Props> = (props) => {
                             interval:   values.interval,                            
                         }
                         console.log(data)
-                        notification.info({ message: '正在创建 ServiceMonitor', duration: 0 })
+                        message.info({ message: '正在创建 ServiceMonitor', duration: 0 })
                         const res = await createOrUpdateServiceMonitor(data)
                         if (res && res.success) {
-                            notification.success({ message: '更新资源成功' })
+                            message.success({ message: '更新资源成功' })
                             return true
 
                         } else {
-                            notification.error({ message: '更新资源失败' })
+                            message.error({ message: '更新资源失败' })
                         }
                         ref.current?.reload()
-                    }
-                }}
->
-                <ProCard title="部署配置 (只显示该应用下已运行的所有部署)" bordered>
-                    <ProForm.Item name="deploymentId" label="选择部署" style={{marginBottom:45}} rules={[{ required: true, message: '请选择部署' }]}>
+                     
+                    }   
+                    return true
+                }}  >
+                <ProCard  bordered  >
+                    Service Monitor 是 Prometheus Operator一种 K8S 资源对象，用于定义 Prometheus 用于抓取指标的目标 Service ，接入参考文档如下：
+                    <br/>
+                    <br/>
+                    <a target='_blank' href='https://github.com/KubeLilin/kubelilin/blob/main/scripts/kube-prometheus/java.md'>Spring Boot 接入文档</a>  
+                    <br/>
+                    <a target='_blank' href='https://github.com/KubeLilin/kubelilin/blob/main/scripts/kube-prometheus/go.md'>Go 语言接入文档</a>  
+                    <br/>
+                    <a target='_blank' href='https://github.com/KubeLilin/kubelilin/blob/main/scripts/kube-prometheus/dotnet.md'>ASP.NET Core 接入文档</a>  
+                </ProCard>
+
+                <ProCard title="部署配置 (只显示该应用下已运行的部署环境)" bordered style={{marginTop:20}}>
+                    <ProForm.Item name="deploymentId" label="选择部署" style={{marginBottom:20}} rules={[{ required: true, message: '请选择部署' }]}>
                         <ProFormSelect  allowClear options={ deploymentList.map((item,idx)=> ({ label: item.name, value: item.id }))  }
                            fieldProps={{ onChange(id){
                             const deploy = deploymentList.filter((item)=>item.id == id)[0]
@@ -195,13 +227,13 @@ const AppServiceMonitor: React.FC<Props> = (props) => {
                     <ProForm.Item name="id" hidden >
                         <ProFormText  disabled />
                     </ProForm.Item>
-                    <ProForm.Item name="name" label="服务监控" >
+                    <ProForm.Item name="name" label="服务监控" rules={[{ required: true, message: '请选择部署' }]} >
                         <ProFormText  disabled  initialValue={'sm-'+selectedDeployment?.name} />
                     </ProForm.Item>
-                    <ProForm.Item name="clusterName" label="部署集群" >
+                    <ProForm.Item name="clusterName" label="部署集群" rules={[{ required: true, message: '请选择部署' }]}>
                         <ProFormText  disabled  initialValue={selectedDeployment?.clusterName} />
                     </ProForm.Item>
-                    <ProForm.Item name="namespace"  label="命名空间" >
+                    <ProForm.Item name="namespace"  label="命名空间" rules={[{ required: true, message: '请选择部署' }]}>
                         <ProFormText disabled initialValue={selectedDeployment?.namespace} />
                     </ProForm.Item>
                     <ProForm.Item name="serviceName" hidden label="服务名称" >
@@ -235,19 +267,19 @@ const AppServiceMonitor: React.FC<Props> = (props) => {
 
                 <ProCard title="Targets 采集配置" bordered style={{marginTop:20}}>
                    
-                    <ProForm.Item name="path"  label="指标端点"  >
-                        <ProFormText name="path" rules={[{ required: true, message: '请填写指标端点' }]}/>
+                    <ProForm.Item name="path"  label="指标端点" rules={[{ required: true, message: '请填写指标端点' }]}  >
+                        <ProFormText name="path" />
                         <Tag color='blue'>请检查指标端点是否可以访问</Tag>
                     </ProForm.Item>
-                    <ProForm.Item name="port"   label="服务端口" >
-                       <ProFormText name="port"  width='sm' rules={[{ required: true, message: '请填写服务端口,请使用校验服务可用性功能获取！' }]}/>
+                    <ProForm.Item name="port"   label="服务端口" rules={[{ required: true, message: '请填写服务端口,请使用校验服务可用性功能获取！' }]} >
+                       <ProFormText name="port"  width='sm' />
                     </ProForm.Item>
                     <ProForm.Item  name="interval" label="间隔时间" rules={[{  required: true, message: '请填写间隔时间' }]}>
                         <ProFormDigit  min={15} max={60} width='sm' name="interval"  />
                     </ProForm.Item>
                 </ProCard>
-
-
+                
+              
             </DrawerForm>
         </div>
     )

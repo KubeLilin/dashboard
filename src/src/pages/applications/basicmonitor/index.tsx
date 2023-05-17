@@ -17,7 +17,8 @@ import { getPodCPUUsage,getPodMemoryUsage,getPodMemoryRss,
 import TabPane from 'antd/lib/tabs/TabPane';
 const { RangePicker } = DatePicker;
 import GolangServiceMonitor  from './servicemonitor/golang'
-
+import JavaServiceMonitor from './servicemonitor/java';
+import DotNETServiceMonitor from './servicemonitor/dotnet'
 
 interface Props {
     AppId: number,  
@@ -260,14 +261,32 @@ const BasicMonitor: React.FC<Props> = (props) => {
     </Row>
     </TabPane>
     <TabPane  tab={`服务监控 (${appLanguage})`} key="sm">
-      { appLanguage == 'GOLANG'?
+      { 
+        appLanguage == 'GOLANG'?
         <GolangServiceMonitor 
           clusterId={selectedDeployment?.clusterId} 
           startTime={selectedDataRange[0]} endTime={selectedDataRange[1]} 
           namespace={selectedDeployment?.namespace}
           serviceName={selectedDeployment?.serviceName}
           refresh={refresh}
-        /> : '' }
+        /> : 
+        appLanguage == 'JAVA'?
+        <JavaServiceMonitor 
+          clusterId={selectedDeployment?.clusterId} 
+          startTime={selectedDataRange[0]} endTime={selectedDataRange[1]} 
+          namespace={selectedDeployment?.namespace}
+          serviceName={selectedDeployment?.serviceName}
+          refresh={refresh}
+        /> : 
+        appLanguage == 'DOTNET'?
+        <DotNETServiceMonitor 
+          clusterId={selectedDeployment?.clusterId} 
+          startTime={selectedDataRange[0]} endTime={selectedDataRange[1]} 
+          namespace={selectedDeployment?.namespace}
+          serviceName={selectedDeployment?.serviceName}
+          refresh={refresh}
+        /> : ''
+      }
     </TabPane>
     </Tabs>
     </div>
