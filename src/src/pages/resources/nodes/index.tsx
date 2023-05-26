@@ -23,6 +23,7 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         width:170,
         dataIndex:'name',
         title:'节点名称',
+        hideInSearch:true,
         render: (dom,row) =>{
              return <a  onClick={()=>{
                  history.push('/resources/pods?node='+ row.name +'&cid='+clusterId )
@@ -150,8 +151,8 @@ const Nodes: React.FC<Props> = (props:Props) => {
     const TableListContent: FC<Record<string, any>> = () =>  ( <ProTable<NodeItem>
         rowKey={record=>record.uid}
         columns={nodeListColumns}
-        headerTitle={false}
-        toolBarRender={false}
+        headerTitle="节点管理 (管理集群节点 & 节点基本信息)"
+        search={false}
         request={async (params,sort) => {
             if(clusterId){
                 params.cid = clusterId
@@ -170,10 +171,7 @@ const Nodes: React.FC<Props> = (props:Props) => {
     />)
 
     return(
-        <PageContainer title={'节点管理'} subTitle='管理集群节点 & 节点基本信息'  > 
-            <TableListContent/>
-        </PageContainer>
-            
+         <TableListContent/>     
     )
 }
 
