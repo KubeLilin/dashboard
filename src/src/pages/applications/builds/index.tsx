@@ -1,8 +1,8 @@
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
-import {List,Card ,Tooltip,Button,Space,Empty,Tag,Modal,Dropdown,Menu, message } from 'antd'
+import {List,Card ,Tooltip,Button,Space,Empty,Tag,Modal,Dropdown,Menu, message,Form } from 'antd'
 import { SettingOutlined,EditOutlined ,CloseCircleTwoTone,SyncOutlined,CheckCircleOutlined,CloseCircleOutlined,
     EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone,ReloadOutlined,ExclamationCircleOutlined} from '@ant-design/icons'
-
+import { ProFormSelect, ModalForm ,ProFormItem}  from '@ant-design/pro-form';
 import { Drawer } from 'antd'
 import ProForm, {
   ProFormText,
@@ -14,7 +14,7 @@ import ProDescriptions from '@ant-design/pro-descriptions';
 
 
 import { NewPipeline,GetPipelineList,RunPipeline,AbortPipeline,DeletePipeline,
-        GetPipelineDetails,GetPipelineLogs,GetDeploymentFormInfo } from '../info/deployment.service'
+        GetPipelineDetails,GetPipelineLogs,GetDeploymentFormInfo ,GetAppGitBranches, RunPipelineWithBranch } from '../info/deployment.service'
 
 
 interface Props{
@@ -53,6 +53,10 @@ const AppBuildList : React.FC<Props> = (props) => {
     const [visablePipelineLogForm, setVisablePipelineLogForm] = useState(false);
 
     const [buildList, setBuildList] = useState<BuildItem[]>([]);
+
+    const [runPipelineFormVis, setRunPipelineFormVis] = useState(false);
+    const [runPipelineForm] = Form.useForm();
+
 
     const [currentBuildItem,setCurrentBuildItem] = useState<BuildItem|undefined>(undefined)
     const [autoLogs, setAutoLogs] = useState(false);
@@ -121,7 +125,6 @@ const AppBuildList : React.FC<Props> = (props) => {
         console.log(props.AppId)
         LoadData(props.AppId)
 
-
         var id: NodeJS.Timeout
         if (props.AutoLoad) {
             id =  setInterval(()=>{
@@ -129,6 +132,8 @@ const AppBuildList : React.FC<Props> = (props) => {
             },5500)
         }
         return () => { clearInterval(id) }
+
+
 
         // var buildList1:BuildItem[] =[]
         // buildList1.push({title:'dev-nginx-cls-hbktlqm5', lastBuildRecords:undefined    })
@@ -197,17 +202,9 @@ const AppBuildList : React.FC<Props> = (props) => {
                                 actions={[ 
                                 <Tooltip title="开始构建">
                                     <PlayCircleFilled  key="building" style={{ fontSize:23}} twoToneColor="#52c41a" 
-                                     onClick={(e)=>{  
-                                                    e.stopPropagation()
-                                                    confirm({
-                                                    title: '要构建此任务吗?',
-                                                    icon: <ExclamationCircleOutlined />,
-                                                    content: '构建时间较长，请耐心等待',
-                                                    onOk : async ()=> {
-                                                        const res = await RunPipeline(item.id,props.AppId)
-                                                        LoadData(props.AppId)
-                                                        console.log(res.data)
-                                                    } })
+                                     onClick={(e)=>{ e.stopPropagation()
+                                        setRunPipelineFormVis(true)
+                                        runPipelineForm.setFieldsValue({ id:item.id, })
                                       }} /></Tooltip>,
                                 <Tooltip title="设置"><SettingOutlined onClick={()=>{ 
                                     history.push(`/devops/pipeline?id=${item.id}&name=${item.title}&appid=${props.AppId}&appname=${props.AppName}`)
@@ -352,6 +349,34 @@ const AppBuildList : React.FC<Props> = (props) => {
                         }}>
             </textarea>
             </Drawer>
+
+
+            <ModalForm title="构建流水线" form={runPipelineForm} width={400} visible={runPipelineFormVis} onVisibleChange={setRunPipelineFormVis}
+                onFinish={async (fromData) => {
+                    console.log(fromData)
+                    if (fromData.branche == '') {
+                         await RunPipeline(fromData.id,props.AppId)
+                    } else {
+                        await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                    }
+                    
+                    LoadData(props.AppId)
+                    return true
+                }} >
+                <ProFormItem name="id" hidden >
+                    <ProFormText ></ProFormText>
+                </ProFormItem>
+                <ProFormItem name="branche" label="构建分支" initialValue={''}>
+                    <ProFormSelect request={async()=>{
+                            var namesRes = await GetAppGitBranches( props.AppId) 
+                            var list = [ {label:'默认',value:''} ] 
+                            if (namesRes.data.branches){
+                                list.push(... namesRes.data.branches.map((item)=> ({label: item ,value:item}) ))
+                            } 
+                            return list
+                    }} ></ProFormSelect>
+                </ProFormItem>
+            </ModalForm>
         </div>
         
         )
