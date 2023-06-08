@@ -56,6 +56,7 @@ const ConfigMapForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) 
 
                 if(props.isEdit) {
                     const res = await getConfigmap({ name:configmapName, clusterId:props.deployment?.clusterId , namespaceId:props.deployment?.namespaceId })
+                    console.log(res)
                     if (res.success) {
                         result.items = res.data!=''?res.data.items:[{ key:'',value:'' }]
                     }

@@ -3,8 +3,7 @@ import ProForm, {
     ProFormSwitch, ProFormTextArea, ProFormSelect, ProFormText,ProFormRadio
 } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
-import { Checkbox, Divider, InputNumber, Switch, Input, notification, message,Space,Button,Upload, Popconfirm} from 'antd';
-import Form from 'antd/lib/form';
+import { Checkbox, Divider, InputNumber, Switch, Input, notification, message,Space,Button,Upload, Popconfirm ,Form} from 'antd';
 import { CloseCircleTwoTone, SmileOutlined ,MinusCircleOutlined, PlusOutlined,UploadOutlined} from '@ant-design/icons';
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
 const { TextArea } = Input;
@@ -29,7 +28,7 @@ const VolumeForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) => 
     const form = useRef<ProFormInstance>();
 
     return (
-        <ProForm  formRef={form}  submitter={{ resetButtonProps:{},searchConfig:{ resetText:'取消',submitText:'保存'} }}
+        <ProForm formRef={form}  submitter={{ resetButtonProps:{},searchConfig:{ resetText:'取消',submitText:'保存'} }}
             request={async(r)=>{
                 let deployId = 0
                 console.log(props.deployment)
@@ -42,6 +41,7 @@ const VolumeForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) => 
 
                 if(props.isEdit) {
                     const res = await getVolumeAndMounts(deployId)
+                    console.log(res)
                     return res.data
                 }
 
@@ -97,10 +97,10 @@ const VolumeForm: React.FC<ConfigMapFormProps> = (props: ConfigMapFormProps) => 
 
 
                                                     
-                                                {form.current?.getFieldValue('volumes')[field.name].volumeType == 'configmap'?
-                                                <Form.Item name={[field.name, 'value']} >
+                                                
+                                                <Form.Item name={[field.name, 'value']} hidden={form.current?.getFieldValue?(form.current?.getFieldValue('volumes')[field.name]?.volumeType != 'configmap'?true:false):false} >
                                                         <Input placeholder="请输入volume名称"  style={{ width:280 }} disabled/>
-                                                </Form.Item>:''}
+                                                </Form.Item> 
                                         
                                                 
                                                 <MinusCircleOutlined onClick={() => { 

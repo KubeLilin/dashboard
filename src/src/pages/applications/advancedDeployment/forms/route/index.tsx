@@ -50,11 +50,11 @@ const RouteForm: React.FC<RouteFormProps> = (props: RouteFormProps) => {
         }}
         onFinish={async(fromData)=>{
             console.log(fromData)
-            // const res = await createOrEditRoute(fromData)
-            // if (res.success){
-            //     message.success("路由已生效,请联系管理员对域名进行DNS解析.")
-            //     return true
-            // }
+            const res = await createOrEditRoute(fromData)
+            if (res.success){
+                message.success("路由已生效,请联系管理员对域名进行DNS解析.")
+                return true
+            }
             return false
         }}
         onReset={()=>{ props.visibleFunc(false) }}>

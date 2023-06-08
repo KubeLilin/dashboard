@@ -1,8 +1,9 @@
 import { PageContainer } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProForm, { ModalForm, ProFormInstance } from '@ant-design/pro-form';
+import ProForm, { ModalForm, ProFormInstance,ProFormItem,ProFormSelect,ProFormText } from '@ant-design/pro-form';
 import { history, Link,useModel } from 'umi';
-import {Drawer, Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, notification, Radio,Steps } from 'antd'
+import {Drawer, Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, 
+    Popconfirm, Select, Switch, notification, Radio,Steps , Form } from 'antd'
 import React, { useState, useRef, useEffect } from 'react';
 import {  CloseCircleTwoTone,SyncOutlined, SmileOutlined, SolutionOutlined, UserOutlined,CodeTwoTone,
     LoadingOutlined,CheckCircleTwoTone,ReloadOutlined ,PlayCircleTwoTone,PauseCircleTwoTone ,ExclamationCircleOutlined} from '@ant-design/icons'
@@ -12,7 +13,8 @@ import moment from 'moment';
 const { Step } = Steps;
 import ProDescriptions from '@ant-design/pro-descriptions';
 
-import { GetPipelineList,GetPipelineDetails,RunPipeline,AbortPipeline,GetPipelineLogs,GetDeploymentFormInfo } from '../service'
+import { GetPipelineList,GetPipelineDetails,GetPipelineLogs,GetDeploymentFormInfo,
+    RunPipeline,RunPipelineWithBranch,AbortPipeline ,GetAppGitBranches } from '../service'
 
 type BuildItem = {
     id:number,
@@ -52,6 +54,9 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
     const [time, setTime] = useState(() => Date.now());
     const [polling, setPolling] = useState<number | undefined>(undefined);
     var timerId: NodeJS.Timeout
+
+    const [runPipelineFormVis, setRunPipelineFormVis] = useState(false);
+    const [runPipelineForm] = Form.useForm();
 
     const formatDuration = (ms:any) => {
         var duration = moment.duration(ms);
@@ -284,15 +289,14 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
                 <PlayCircleTwoTone  key="building" style={{ fontSize:23}} twoToneColor="#52c41a" 
                  onClick={(e)=>{  
                     e.stopPropagation()
-                    confirm({
-                        title: '要构建此任务吗?',
-                        icon: <ExclamationCircleOutlined />,
-                        content: '构建时间较长，请耐心等待',
-                        onOk : async ()=> {
-                            const res = await RunPipeline(item.id,item.appId)
-                            console.log(res)
-                            message.success("开始构建...")
-                        } })  
+
+                    runPipelineForm.setFieldsValue({
+                        appId: item.appId,
+                        id: item.id,
+
+                    })
+                    setRunPipelineFormVis(true)
+                    
                   }} /></Tooltip>,
                 <Tooltip title="停止构建" key={"btn_stop"+item.id}>
                 <PauseCircleTwoTone style={{ fontSize:23}}
@@ -373,6 +377,36 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
                         }}>
             </textarea>
             </Drawer>
+
+            <ModalForm title="构建流水线" form={runPipelineForm} width={400} visible={runPipelineFormVis} onVisibleChange={setRunPipelineFormVis}
+                onFinish={async (fromData) => {
+                    console.log(fromData)
+                    if (fromData.branche == '') {
+                         await RunPipeline(fromData.id,fromData.AppId)
+                    } else {
+                        await RunPipelineWithBranch(fromData.id,fromData.appId,fromData.branche)
+                    }
+                    
+                    return true
+                }} >
+                <ProFormItem name="id" hidden >
+                    <ProFormText></ProFormText>
+                </ProFormItem>
+                <ProFormItem name="appId" hidden >
+                    <ProFormText></ProFormText>
+                </ProFormItem>
+                <ProFormItem name="branche" label="构建分支" initialValue={''}>
+                    <ProFormSelect request={async()=>{
+                            const appid = runPipelineForm.getFieldValue('appId')
+                            var namesRes = await GetAppGitBranches( Number(appid) ) 
+                            var list = [ {label:'默认',value:''} ] 
+                            if (namesRes.data.branches){
+                                list.push(... namesRes.data.branches.map((item)=> ({label: item ,value:item}) ))
+                            } 
+                            return list
+                    }} ></ProFormSelect>
+                </ProFormItem>
+            </ModalForm>
     </div>
     )
 }
