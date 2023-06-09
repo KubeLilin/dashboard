@@ -219,6 +219,9 @@ const Pipeline : React.FC = () => {
             const languageId = query[0].id
             console.log(languageId)
             const dataList = await getBuildImageByLanguageId(languageId)
+            if(dataList.length > 0){
+                buildForm?.current?.setFieldsValue({buildImage:dataList[0].value})
+            }
             setLanguageCompileOptions(dataList)
         }
     }
@@ -402,7 +405,7 @@ const Pipeline : React.FC = () => {
                                                 </CheckCard.Group>
                                     </ProForm.Item>
                                     <ProForm.Item name="buildImage" rules={[{ required: true, message: '请选择构建环境' }]}>
-                                        <ProFormSelect label="构建镜像" width="md" options={languageCompileOptions} ></ProFormSelect>
+                                        <ProFormSelect label="构建镜像" width="md" options={languageCompileOptions}></ProFormSelect>
                                     </ProForm.Item>
                                     <ProForm.Item name="buildScript" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "} rules={[{ required: true, message: '请选择填写构建脚本' }]} >
                                         <ProFormTextArea label="构建脚本"  
