@@ -66,6 +66,7 @@ const AppInfo: React.FC = () => {
         {
             title: 'ID',
             dataIndex: 'id',
+            width: 38,
             hideInForm: true,
             hideInSearch: true
         },
