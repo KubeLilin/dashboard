@@ -171,9 +171,9 @@ const ProjectDeployList: React.FC<ProjectDeployProps> = ( props ) => {
                 console.log(asyncPodList)
                 asyncPodList.forEach((podSet) => {
                     if (podSet.data && podSet.data.length > 0) {
-                        list[podSet.index].lastImage = podSet.data[0].containers[0].image
+                        list[podSet.index].lastImage = podSet.data[0].containers ? podSet.data[0].containers[0].image : ''
                         list[podSet.index].running = podSet.data.length
-                        list[podSet.index].serviceIP = podSet.data[0].ip
+                        list[podSet.index].serviceIP = podSet.data[0]?.ip
                     } else {
                         list[podSet.index].lastImage = '无'
                         list[podSet.index].running = 0
