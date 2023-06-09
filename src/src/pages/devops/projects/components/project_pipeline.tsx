@@ -381,11 +381,23 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             <ModalForm title="构建流水线" form={runPipelineForm} width={400} visible={runPipelineFormVis} onVisibleChange={setRunPipelineFormVis}
                 onFinish={async (fromData) => {
                     console.log(fromData)
+                    message.success("构建已开始...")
+                    var res
                     if (fromData.branche == '') {
-                         await RunPipeline(fromData.id,fromData.AppId)
+                        res = await RunPipeline(fromData.id,fromData.appId)
                     } else {
-                        await RunPipelineWithBranch(fromData.id,fromData.appId,fromData.branche)
+                        res = await RunPipelineWithBranch(fromData.id,fromData.appId,fromData.branche)
                     }
+                    if (res && res.success) {
+                        notification.open({
+                            message: '构建已开始',
+                            description: `构建已开始，任务ID：${res.data}`,
+                            icon: <SmileOutlined style={{ color: '#108ee9' }} />,
+                        })
+                    } else {
+                       message.error("构建失败")
+                    }
+                  
                     
                     return true
                 }} >

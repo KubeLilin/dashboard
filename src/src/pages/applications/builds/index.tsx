@@ -1,7 +1,7 @@
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
-import {List,Card ,Tooltip,Button,Space,Empty,Tag,Modal,Dropdown,Menu, message,Form } from 'antd'
+import {notification,List,Card ,Tooltip,Button,Space,Empty,Tag,Modal,Dropdown,Menu, message,Form } from 'antd'
 import { SettingOutlined,EditOutlined ,CloseCircleTwoTone,SyncOutlined,CheckCircleOutlined,CloseCircleOutlined,
-    EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone,ReloadOutlined,ExclamationCircleOutlined} from '@ant-design/icons'
+    SmileOutlined, EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone,ReloadOutlined,ExclamationCircleOutlined} from '@ant-design/icons'
 import { ProFormSelect, ModalForm ,ProFormItem}  from '@ant-design/pro-form';
 import { Drawer } from 'antd'
 import ProForm, {
@@ -354,10 +354,21 @@ const AppBuildList : React.FC<Props> = (props) => {
             <ModalForm title="构建流水线" form={runPipelineForm} width={400} visible={runPipelineFormVis} onVisibleChange={setRunPipelineFormVis}
                 onFinish={async (fromData) => {
                     console.log(fromData)
+                    var res
                     if (fromData.branche == '') {
-                         await RunPipeline(fromData.id,props.AppId)
+                        res = await RunPipeline(fromData.id,props.AppId)
                     } else {
-                        await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                       res = await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                    }
+
+                    if (res && res.success) {
+                        notification.open({
+                            message: '构建已开始',
+                            description: `构建已开始，任务ID：${res.data}`,
+                            icon: <SmileOutlined style={{ color: '#108ee9' }} />,
+                        })
+                    } else {
+                       message.error("构建失败")
                     }
                     
                     LoadData(props.AppId)
