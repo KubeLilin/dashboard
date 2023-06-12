@@ -242,7 +242,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                                 } ></Dropdown.Button> </Tooltip>,
                             ]}> 
                             
-                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}  style={{ height:30, display: !item.lastBuildRecords?'block':'none' }}>
+                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}  style={{ height:46, display: !item.lastBuildRecords?'block':'none' }}>
                             {/* <a href=''>立即构建  </a> */}
                             </Empty>
 
@@ -357,6 +357,9 @@ const AppBuildList : React.FC<Props> = (props) => {
                     var res
                     if (fromData.branche == '') {
                         res = await RunPipeline(fromData.id,props.AppId)
+                        if (res.success == false) {
+                            res = await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                        }
                     } else {
                        res = await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
                     }
@@ -380,7 +383,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                 <ProFormItem name="branche" label="构建分支" initialValue={''}>
                     <ProFormSelect request={async()=>{
                             var namesRes = await GetAppGitBranches( props.AppId) 
-                            var list = [ {label:'默认',value:''} ] 
+                            var list = [ {label:'初始化',value:''} ] 
                             if (namesRes.data.branches){
                                 list.push(... namesRes.data.branches.map((item)=> ({label: item ,value:item}) ))
                             } 

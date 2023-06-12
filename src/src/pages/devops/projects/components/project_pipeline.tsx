@@ -385,6 +385,9 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
                     var res
                     if (fromData.branche == '') {
                         res = await RunPipeline(fromData.id,fromData.appId)
+                        if (res.success == false) {
+                            res = await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                        }
                     } else {
                         res = await RunPipelineWithBranch(fromData.id,fromData.appId,fromData.branche)
                     }
@@ -411,7 +414,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
                     <ProFormSelect request={async()=>{
                             const appid = runPipelineForm.getFieldValue('appId')
                             var namesRes = await GetAppGitBranches( Number(appid) ) 
-                            var list = [ {label:'默认',value:''} ] 
+                            var list = [ {label:'初始化',value:''} ] 
                             if (namesRes.data.branches){
                                 list.push(... namesRes.data.branches.map((item)=> ({label: item ,value:item}) ))
                             } 
