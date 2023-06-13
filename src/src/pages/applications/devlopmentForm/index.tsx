@@ -58,6 +58,9 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
 
     useEffect(() => {
         BindDeploymentLevels()
+        formMapRef.current.forEach((formInstanceRef) => {
+            formInstanceRef.current?.setFieldsValue({level:'release'})
+        })
         BindClusterSelect()
         if (props.isEdit) {
             let req = GetDeploymentFormInfo(props.id)
@@ -161,7 +164,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                   <ProCard title="部署目标" bordered headerBordered
                         collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
                     <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }]}>
-                        <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, '') }} ></Input>
+                        <Input placeholder="请输入应用名称(仅限英文小写和-)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-z\-]/g, "") }} ></Input>
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level'>
                         <Select options={deploymentLevels}  disabled={props.isEdit} 
