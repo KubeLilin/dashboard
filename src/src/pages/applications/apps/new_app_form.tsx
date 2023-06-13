@@ -70,7 +70,7 @@ const AppDrawForm: React.FC<AppDrawFormProps> = (props) => {
 
         <ProFormText width="md" name="id" label="id" readonly={true} hidden={true} />
         <ProForm.Item name="name" label="应用名称" rules={[{ required: true, message: '请输入应用名' }]} >
-            <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, ''); appNamehandler(e.currentTarget.value) }}  />
+            <Input placeholder="请输入应用名称(仅限英文)" disabled={props.editable} onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, ''); appNamehandler(e.currentTarget.value) }}  />
         </ProForm.Item>
         <ProForm.Item name="labels" label="应用标签">
             <Input placeholder="" />

@@ -66,6 +66,7 @@ const AppInfo: React.FC = () => {
         {
             title: 'ID',
             dataIndex: 'id',
+            width: 38,
             hideInForm: true,
             hideInSearch: true
         },
@@ -101,7 +102,7 @@ const AppInfo: React.FC = () => {
         },
         {
             title: '实例数',
-            width: 80,
+            width: 160,
             dataIndex: 'runningNumber',
             hideInForm: true,
             hideInSearch: true,
@@ -135,6 +136,7 @@ const AppInfo: React.FC = () => {
         {
             title: '集群',
             dataIndex: 'clusterName',
+            width: 230,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
@@ -147,6 +149,7 @@ const AppInfo: React.FC = () => {
         {
             title: '镜像(last)',
             dataIndex: 'lastImage',
+            width: 320,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {

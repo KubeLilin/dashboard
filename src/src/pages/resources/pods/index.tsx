@@ -142,7 +142,7 @@ const Pods: React.FC = (props) => {
             title: '容器数',
             search: false,
             render: (_, row) => {
-                return <span>{row.containers.length}个</span>
+                return <span>{row.containers?.length}个</span>
             }
         },
         {

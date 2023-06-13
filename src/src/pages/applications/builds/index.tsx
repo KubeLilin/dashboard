@@ -1,7 +1,7 @@
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
-import {List,Card ,Tooltip,Button,Space,Empty,Tag,Modal,Dropdown,Menu, message,Form } from 'antd'
+import {notification,List,Card ,Tooltip,Button,Space,Empty,Tag,Modal,Dropdown,Menu, message,Form } from 'antd'
 import { SettingOutlined,EditOutlined ,CloseCircleTwoTone,SyncOutlined,CheckCircleOutlined,CloseCircleOutlined,
-    EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone,ReloadOutlined,ExclamationCircleOutlined} from '@ant-design/icons'
+    SmileOutlined, EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone,ReloadOutlined,ExclamationCircleOutlined} from '@ant-design/icons'
 import { ProFormSelect, ModalForm ,ProFormItem}  from '@ant-design/pro-form';
 import { Drawer } from 'antd'
 import ProForm, {
@@ -242,7 +242,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                                 } ></Dropdown.Button> </Tooltip>,
                             ]}> 
                             
-                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}  style={{ height:30, display: !item.lastBuildRecords?'block':'none' }}>
+                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}  style={{ height:46, display: !item.lastBuildRecords?'block':'none' }}>
                             {/* <a href=''>立即构建  </a> */}
                             </Empty>
 
@@ -354,10 +354,24 @@ const AppBuildList : React.FC<Props> = (props) => {
             <ModalForm title="构建流水线" form={runPipelineForm} width={400} visible={runPipelineFormVis} onVisibleChange={setRunPipelineFormVis}
                 onFinish={async (fromData) => {
                     console.log(fromData)
+                    var res
                     if (fromData.branche == '') {
-                         await RunPipeline(fromData.id,props.AppId)
+                        res = await RunPipeline(fromData.id,props.AppId)
+                        if (res.success == false) {
+                            res = await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                        }
                     } else {
-                        await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                       res = await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                    }
+
+                    if (res && res.success) {
+                        notification.open({
+                            message: '构建已开始',
+                            description: `构建已开始，任务ID：${res.data}`,
+                            icon: <SmileOutlined style={{ color: '#108ee9' }} />,
+                        })
+                    } else {
+                       message.error("构建失败")
                     }
                     
                     LoadData(props.AppId)
@@ -369,7 +383,7 @@ const AppBuildList : React.FC<Props> = (props) => {
                 <ProFormItem name="branche" label="构建分支" initialValue={''}>
                     <ProFormSelect request={async()=>{
                             var namesRes = await GetAppGitBranches( props.AppId) 
-                            var list = [ {label:'默认',value:''} ] 
+                            var list = [ {label:'初始化',value:''} ] 
                             if (namesRes.data.branches){
                                 list.push(... namesRes.data.branches.map((item)=> ({label: item ,value:item}) ))
                             } 
