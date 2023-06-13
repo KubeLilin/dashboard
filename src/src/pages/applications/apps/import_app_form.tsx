@@ -99,7 +99,18 @@ const ImportAppForm: React.FC<ImportAppFormProps> = (props) => {
             }} >
         <Spin spinning={loading} tip="正在导入应用,请稍等 ......." size="large">
         <ProForm.Item name="name" label="应用名称" rules={[{ required: true, message: '请输入应用名' }]} >
-            <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, ''); appNamehandler(e.currentTarget.value) }}  />
+            <Input placeholder="请输入应用名称(仅限小写字母、数字、-)" 
+                onInput={(e) => { 
+                    let value = e.currentTarget.value;
+                    if (!/^[a-z]/.test(value)) {
+                      e.currentTarget.value = ''
+                      return
+                    }
+                  
+                    value = value.replace(/[^a-z0-9-]/g, '');
+                    e.currentTarget.value = value;
+                    appNamehandler(e.currentTarget.value) 
+                }}  />
         </ProForm.Item>
         <ProForm.Item name="sourceType" label="选择代码源类型" rules={[{ required: true, message: '请选择代码源类型' }]} >
             {/* <Radio.Group onChange={(x) => { bindRepo(x.target.value,null) }}>
