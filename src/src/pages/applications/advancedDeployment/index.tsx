@@ -155,17 +155,17 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                         //value.name = (`${value.nickname}-${props.appName}-${clusterName}`).trim();
                     }
                     console.log(value)
-                    value.name = (`${value.nickname}-${props.appName}-${clusterName}`).trim();
+                    value.name = (`${props.appName}-${value.nickname}`).trim();
                     let res = await CreateDeploymnet(value)
-                    if (res.success == false) {
-                        notification.open({
-                            message: res.message,
-                            icon: <CloseCircleTwoTone />,
-                        });
-                    } else {
+                    if (res && res.success) {
                         message.success("部署基础信息保存成功")
                         formEditableHandler(true)
                         props.tableRef.current?.reload()
+                   
+                    } else {
+                        message.error("部署基础信息保存失败!")
+                        props.visibleFunc[1](false)
+                        return false
                     }
                     dpStepHandler(res.data)
                     tabActiveKeyHandler("2")
@@ -174,8 +174,19 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
                 >
                 <ProCard title="部署目标(必填)" bordered headerBordered
                         collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
-                    <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }]}>
-                        <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, '') }}  disabled={props.isEdit}></Input>
+                    <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }, { pattern: /^[a-z][a-z0-9-]*[a-z]$/,message: '字段只能包含小写字母，数字和中划线，且必须以小写字母开头并以字母结尾!',}]}>
+                        <Input placeholder="请输入应用名称(仅限英文)" 
+                            onInput={(e) => { 
+                                // e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z]/g, '') 
+                                let value = e.currentTarget.value;
+                                if (!/^[a-z]/.test(value)) {
+                                  e.currentTarget.value = ''
+                                  return
+                                }
+                              
+                                value = value.replace(/[^a-z0-9-]/g, '');
+                                e.currentTarget.value = value;
+                            }}  disabled={props.isEdit}></Input>
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level' rules={[{ required: true, message: '请选择环境级别' }]}>
                         <Select options={deploymentLevels}  disabled={props.isEdit}></Select>
