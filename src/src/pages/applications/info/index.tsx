@@ -391,10 +391,10 @@ const AppInfo: React.FC = () => {
             </Tabs>
          
             <DevlopmentFormentForm visibleFunc={[stepFormVisible ,setStepFormVisible ]}
-                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} envLevel={activeKey} />
 
             <AdvancedDevlopment visibleFunc={[advancedDeployFormVisible, setAdvancedDeployFormVisible]}
-                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} envLevel={activeKey} />
 
 
             <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} 

@@ -26,6 +26,7 @@ export interface Props {
     tableRef: any,
     isEdit: boolean,
     id?: number,
+    envLevel:string,
 }
 function BindNamespaceSelect(clusterId: any, handler: any) {
     let req = BindNameSpace(clusterId)
@@ -106,13 +107,18 @@ const AdvancedDevlopment: React.FC<Props> = (props: Props) => {
             })
 
         } else {
-            //dpStepHandler(undefined)
             openScvHandler(true)
+
+            var levelSelected = 'dev'
+            if(props.envLevel != 'all'){
+                levelSelected = props.envLevel
+            }
+
             const arrays = [baseForm,instanceForm]
             arrays.forEach((formInstanceRef) => {
                 console.log(formInstanceRef)
                 formInstanceRef.current?.setFieldsValue({
-                    level: 'dev',
+                    level: levelSelected,
                     serviceEnable: 'true',
                     serviceAway: 'ClusterPort',
                     servicePort: '8080',
