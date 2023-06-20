@@ -4,7 +4,7 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm, { ModalForm, ProFormInstance } from '@ant-design/pro-form';
 import { history, Link,useModel } from 'umi';
 import { PodItem, ContainerItem, podLogsRequest } from './data';
-import { Table,Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, notification, Radio } from 'antd'
+import { Table,Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, notification, Radio,Progress } from 'antd'
 
 import { getPodList, getNamespaceList, setReplicasByDeployId, 
     GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , 
@@ -23,6 +23,9 @@ import { UnControlled as CodeMirror } from 'react-codemirror2';
 import EventListComponent from './events';
 import WebTerminal from './terminal';
 import ExecDeployment from '@/pages/applications/execDeployment';
+
+//moment-duration-format
+import 'moment-duration-format';
 
 
 const { TabPane } = Tabs;
@@ -99,6 +102,17 @@ const Pods: React.FC = (props) => {
             }
         },
         {
+            title: '命名空间',
+            dataIndex: 'namespace',
+            valueType: 'select',
+            request: async () => {
+                var namespaces = [{ label: '全部', value: '' }]
+                var ns = await getNamespaceList(String(clusterId))
+                namespaces.push(...ns)
+                return namespaces
+            }
+        },
+        {
             title: '状态',
             dataIndex: 'status',
             search: false,
@@ -118,18 +132,9 @@ const Pods: React.FC = (props) => {
             title: '实例所在节点IP',
             dataIndex: 'hostIP',
             search: false,
+            hideInTable:true,
         },
-        {
-            title: '命名空间',
-            dataIndex: 'namespace',
-            valueType: 'select',
-            request: async () => {
-                var namespaces = [{ label: '全部', value: '' }]
-                var ns = await getNamespaceList(String(clusterId))
-                namespaces.push(...ns)
-                return namespaces
-            }
-        },
+      
         {
             title: '重启次数',
             dataIndex: 'restarts',
@@ -146,22 +151,67 @@ const Pods: React.FC = (props) => {
             }
         },
         {
-            title: '性能(使用率)',
+            title: 'CPU资源',
+            width: 200,
             search: false,
             render: (_, row) => {
-                return <span style={{color:'green'}}>CPU:{(row.usage.cpu * 1000).toFixed(1)}m / 内存:{(row.usage.memory / 1024/1024).toFixed(1)} Mi</span>
+                const cpuUsage = row.usage.cpu  
+
+                // sum resources
+                var cpuLimits = 0
+                var cpuRequests = 0
+                row.containers?.forEach((item) => {
+                    cpuLimits += item.limitCpu  
+                    cpuRequests += item.requestCpu 
+                })
+
+              let cpuUsagePercentage =(cpuUsage / cpuLimits) * 100
+                //  return <span style={{color:'green'}}>CPU:{(row.usage.cpu * 1000).toFixed(1)}m / 内存:{(row.usage.memory / 1024/1024).toFixed(1)} Mi</span>
+               return  <Tooltip title={`CPU Usage: ${cpuUsage} Core  / Request: ${cpuRequests} Core  / Limit: ${cpuLimits} Core `}>
+                    <Progress percent={cpuUsagePercentage} />
+                </Tooltip>
             }
+        },
+        {
+            title: '内存资源',
+            search: false,
+            width: 200,
+            render: (_, row) => {
+                const memoryUsage = row.usage.memory
+
+                // sum resources
+                var memoryLimits = 0
+                var memoryRequests = 0
+                row.containers?.forEach((item) => {
+                    memoryLimits += item.limitMemory 
+                    memoryRequests += item.requestMemory
+                })
+
+              let memoryUsagePercentage = Math.floor(  (memoryUsage / memoryLimits) * 100)
+
+                //  return <span style={{color:'green'}}>CPU:{(row.usage.cpu * 1000).toFixed(1)}m / 内存:{(row.usage.memory / 1024/1024).toFixed(1)} Mi</span>
+               return  <Tooltip title={`Memory (Mi) Usage: ${(memoryUsage /1024/1024).toFixed(2) } Mi / Request: ${ (memoryRequests /1024/1024).toFixed(2) } Mi / Limit: ${ (memoryLimits/1024/1024).toFixed(2) } Mi`}>
+                    <Progress percent={memoryUsagePercentage} />
+                </Tooltip>
+            }
+        },
+        {
+            title: '运行时间',
+            search: false,
+            render:(_,row)=>{
+                const creationTimestamp = new Date(row.startTime)
+                const now = new Date()
+                const diff = moment.duration(moment(now).diff(moment(creationTimestamp)));
+                const duration = moment.duration(diff).format("D[d] H[h] m[m]");
+                return <span>{duration}</span>
+            },
         },
         {
             title: '创建时间',
             search: false,
+            
             render:(_,row)=>{
-                const seconds = Math.round(Number(row.age) / 1000/1000/1000)
-                var hh =  Math.round(seconds/3600)
-                if (hh >1) { hh = hh-1 }
-                const mm = Math.round((seconds%3600)/60)
-                const ss = Math.round(seconds%60)
-                return <Tooltip title={  (hh>0?hh+'小时':'') +  (mm>0?mm+'分钟':'') + (ss>0?ss+'秒':'0s')}><a href='#'>{row.startTime}</a> </Tooltip> 
+                return <a href='#'>{row.startTime}</a>
             },
         },
         {
@@ -202,10 +252,12 @@ const Pods: React.FC = (props) => {
                     { title: '容器名称', dataIndex: 'name', key: 'name' },
                     { title: '容器ID', dataIndex: 'id', key: 'id' },
                     { title: '镜像版本号', dataIndex: 'image', key: 'image' },
-                    //   { title: 'CPU Request', dataIndex: 'cpuRequest', key: 'cpuRequest' },
-                    //   { title: 'CPU Limit', dataIndex: 'cpuLimit', key: 'cpuLimit' },
-                    //   { title: '内存 Request', dataIndex: 'memoryRequest', key: 'memoryRequest' },
-                    //   { title: '内存 Limit', dataIndex: 'memoryLimit', key: 'memoryLimit' },
+                      { title: 'CPU Request', dataIndex: 'requestCpu', key: 'requestCpu' },
+                      { title: 'CPU Limit', dataIndex: 'limitCpu', key: 'limitCpu' },
+                      { title: '内存 Request', dataIndex: 'requestMemory', key: 'requestMemory',
+                        render:(_,v) => { return <span>{(v.requestMemory/1024/1024).toFixed(0)} Mi</span>} },
+                        { title: '内存 Limit', dataIndex: 'limitMemory', key: 'limitMemory',
+                        render:(_,v) => { return <span>{(v.limitMemory/1024/1024).toFixed(0)} Mi</span>} },
                     { title: '重启次数', dataIndex: 'restartCount', key: 'restartCount' },
                     {
                         title: '状态', dataIndex: 'status', key: 'status',
@@ -370,7 +422,7 @@ const Pods: React.FC = (props) => {
                                     console.log(appName)
 
                                     setPolling(1000)
-                                    const resp = await deleteDeployment(did,Number(clusterId),String(namespace),String(appName))
+                                    const resp = await deleteDeployment(did,Number(clusterId),String(namespace),String(appName),String(workload))
                                     if (resp.success) {
                                             message.success('删除部署成功');
                                     } else {
