@@ -72,18 +72,18 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             let appBuildList:BuildItem[] = []
             const res = await GetPipelineList(projectId)
             if(res) {
-                var build = { success:false,status:'', action:'管理员: 手动触发', time:'-- 分钟', task:'' ,start:'',  } 
+                var build = { success:false,status:'', action:'管理员: 手动触发', time:'-- 分钟', task:'' ,start:'', updateTime:''  } 
                 appBuildList = res.data.map((v:any,i)=>
-                     ({ id:v.id, title: v.name ,appId:v.appid,appName:v.appName,taskId:Number(v.lastTaskId),lastBuildRecords:build ,dsl:v.dsl?JSON.parse(v.dsl):undefined,lastCommit:v.lastCommit?JSON.parse(v.lastCommit):undefined  }))
+                     ({ id:v.id, title: v.name ,appId:v.appid,appName:v.appName,taskId:Number(v.lastTaskId),lastBuildRecords:build ,dsl:v.dsl?JSON.parse(v.dsl):undefined,lastCommit:v.lastCommit?JSON.parse(v.lastCommit):undefined , updateTime: v.updateTime  }))
                 //console.log(appBuildList)
             }      
             const cpBuildList:BuildItem[] = [...appBuildList]
-            appBuildList.forEach(async (v:BuildItem,i:number)=>{
-                if(v.taskId > 0) {
+            let promises = appBuildList.map(async (v,i)=>{
+                // if(v.taskId > 0) {
                    const res = await GetPipelineDetails(v.appId,v.id,v.taskId)
                    if (res && res.data) {
                         var buildItem = { success:false,status:'running', action:'管理员: 手动触发', time:'-- 分钟', task:v.taskId.toString() ,start:'', stages:res.data.stages } 
-                        cpBuildList[i].lastBuildRecords = buildItem
+                        //cpBuildList[i].lastBuildRecords = buildItem
                         var date = new Date(res.data.startTimeMillis);
                         buildItem.time = formatDuration(res.data.durationMillis)
                         buildItem.start = date.toString()      
@@ -102,8 +102,11 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
                         }
                         cpBuildList[i].lastBuildRecords =  buildItem
                     }
-                }
+                // }
             })
+            // wait appBuildList
+            await Promise.all(promises)
+
             return cpBuildList
     }
     
@@ -142,6 +145,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
         },
         {
             title:'流水线名称',
+            width: 188,
             dataIndex:'title',
             render:(dom,item)=>(
                 <a style={{  textDecorationLine: 'underline' }} onClick={()=>{
@@ -151,6 +155,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
         },
         {
             title: '应用名称',
+            width: 188,
             dataIndex: 'appName',
         },
         {
@@ -225,6 +230,11 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             render:(_,item:BuildItem)=> {
                return <span key={"tasktimeout"+item.id}>耗时: {item.lastBuildRecords.time} </span>
             }
+        },
+        {
+            title: '最后构建',
+            dataIndex: 'updateTime',
+            valueType: 'dateTime'
         },
         {
             title:'任务状态',
@@ -378,7 +388,8 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
             </textarea>
             </Drawer>
 
-            <ModalForm title="构建流水线" form={runPipelineForm} width={400} visible={runPipelineFormVis} onVisibleChange={setRunPipelineFormVis}
+            <ModalForm title="构建流水线" modalProps={{ destroyOnClose:true }}
+                form={runPipelineForm} width={400} visible={runPipelineFormVis} onVisibleChange={setRunPipelineFormVis}
                 onFinish={async (fromData) => {
                     console.log(fromData)
                     message.success("构建已开始...")
@@ -386,7 +397,7 @@ const ProjectPipelineList: React.FC<ProjectPipelineProps> = ( props ) => {
                     if (fromData.branche == '') {
                         res = await RunPipeline(fromData.id,fromData.appId)
                         if (res.success == false) {
-                            res = await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                            res = await RunPipelineWithBranch(fromData.id,fromData.appId,fromData.branche)
                         }
                     } else {
                         res = await RunPipelineWithBranch(fromData.id,fromData.appId,fromData.branche)

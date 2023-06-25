@@ -115,8 +115,6 @@ const AppBuildList : React.FC<Props> = (props) => {
                 console.log(tasks)
                 setBuildList(appBuildList)
             })
-        }).catch(()=>{
-            setBuildList(appBuildList)
         })
     }
 
@@ -352,6 +350,7 @@ const AppBuildList : React.FC<Props> = (props) => {
 
 
             <ModalForm title="构建流水线" form={runPipelineForm} width={400} visible={runPipelineFormVis} onVisibleChange={setRunPipelineFormVis}
+                modalProps={{destroyOnClose:true}}
                 onFinish={async (fromData) => {
                     console.log(fromData)
                     var res
