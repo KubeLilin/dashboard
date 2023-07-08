@@ -87,12 +87,12 @@ const nodeListColumns: ProColumns<NodeItem>[] = [
         width:230,
         dataIndex: '',
         hideInSearch:true,
-        title:'可分配/总资源',
+        title:'Reuqests/Limits',
         render:(dom,row)=> {
             return (
             <Space key={row.uid} direction="vertical" size={0}>
-               <Paragraph>CPU: { (row.allocatable.cpu).toFixed(2)} / {row.capacity.cpu.toFixed(2)} 核</Paragraph>
-               <Paragraph>内存: { (row.allocatable.memory /1024/1024/1024 ).toFixed(2)} / {(row.capacity.memory / 1024/1024/1024).toFixed(2)} Gi</Paragraph>
+               <Paragraph>CPU: { (row.request.cpu).toFixed(2)} / {row.limit.cpu.toFixed(2)} 核</Paragraph>
+               <Paragraph>内存: { (row.request.memory /1024/1024/1024 ).toFixed(2)} / {(row.limit.memory / 1024/1024/1024).toFixed(2)} Gi</Paragraph>
             </Space>
         )}
     },
