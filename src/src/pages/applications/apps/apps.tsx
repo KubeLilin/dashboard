@@ -59,7 +59,6 @@ const Apps: React.FC = () => {
                 let arr = record.labels.split(" ");
                 let tagList=[]
                 for (let item of arr) {
-                    console.log(item);
                     tagList.push(<Tag color='#87d068' >{item}</Tag>)  
                 }
                 return tagList;
