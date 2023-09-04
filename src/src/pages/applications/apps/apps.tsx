@@ -3,9 +3,9 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ApplicationItem, ApplicationModel } from './apps_data';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProForm, { DrawerForm, ProFormSelect, ProFormTextArea, ProFormText, ProFormGroup } from '@ant-design/pro-form';
-import { Input, Button, Form, Checkbox, Radio, Select,Modal, message,Dropdown,Menu } from 'antd';
-import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled,ExclamationCircleOutlined } from '@ant-design/icons';
-import { getAppLanguage, getAppLevel, createApp, getApps, updateApp,deleteApp, initGitRepoistry } from './apps_service';
+import { Input, Button, Form, Checkbox, Radio, Select, Modal, message, Dropdown, Menu, Tag } from 'antd';
+import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled, ExclamationCircleOutlined } from '@ant-design/icons';
+import { getAppLanguage, getAppLevel, createApp, getApps, updateApp, deleteApp, initGitRepoistry } from './apps_service';
 import { Link } from 'umi';
 import AppDrawForm from './new_app_form'
 import ImportAppForm from './import_app_form'
@@ -21,7 +21,7 @@ const Apps: React.FC = () => {
     const [edit, editHandler] = useState<boolean>(false)
     const [gitRepo, gieRepoHandler] = useState<string>("");
     const [appName, appNamehandler] = useState<string>("");
-    const [repoOptions, repoOptionsHandler] = useState<any>([{label:'公开',value:0}]);
+    const [repoOptions, repoOptionsHandler] = useState<any>([{ label: '公开', value: 0 }]);
     const columns: ProColumns<ApplicationItem>[] = [
         {
             title: 'id',
@@ -34,8 +34,12 @@ const Apps: React.FC = () => {
             title: '应用名称',
             dataIndex: 'name',
             render: (dom, row) => {
-                return <Link key={'linkapp' + row.id} style={{  textDecorationLine: 'underline' }} to={'/applications/info?id=' + row.id + '&name=' + row.name + '&language=' + row.languageName}>{dom}</Link>
+                return <Link key={'linkapp' + row.id} style={{ textDecorationLine: 'underline' }} to={'/applications/info?id=' + row.id + '&name=' + row.name + '&language=' + row.languageName}>{dom}</Link>
             }
+        },
+        {
+            title: '应用别名',
+            dataIndex: 'nickname'
         },
         {
             title: '租户id',
@@ -47,10 +51,21 @@ const Apps: React.FC = () => {
         {
             title: "部署环境",
             dataIndex: 'deployCount',
-        }, 
+        },
         {
             title: "标签",
             dataIndex: 'labels',
+            render: (_, record) => {
+                let arr = record.labels.split(" ");
+                let tagList=[]
+                for (let item of arr) {
+                    console.log(item);
+                    tagList.push(<Tag color='#87d068' >{item}</Tag>)  
+                }
+                return tagList;
+            }
+
+            ,
         }, {
             title: "Git地址",
             dataIndex: 'git',
@@ -97,35 +112,35 @@ const Apps: React.FC = () => {
                     record.sources = record.sCID
                     appForm.setFieldsValue(record)
                 }}>编辑</Button>,
-                <Button danger key={"delete" + record.id} onClick={()=>{
+                <Button danger key={"delete" + record.id} onClick={() => {
                     Modal.confirm({
                         title: 'Confirm',
                         icon: <ExclamationCircleOutlined />,
                         content: `确认要删除${record.name}应用吗?`,
                         okText: '确认',
                         cancelText: '取消',
-                        onOk:async ()=>{
-                          if(record.deployCount > 0) {
-                            message.error('应用中还存在部署环境,请删除所有部署环境后再进行应用删除操作!')
-                          } else {
-                            const res= await deleteApp(record.id)
-                            if (res.success) {
-                                message.success('删除成功')
+                        onOk: async () => {
+                            if (record.deployCount > 0) {
+                                message.error('应用中还存在部署环境,请删除所有部署环境后再进行应用删除操作!')
                             } else {
-                                message.error(res.message)
+                                const res = await deleteApp(record.id)
+                                if (res.success) {
+                                    message.success('删除成功')
+                                } else {
+                                    message.error(res.message)
+                                }
+
                             }
-   
-                          }
-                          actionRef.current?.reload()
+                            actionRef.current?.reload()
                         }
-                      });
+                    });
 
 
                 }}>删除</Button>
             ]
         }
     ]
-   
+
 
     return (
         <PageContainer >
@@ -135,31 +150,33 @@ const Apps: React.FC = () => {
                 actionRef={actionRef}
                 headerTitle="应用列表"
                 toolBarRender={() => [
-                    <Dropdown.Button type="primary"  overlay={ <Menu items={[
-                        { key:1,icon:<PlusOutlined /> ,label: '导入应用 (代码仓库)',onClick:()=>{
-                            importAppForm.resetFields()
-                            importAppFormVisibleHandler(true);
-                        }},
-                       
-                        ]}/> }
-                        onClick={() =>{
+                    <Dropdown.Button type="primary" overlay={<Menu items={[
+                        {
+                            key: 1, icon: <PlusOutlined />, label: '导入应用 (代码仓库)', onClick: () => {
+                                importAppForm.resetFields()
+                                importAppFormVisibleHandler(true);
+                            }
+                        },
+
+                    ]} />}
+                        onClick={() => {
                             appForm.resetFields()
                             formVisibleHandler(true);
                             editHandler(false)
                             appForm.setFieldsValue({ status: 1 })
-                        }}  > 创建应用 </Dropdown.Button>,                    
+                        }}  > 创建应用 </Dropdown.Button>,
                 ]}
                 request={getApps}
             ></ProTable>
-            <AppDrawForm projectId={0} visbleAble={[formVisible,formVisibleHandler]} editable={edit} form={appForm}
-                onFinish={(success:boolean)=>{
-                    if (success){
+            <AppDrawForm projectId={0} visbleAble={[formVisible, formVisibleHandler]} editable={edit} form={appForm}
+                onFinish={(success: boolean) => {
+                    if (success) {
                         actionRef.current?.reload()
                     }
                 }} />
-            <ImportAppForm projectId={0} visbleAble={[importAppFormVisible,importAppFormVisibleHandler]} form={importAppForm}
-                onFinish={(success:boolean)=>{
-                    if (success){
+            <ImportAppForm projectId={0} visbleAble={[importAppFormVisible, importAppFormVisibleHandler]} form={importAppForm}
+                onFinish={(success: boolean) => {
+                    if (success) {
                         actionRef.current?.reload()
                     }
                 }} />

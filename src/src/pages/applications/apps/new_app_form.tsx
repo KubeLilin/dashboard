@@ -69,8 +69,8 @@ const AppDrawForm: React.FC<AppDrawFormProps> = (props) => {
         >
 
         <ProFormText width="md" name="id" label="id" readonly={true} hidden={true} />
-        <ProForm.Item name="name" label="应用名称" rules={[{ required: true, message: '请输入应用名' }]} >
-            <Input placeholder="请输入应用名称(仅限小写字母、数字、-)" disabled={props.editable} 
+        <ProForm.Item name="name" label="应用标识" rules={[{ required: true, message: '请输入应用名' }]} >
+            <Input placeholder="仅限小写字母、数字、- 标识为应用的唯一身份标签，后期不可修改" disabled={props.editable} 
                 onInput={(e) => { 
                     let value = e.currentTarget.value;
                     if (!/^[a-z]/.test(value)) {
@@ -84,8 +84,11 @@ const AppDrawForm: React.FC<AppDrawFormProps> = (props) => {
                     appNamehandler(e.currentTarget.value) 
                 }}  />
         </ProForm.Item>
-        <ProForm.Item name="labels" label="应用标签">
+        <ProForm.Item name="nickname" label="应用别名" rules={[{ required: true, message: '请输入应用别名' }]}>
             <Input placeholder="" />
+        </ProForm.Item>
+        <ProForm.Item name="labels" label="应用标签">
+            <Input placeholder="多个请用空格分隔"/>
         </ProForm.Item>
         <ProForm.Item name="sourceType" label="选择代码源类型" rules={[{ required: true, message: '请选择代码源类型' }]} >
             <Radio.Group onChange={(x) => { bindRepo(x.target.value,null) }}>
