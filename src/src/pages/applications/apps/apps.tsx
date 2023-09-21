@@ -23,13 +23,13 @@ const Apps: React.FC = () => {
     const [appName, appNamehandler] = useState<string>("");
     const [repoOptions, repoOptionsHandler] = useState<any>([{ label: '公开', value: 0 }]);
     const columns: ProColumns<ApplicationItem>[] = [
-        {
-            title: 'id',
-            dataIndex: 'id',
-            width: 48,
-            hideInForm: true,
-            hideInSearch: true
-        },
+        // {
+        //     title: 'id',
+        //     dataIndex: 'id',
+        //     width: 48,
+        //     hideInForm: true,
+        //     hideInSearch: true
+        // },
         {
             title: '应用名称',
             dataIndex: 'name',
@@ -49,7 +49,7 @@ const Apps: React.FC = () => {
             hideInSearch: true
         },
         {
-            title: "部署环境",
+            title: "部署",
             dataIndex: 'deployCount',
         },
         {
@@ -59,7 +59,7 @@ const Apps: React.FC = () => {
                 let arr = record.labels.split(" ");
                 let tagList=[]
                 for (let item of arr) {
-                    tagList.push(<Tag color='#87d068' >{item}</Tag>)  
+                    tagList.push(<Tag >{item}</Tag>)  
                 }
                 return tagList;
             }
@@ -104,7 +104,7 @@ const Apps: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
-                <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name}>进入应用</Link>,
+                // <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name}>进入应用</Link>,
                 <Button key={"edit" + record.id} onClick={() => {
                     formVisibleHandler(true)
                     editHandler(true)

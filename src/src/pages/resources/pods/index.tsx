@@ -152,7 +152,7 @@ const Pods: React.FC = (props) => {
         },
         {
             title: 'CPU资源',
-            width: 200,
+            width: 150,
             search: false,
             render: (_, row) => {
                 const cpuUsage = row.usage.cpu  
@@ -166,6 +166,7 @@ const Pods: React.FC = (props) => {
                 })
 
               let cpuUsagePercentage =(cpuUsage / cpuLimits) * 100
+              cpuUsagePercentage = Math.round(cpuUsagePercentage * 100) / 100
                 //  return <span style={{color:'green'}}>CPU:{(row.usage.cpu * 1000).toFixed(1)}m / 内存:{(row.usage.memory / 1024/1024).toFixed(1)} Mi</span>
                return  <Tooltip title={`CPU Usage: ${cpuUsage} Core  / Request: ${cpuRequests} Core  / Limit: ${cpuLimits} Core `}>
                     <Progress percent={cpuUsagePercentage} />
@@ -175,7 +176,7 @@ const Pods: React.FC = (props) => {
         {
             title: '内存资源',
             search: false,
-            width: 200,
+            width: 150,
             render: (_, row) => {
                 const memoryUsage = row.usage.memory
 
