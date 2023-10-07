@@ -23,6 +23,7 @@ export const getPodList = async (
         pageSize?: number;
         cid?:number;
         node?: string;
+        workload?: string;
     }, 
     sort: Record<string, any>,
     options?: { [key: string]: any },)=> {
@@ -95,19 +96,25 @@ export const getPodList = async (
         return resData
     }
 
-    export async function getYaml(dpId:any) {
+    export async function getYaml(dpId:any,cid:number,namespace:string,dpName:string,workload:string) {
         let req=await request<ApiResponse<string>>("/v1/deployment/yaml",{
             method:'GET',
-            params:{dpId:dpId}
+            params:{
+                dpId:dpId,
+                cid:cid,
+                namespace:namespace,
+                dpName:dpName,
+                workload:workload
+            }
         })
         return req
     }
 
 
-    export async function DeleteDeploymentWithOutDB(dpId:number) {
+    export async function deleteDeployment(dpId:number,clusterId:number,namespace:string,appName:string,workload:string) {
         let req=await request<ApiResponse<string>>("/v1/deployment/DeploymentWithOutDB",{
             method:'DELETE',
-            params:{dpId:dpId}
+            params:{dpId:dpId,cid:clusterId,namespace:namespace,dpName:appName,workload:workload}
         })
         return req
     }

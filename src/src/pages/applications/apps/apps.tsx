@@ -3,35 +3,43 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ApplicationItem, ApplicationModel } from './apps_data';
 import { PageContainer } from '@ant-design/pro-layout';
 import ProForm, { DrawerForm, ProFormSelect, ProFormTextArea, ProFormText, ProFormGroup } from '@ant-design/pro-form';
-import { Input, Button, Form, Checkbox, Radio, Select,Modal, message } from 'antd';
-import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled,ExclamationCircleOutlined } from '@ant-design/icons';
-import { getAppLanguage, getAppLevel, createApp, getApps, updateApp,deleteApp, initGitRepoistry } from './apps_service';
+import { Input, Button, Form, Checkbox, Radio, Select, Modal, message, Dropdown, Menu, Tag } from 'antd';
+import { GithubOutlined, GitlabOutlined, GoogleOutlined, GooglePlusOutlined, PlusOutlined, SettingFilled, ExclamationCircleOutlined } from '@ant-design/icons';
+import { getAppLanguage, getAppLevel, createApp, getApps, updateApp, deleteApp, initGitRepoistry } from './apps_service';
 import { Link } from 'umi';
 import AppDrawForm from './new_app_form'
+import ImportAppForm from './import_app_form'
 
 const { Search } = Input;
 const Apps: React.FC = () => {
     const actionRef = useRef<ActionType>();
     const [formVisible, formVisibleHandler] = useState<boolean>(false)
+    const [importAppFormVisible, importAppFormVisibleHandler] = useState<boolean>(false)
+    const [importAppForm] = Form.useForm()
+
     const [appForm] = Form.useForm()
     const [edit, editHandler] = useState<boolean>(false)
     const [gitRepo, gieRepoHandler] = useState<string>("");
     const [appName, appNamehandler] = useState<string>("");
-    const [repoOptions, repoOptionsHandler] = useState<any>([{label:'公开',value:0}]);
+    const [repoOptions, repoOptionsHandler] = useState<any>([{ label: '公开', value: 0 }]);
     const columns: ProColumns<ApplicationItem>[] = [
-        {
-            title: 'id',
-            dataIndex: 'id',
-            width: 48,
-            hideInForm: true,
-            hideInSearch: true
-        },
+        // {
+        //     title: 'id',
+        //     dataIndex: 'id',
+        //     width: 48,
+        //     hideInForm: true,
+        //     hideInSearch: true
+        // },
         {
             title: '应用名称',
             dataIndex: 'name',
             render: (dom, row) => {
-                return <Link key={'linkapp' + row.id} style={{  textDecorationLine: 'underline' }} to={'/applications/info?id=' + row.id + '&name=' + row.name}>{dom}</Link>
+                return <Link key={'linkapp' + row.id} style={{ textDecorationLine: 'underline' }} to={'/applications/info?id=' + row.id + '&name=' + row.name + '&language=' + row.languageName}>{dom}</Link>
             }
+        },
+        {
+            title: '应用别名',
+            dataIndex: 'nickname'
         },
         {
             title: '租户id',
@@ -41,12 +49,22 @@ const Apps: React.FC = () => {
             hideInSearch: true
         },
         {
-            title: "部署环境",
+            title: "部署",
             dataIndex: 'deployCount',
-        }, 
+        },
         {
             title: "标签",
             dataIndex: 'labels',
+            render: (_, record) => {
+                let arr = record.labels.split(" ");
+                let tagList=[]
+                for (let item of arr) {
+                    tagList.push(<Tag >{item}</Tag>)  
+                }
+                return tagList;
+            }
+
+            ,
         }, {
             title: "Git地址",
             dataIndex: 'git',
@@ -86,42 +104,42 @@ const Apps: React.FC = () => {
             title: '操作',
             valueType: 'option',
             render: (text, record, _, action) => [
-                <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name}>进入应用</Link>,
+                // <Link key={"link-id" + record.id} to={'/applications/info?id=' + record.id + '&name=' + record.name}>进入应用</Link>,
                 <Button key={"edit" + record.id} onClick={() => {
                     formVisibleHandler(true)
                     editHandler(true)
                     record.sources = record.sCID
                     appForm.setFieldsValue(record)
                 }}>编辑</Button>,
-                <Button danger key={"delete" + record.id} onClick={()=>{
+                <Button danger key={"delete" + record.id} onClick={() => {
                     Modal.confirm({
                         title: 'Confirm',
                         icon: <ExclamationCircleOutlined />,
                         content: `确认要删除${record.name}应用吗?`,
                         okText: '确认',
                         cancelText: '取消',
-                        onOk:async ()=>{
-                          if(record.deployCount > 0) {
-                            message.error('应用中还存在部署环境,请删除所有部署环境后再进行应用删除操作!')
-                          } else {
-                            const res= await deleteApp(record.id)
-                            if (res.success) {
-                                message.success('删除成功')
+                        onOk: async () => {
+                            if (record.deployCount > 0) {
+                                message.error('应用中还存在部署环境,请删除所有部署环境后再进行应用删除操作!')
                             } else {
-                                message.error(res.message)
+                                const res = await deleteApp(record.id)
+                                if (res.success) {
+                                    message.success('删除成功')
+                                } else {
+                                    message.error(res.message)
+                                }
+
                             }
-   
-                          }
-                          actionRef.current?.reload()
+                            actionRef.current?.reload()
                         }
-                      });
+                    });
 
 
                 }}>删除</Button>
             ]
         }
     ]
-   
+
 
     return (
         <PageContainer >
@@ -131,89 +149,36 @@ const Apps: React.FC = () => {
                 actionRef={actionRef}
                 headerTitle="应用列表"
                 toolBarRender={() => [
-                    <Button key='button' icon={<PlusOutlined />} type="primary"
+                    <Dropdown.Button type="primary" overlay={<Menu items={[
+                        {
+                            key: 1, icon: <PlusOutlined />, label: '导入应用 (代码仓库)', onClick: () => {
+                                importAppForm.resetFields()
+                                importAppFormVisibleHandler(true);
+                            }
+                        },
+
+                    ]} />}
                         onClick={() => {
                             appForm.resetFields()
                             formVisibleHandler(true);
                             editHandler(false)
                             appForm.setFieldsValue({ status: 1 })
-                        }}>创建应用</Button>
+                        }}  > 创建应用 </Dropdown.Button>,
                 ]}
                 request={getApps}
             ></ProTable>
-            <AppDrawForm projectId={0} visbleAble={[formVisible,formVisibleHandler]} editable={edit} form={appForm}
-                onFinish={(success:boolean)=>{
-                    if (success){
+            <AppDrawForm projectId={0} visbleAble={[formVisible, formVisibleHandler]} editable={edit} form={appForm}
+                onFinish={(success: boolean) => {
+                    if (success) {
                         actionRef.current?.reload()
                     }
                 }} />
-            {/* <DrawerForm<ApplicationModel>
-                form={appForm}
-                title="创建应用"
-                visible={formVisible}
-                onVisibleChange={formVisibleHandler}
-                onFinish={async (x) => {
-                    console.log(x)
-
-                    let res
-                    if (edit) {
-                        res = await updateApp(x)
-                    } else {
-                        res = await createApp(x)
-                    }
-
-                    if (res.success) {
+            <ImportAppForm projectId={0} visbleAble={[importAppFormVisible, importAppFormVisibleHandler]} form={importAppForm}
+                onFinish={(success: boolean) => {
+                    if (success) {
                         actionRef.current?.reload()
                     }
-                    appForm.resetFields()
-                    return res.success
-                }}
-                drawerProps={{
-                    forceRender: true,
-                    destroyOnClose: true,
-                }}
-            >
-
-                <ProFormText width="md" name="id" label="id" readonly={true} hidden={true} />
-                <ProForm.Item name="name" label="应用名称" rules={[{ required: true, message: '请输入应用名' }]} >
-                    <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^\w_-]/g, ''); appNamehandler(e.currentTarget.value) }} disabled={edit} />
-                </ProForm.Item>
-                <ProForm.Item name="labels" label="应用标签">
-                    <Input placeholder="" />
-                </ProForm.Item>
-                <ProForm.Item name="sourceType" label="选择代码源类型" rules={[{ required: true, message: '请选择代码源类型' }]} >
-                    <Radio.Group onChange={(x) => { bindRepo(x.target.value,null) }}>
-                        <Radio value="github"><GithubOutlined style={{ fontSize: '25px' }} />Github</Radio>
-                        <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '25px' }} />Gitee</Radio>
-                        <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '25px' }} />Gitlab</Radio>
-                        <Radio value="gogs"><SettingFilled style={{ fontSize: '25px' }} />Gogs</Radio>
-                    </Radio.Group>
-                </ProForm.Item>
-                <ProForm.Item name="sources" label="代码源" initialValue={0} rules={[{ required: true, message: '请选择代码源' }]}>
-                    <Select options={repoOptions} ></Select>
-                </ProForm.Item>
-                <ProFormText name="git" label="git地址" rules={[{ required: true, message: '请输入git地址' }]}>
-                </ProFormText>
-                <ProForm.Item name='level' label="应用等级" rules={[{ required: true, message: '请选择应用级别!' }]}>
-                    <ProFormSelect initialValue={0}
-                        request={getAppLevel}
-                    ></ProFormSelect>
-                </ProForm.Item>
-                <ProForm.Item name='language' label="开发语言" rules={[{ required: true, message: '请选择开发语言!' }]}>
-                    <ProFormSelect request={getAppLanguage} ></ProFormSelect>
-                </ProForm.Item>
-                <ProForm.Item name='remark' label='备注'>
-                    <ProFormTextArea></ProFormTextArea>
-                </ProForm.Item>
-                <ProForm.Item name='status' label="状态" >
-                    <ProFormSelect initialValue={1}
-                        request={async () => [
-                            { label: '启用', value: 1 },
-                            { label: '停用', value: 0 }
-                        ]}
-                    ></ProFormSelect>
-                </ProForm.Item>
-            </DrawerForm> */}
+                }} />
         </PageContainer>
     )
 }

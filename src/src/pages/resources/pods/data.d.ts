@@ -10,6 +10,7 @@ export type PodItem = {
     status: string,
     restarts:number
     usage:any
+   
     containers: ContainerItem[]
 }
 
@@ -21,7 +22,11 @@ export type ContainerItem = {
     ready: any,
     started: any,
     state: string,
-    restartCount: number
+    restartCount: number,
+    requestCpu: number,
+    requestMemory: number,
+    limitCpu: number,
+    limitMemory: number,
 }
 
 export type NamespaceItem = {

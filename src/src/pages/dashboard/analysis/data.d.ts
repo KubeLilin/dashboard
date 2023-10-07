@@ -22,6 +22,8 @@ export type ClusterMetricsInfo = {
   usage:MetricsItem;
   allocatable:MetricsItem;
   capacity:MetricsItem;
+  limit:MetricsItem;
+  requests:MetricsItem;
   nodes:NodeStatus;
 }
 

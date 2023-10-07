@@ -23,19 +23,12 @@ const ProjectDeployList: React.FC<ProjectDeployProps> = ( props ) => {
             hideInSearch: true
         },
         {
-            title:'可用集群',
-            dataIndex:'clusterId',
-            hideInTable:true,
-            hideInSearch: true
-        },
-        {
             title: '环境名称',
-            width: 320,
             dataIndex: 'nickname',
             render: (_, row) => {
                 return <span>
                     <Paragraph><Link to={{ pathname:'/resources/pods' ,  search: '?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId + '&ns=' + row.namespace ,  state:row } }  >{row.name}</Link></Paragraph>
-                    <Paragraph>{row.nickname}</Paragraph>
+                    <Paragraph><Tag color="yellow" style={{fontSize:13}}>{row.nickname}</Tag></Paragraph>
                 </span>
             }
         },
@@ -50,46 +43,12 @@ const ProjectDeployList: React.FC<ProjectDeployProps> = ( props ) => {
                 '预发布环境': { text: '预发布环境', status: 'Default' },
                 '生产环境': { text: '生产环境', status: 'Success' },
 
-            }
-        },
-        {
-            title: '集群',
-            dataIndex: 'clusterName',
-            width: 180,
-            hideInForm: true,
-            hideInSearch: true
-        },
-        {
-            title: '命名空间',
-            dataIndex: 'namespace',
-            width: 180,
-            hideInForm: true,
-            hideInSearch: true
-        },
-        {
-            title: '部署状态',
-            dataIndex: 'status',
-            width: 110,
-            hideInForm: true,
-            hideInSearch: true,
-            render: (_, row) => {
-                return <span>  {row.running > 0 ? <Tag color='blue'>已部署</Tag> : <Tag color='red'>未部署</Tag>} </span>
-            }
-        },
-        {
-            title: '镜像(last)',
-            dataIndex: 'lastImage',
-            width: 330,
-            hideInForm: true,
-            hideInSearch: true,
-            render: (_, row) => {
-                return <span>  {row.lastImage != '' ? row.lastImage : <LoadingOutlined />} </span>
-            }
+            },
+            hideInTable:true,
         },
         {
             title: '实例数',
             dataIndex: 'runningNumber',
-            width: 80,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
@@ -97,20 +56,65 @@ const ProjectDeployList: React.FC<ProjectDeployProps> = ( props ) => {
             }
         },
         {
-            title: '服务名/IP',
+            title: '部署状态',
+            dataIndex: 'status',
+            hideInForm: true,
+            hideInSearch: true,
+            render: (_, row) => {
+                return <span>  {row.running > 0 ? <Tag color='green' style={{fontSize:13}}>已部署</Tag> : <Tag color='red' style={{fontSize:13}}>未部署</Tag>} </span>
+            }
+        },
+        {
+            title: '运行时',
+            dataIndex: 'runtime',
+            hideInForm: true,
+            hideInSearch: true,
+            render: (dom, row) => {
+                return  <Tag color='blue' style={{fontSize:13}}>{dom}</Tag>
+            }
+        },
+        {
+            title: '集群',
+            dataIndex: 'clusterName',
+            hideInForm: true,
+            hideInSearch: true,
+            render: (dom, row) => {
+                return (<span>
+                        <Paragraph >Cluster: {row.clusterName}</Paragraph>
+                        <Paragraph>Namespace: {row.namespace}</Paragraph>
+                </span>)
+            }
+        },      
+        {
+            title: '镜像(last)',
+            dataIndex: 'lastImage',
+            hideInForm: true,
+            hideInSearch: true,
+            render: (_, row) => {
+                return <Paragraph copyable>  {row.lastImage != '' ? row.lastImage : <LoadingOutlined />} </Paragraph>
+            }
+        },
+
+        {
+            title: '服务名 / ClusterIP',
             dataIndex: 'serviceIP',
-            width: 380,
+            width: 400,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
                 return (<span>
                     {row.serviceIP != '0.0.0.0' ? <span>
                         <Paragraph copyable>{row.serviceName}</Paragraph>
-                        <Paragraph copyable>{row.serviceIP} </Paragraph>
-                    </span> : <span><LoadingOutlined /> / {dom}</span>}
+                        <Paragraph>ClusterIP: {row.serviceIP}:{row.servicePort}  </Paragraph>
+                    </span> : <span>
+                        <Paragraph copyable>Service Name:<LoadingOutlined /></Paragraph>
+                        <Paragraph>ClusterIP: <LoadingOutlined /> </Paragraph>
+                    </span>  }
                 </span>)
             }
-        },]
+        },
+      
+    ]
 
     useEffect(()=>{
         GetProjectDeployLevelCounts(props.projectId).then(res=>{
@@ -167,9 +171,9 @@ const ProjectDeployList: React.FC<ProjectDeployProps> = ( props ) => {
                 console.log(asyncPodList)
                 asyncPodList.forEach((podSet) => {
                     if (podSet.data && podSet.data.length > 0) {
-                        list[podSet.index].lastImage = podSet.data[0].containers[0].image
+                        list[podSet.index].lastImage = podSet.data[0].containers ? podSet.data[0].containers[0].image : ''
                         list[podSet.index].running = podSet.data.length
-                        list[podSet.index].serviceIP = podSet.data[0].ip
+                        list[podSet.index].serviceIP = podSet.data[0]?.ip
                     } else {
                         list[podSet.index].lastImage = '无'
                         list[podSet.index].running = 0

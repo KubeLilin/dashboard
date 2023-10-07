@@ -14,6 +14,7 @@ export type DeploymentItem={
     servicePort:number,
     serviceName: string,
     appName:string,
+    runtime:string,
 }
 
 
@@ -45,9 +46,11 @@ export type ContainerItem = {
 
 export type PipelineInfo  = {
     appid: number,
+    language:string,
     id: number,
     name: string,
     dsl: string,
     status: number,
     taskid: string,
+    lastCommit: string,
 }

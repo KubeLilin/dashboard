@@ -140,7 +140,7 @@ const Projects: React.FC = () => {
                             message.success({ content: '项目创建成功!', key:"createProject",duration: 3 });
                         }
                     }
-
+                    actionRef.current?.reload()
                     //setTargetKeys([""])
                     return true
                 }} >

@@ -18,13 +18,16 @@ import ExecDeployment from '../execDeployment';
 import AppBuildList from '../builds'
 import ReleaseRecord from '../releaseRecord';
 import Probe from '../probe';
-
+import AppConifigMaps from '../appConfigmaps'
+import BasicMonitor from '../basicmonitor'
+import AppServiceMonitor from '../appServiceMonitor'
 
 const { TabPane } = Tabs;
 const { Content } = Layout;
 const { Paragraph } = Typography;
 
 const AppInfo: React.FC = () => {
+    
     var appId = history.location.query?.id
     var appName = history.location.query?.name
     var returnKey = history.location.query?.returnkey
@@ -63,7 +66,7 @@ const AppInfo: React.FC = () => {
         {
             title: 'ID',
             dataIndex: 'id',
-            width: 48,
+            width: 38,
             hideInForm: true,
             hideInSearch: true
         },
@@ -75,12 +78,12 @@ const AppInfo: React.FC = () => {
         },
         {
             title: '环境名称',
-            width: 320,
             dataIndex: 'nickname',
+            width: 280,
             render: (_, row) => {
                 return <span>
                     <Paragraph><Link to={{ pathname:'/resources/pods' ,  search: '?did='+ row.id + '&app=' + row.name + '&cid=' + row.clusterId + '&ns=' + row.namespace ,  state:row } }  >{row.name}</Link></Paragraph>
-                    <Paragraph>{row.nickname}</Paragraph>
+                    <Paragraph><Tag color="yellow" style={{fontSize:13}}>{row.nickname}</Tag></Paragraph>
                 </span>
             }
         },
@@ -88,53 +91,19 @@ const AppInfo: React.FC = () => {
             title: '环境级别',
             dataIndex: 'level',
             hideInSearch: true,
-            width: 140,
             valueEnum:{
                 '测试环境': { text: '测试环境', status: 'Warning' },
                 '开发环境': { text: '开发环境', status: 'Processing' },
                 '预发布环境': { text: '预发布环境', status: 'Default' },
                 '生产环境': { text: '生产环境', status: 'Success' },
 
-            }
-        },
-        {
-            title: '集群',
-            dataIndex: 'clusterName',
-            width: 180,
-            hideInForm: true,
-            hideInSearch: true
-        },
-        {
-            title: '命名空间',
-            dataIndex: 'namespace',
-            width: 180,
-            hideInForm: true,
-            hideInSearch: true
-        },
-        {
-            title: '部署状态',
-            dataIndex: 'status',
-            width: 110,
-            hideInForm: true,
-            hideInSearch: true,
-            render: (_, row) => {
-                return <span>  {row.running > 0 ? <Tag color='blue'>已部署</Tag> : <Tag color='red'>未部署</Tag>} </span>
-            }
-        },
-        {
-            title: '镜像(last)',
-            dataIndex: 'lastImage',
-            width: 330,
-            hideInForm: true,
-            hideInSearch: true,
-            render: (_, row) => {
-                return <span>  {row.lastImage != '' ? row.lastImage : <LoadingOutlined />} </span>
-            }
+            },
+            hideInTable:true,
         },
         {
             title: '实例数',
+            width: 160,
             dataIndex: 'runningNumber',
-            width: 80,
             hideInForm: true,
             hideInSearch: true,
             render: (_, row) => {
@@ -142,18 +111,67 @@ const AppInfo: React.FC = () => {
             }
         },
         {
-            title: '服务名 / IP / Port',
+            title: '部署状态',
+            dataIndex: 'status',
+            width: 80,
+            hideInForm: true,
+            hideInSearch: true,
+            render: (_, row) => {
+                return <Space> 
+                            <span>  {row.running > 0 ? <Tag color='green' style={{fontSize:13}}>已部署</Tag> : <Tag color='red' style={{fontSize:13}}>未部署</Tag>} </span>
+                            {row.ready?<Tag color='green' style={{fontSize:13}} >就绪</Tag>:<Tag color='red' style={{fontSize:13}}>未就绪</Tag>} 
+                        </Space>
+            }
+        },
+        {
+            title: '运行时',
+            dataIndex: 'runtime',
+            width: 80,
+            hideInForm: true,
+            hideInSearch: true,
+            render: (dom, row) => {
+                return   row.runtime != ''? <Tag color='blue' style={{fontSize:13}}>{row.runtime}</Tag>:<Tag color='blue' style={{fontSize:13}}>None</Tag>
+            }
+        },
+        {
+            title: '集群',
+            dataIndex: 'clusterName',
+            width: 230,
+            hideInForm: true,
+            hideInSearch: true,
+            render: (dom, row) => {
+                return (<span>
+                        <Paragraph>集群: {row.clusterName}</Paragraph>
+                        <Paragraph>命名空间: {row.namespace}</Paragraph>
+                </span>)
+            }
+        },      
+        {
+            title: '镜像(last)',
+            dataIndex: 'lastImage',
+            width: 320,
+            hideInForm: true,
+            hideInSearch: true,
+            render: (_, row) => {
+                return <Paragraph copyable>  {row.lastImage != '' ? row.lastImage : <LoadingOutlined />} </Paragraph>
+            }
+        },
+
+        {
+            title: '服务名 / ClusterIP',
             dataIndex: 'serviceIP',
-            width: 520,
+            width: 400,
             hideInForm: true,
             hideInSearch: true,
             render: (dom, row) => {
                 return (<span>
                     {row.serviceIP != '0.0.0.0' ? <span>
                         <Paragraph copyable>{row.serviceName}</Paragraph>
-                        <Paragraph>ClusterIP: {row.serviceIP} </Paragraph>
-                        <Paragraph>Port: {row.servicePort} </Paragraph>
-                    </span> : <span><LoadingOutlined /> / {dom}</span>}
+                        <Paragraph>ClusterIP: {row.serviceIP}:{row.servicePort}  </Paragraph>
+                    </span> : <span>
+                        <Paragraph copyable>Service Name:<LoadingOutlined /></Paragraph>
+                        <Paragraph>ClusterIP: <LoadingOutlined /> </Paragraph>
+                    </span>  }
                 </span>)
             }
         },
@@ -164,17 +182,20 @@ const AppInfo: React.FC = () => {
             render: (dom, record, _, action) => {
                 const menu = (
                     <Menu items={[
-                        { key:1,icon:<CloudUploadOutlined /> ,label: '部署应用',onClick:()=>{
+                        { key:1,icon:<CloudUploadOutlined /> ,label: '更新部署',onClick:()=>{
                                 tableListDataSource[0].namespace = 'n' + Math.random()
                                 setTableListDataSource(tableListDataSource)
                                 stepDpId(record.id)
-                                setDeployImage(record.lastImage)
+                                if (record.lastImage != '无') {
+                                    setDeployImage(record.lastImage)
+                                }
+                               
                                 setExecFormVisible(true)
                         }},
-                        { key:2,icon:<PushpinOutlined />,label: '生命周期',onClick:()=>{
-                                stepDpId(record.id)
-                                setProbeFormVisible(true)
-                        }},
+                        // { key:2,icon:<PushpinOutlined />,label: '生命周期',onClick:()=>{
+                        //         stepDpId(record.id)
+                        //         setProbeFormVisible(true)
+                        // }},
                         { key:3,icon:<PushpinOutlined />,label: '删除部署环境',danger:true,onClick:()=>{
                             Modal.confirm({
                                 title: 'Confirm',
@@ -225,7 +246,6 @@ const AppInfo: React.FC = () => {
                 extra: [
                     <Button key="1" onClick={() => { history.goBack() }}>返回上一级</Button>]
             }}>
-            <Content  > 
             <Tabs defaultActiveKey={defaultActiveKey} size="large" type="line" tabBarStyle={{ paddingLeft:25 }} 
                 onChange={(key)=>{
                     if(key=="3") {
@@ -259,7 +279,7 @@ const AppInfo: React.FC = () => {
 
 
                                 <Dropdown.Button type="primary"  overlay={ <Menu items={[
-                                    { key:1,icon:<CloudUploadOutlined /> ,label: '创建部署环境(高级)',onClick:()=>{
+                                    { key:1,icon:<CloudUploadOutlined /> ,label: '创建部署(高级)',onClick:()=>{
                                         setStepFormEdit(false)
                                         setAdvancedDeployFormVisible(true)
                                     }},
@@ -268,7 +288,7 @@ const AppInfo: React.FC = () => {
                                     onClick={() =>{
                                         setStepFormEdit(false)
                                         setStepFormVisible(true)
-                                    }}> 创建部署环境(快速) </Dropdown.Button>,
+                                    }}> 创建部署 </Dropdown.Button>,
                             ]
                         }}
                         request={async (params, sort) => {
@@ -298,10 +318,11 @@ const AppInfo: React.FC = () => {
                                         list[podSet.index].lastImage = podSet.data[0].containers[0].image
                                         list[podSet.index].running = podSet.data.length
                                         list[podSet.index].serviceIP = podSet.data[0].ip
+                                        list[podSet.index].ready = podSet.data[0].podReadyCount == podSet.data[0].podCount
                                     } else {
                                         list[podSet.index].lastImage = '无'
                                         list[podSet.index].running = 0
-                                        list[podSet.index].serviceName ='no services'
+                                        list[podSet.index].serviceName ='No Service'
                                         list[podSet.index].serviceIP = 'x.x.x.x'
                                     }
                                 })
@@ -314,6 +335,9 @@ const AppInfo: React.FC = () => {
                             return datasource
                         }}
                     ></ProTable>
+                </TabPane>
+                <TabPane tab="性能监控" key="6" >
+                    <BasicMonitor AppId={Number(appId)} deployList={tableListDataSource}></BasicMonitor>
                 </TabPane>
                 <TabPane tab="详情&路由" key="2" >
                     <ProDescriptions title="应用详情" request={ async () => GetApplicationInfo(Number(appId)) } style={{ padding:35, }} 
@@ -355,19 +379,22 @@ const AppInfo: React.FC = () => {
                 <TabPane tab="发布记录" key="4" >
                    <ReleaseRecord AppId={Number(appId)}></ReleaseRecord>
                 </TabPane>
-                <TabPane tab="应用配置" key="5" disabled>
-                    Content of Tab Pane 5
+                <TabPane tab="服务监控配置 (Service Monitor)" key="7" >
+                    <AppServiceMonitor appId={Number(appId)} appName={String(appName)} deployList={tableListDataSource} ></AppServiceMonitor>
                 </TabPane>
-                <TabPane tab="应用监控" key="6" disabled>
-                    Content of Tab Pane 6
+                <TabPane tab="应用配置列表 (Configmap)" key="5" >
+                    <AppConifigMaps  AppId={Number(appId)}></AppConifigMaps>
                 </TabPane>
+              
+              
+
             </Tabs>
          
             <DevlopmentFormentForm visibleFunc={[stepFormVisible ,setStepFormVisible ]}
-                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} envLevel={activeKey} />
 
             <AdvancedDevlopment visibleFunc={[advancedDeployFormVisible, setAdvancedDeployFormVisible]}
-                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} />
+                appId={appId} appName={appName} tableRef={actionRef} isEdit={stepFormEdit} id={dpId} envLevel={activeKey} />
 
 
             <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} 
@@ -376,7 +403,6 @@ const AppInfo: React.FC = () => {
             <Probe visibleFunc={[probeFormVisible,setProbeFormVisible]} 
                 deploymentId={dpId} tableRef={actionRef} ></Probe>
               
-            </Content>
         </PageContainer>
     )
 

@@ -23,7 +23,9 @@ const AppDrawForm: React.FC<AppDrawFormProps> = (props) => {
     function bindRepo(repoType: string,selectedRecord:any) {
         let res = queryRepoConnections(repoType)
         res.then(x => {    
+            console.log(x)
             repoOptionsHandler(x)
+            props.form.setFieldsValue({ sources:x.value })
             if (selectedRecord){
                 props.form.setFieldsValue({ sources:selectedRecord.sources }) 
             }           
@@ -67,18 +69,33 @@ const AppDrawForm: React.FC<AppDrawFormProps> = (props) => {
         >
 
         <ProFormText width="md" name="id" label="id" readonly={true} hidden={true} />
-        <ProForm.Item name="name" label="应用名称" rules={[{ required: true, message: '请输入应用名' }]} >
-            <Input placeholder="请输入应用名称(仅限英文)" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^\w_-]/g, ''); appNamehandler(e.currentTarget.value) }}  />
+        <ProForm.Item name="name" label="应用标识" rules={[{ required: true, message: '请输入应用名' }]} >
+            <Input placeholder="仅限小写字母、数字、- 标识为应用的唯一身份标签，后期不可修改" disabled={props.editable} 
+                onInput={(e) => { 
+                    let value = e.currentTarget.value;
+                    if (!/^[a-z]/.test(value)) {
+                      e.currentTarget.value = ''
+                      return
+                    }
+                  
+                    value = value.replace(/[^a-z0-9-]/g, '');
+                    e.currentTarget.value = value;
+                    // e.currentTarget.value = e.currentTarget.value.replace(/[^a-z]/g, '');
+                    appNamehandler(e.currentTarget.value) 
+                }}  />
+        </ProForm.Item>
+        <ProForm.Item name="nickname" label="应用别名" rules={[{ required: true, message: '请输入应用别名' }]}>
+            <Input placeholder="" />
         </ProForm.Item>
         <ProForm.Item name="labels" label="应用标签">
-            <Input placeholder="" />
+            <Input placeholder="多个请用空格分隔"/>
         </ProForm.Item>
         <ProForm.Item name="sourceType" label="选择代码源类型" rules={[{ required: true, message: '请选择代码源类型' }]} >
             <Radio.Group onChange={(x) => { bindRepo(x.target.value,null) }}>
                 <Radio value="github"><GithubOutlined style={{ fontSize: '25px' }} />Github</Radio>
                 <Radio value="gitee"><GooglePlusOutlined style={{ fontSize: '25px' }} />Gitee</Radio>
                 <Radio value="gitlab"><GitlabOutlined style={{ fontSize: '25px' }} />Gitlab</Radio>
-                <Radio value="gogs"><SettingFilled style={{ fontSize: '25px' }} />Gogs</Radio>
+                {/* <Radio value="gogs"><SettingFilled style={{ fontSize: '25px' }} />Gogs</Radio> */}
             </Radio.Group>
         </ProForm.Item>
         <ProForm.Item name="sources" label="代码源" initialValue={0} rules={[{ required: true, message: '请选择代码源' }]}>

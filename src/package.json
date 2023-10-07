@@ -70,6 +70,7 @@
     "lodash": "^4.17.11",
     "lodash-decorators": "^6.0.0",
     "moment": "^2.25.3",
+    "moment-duration-format": "^2.3.2",
     "numeral": "^2.0.6",
     "nzh": "^1.0.3",
     "omit.js": "^2.0.2",
@@ -130,6 +131,5 @@
   },
   "gitHooks": {
     "commit-msg": "fabric verify-commit"
-  },
-  "__npminstall_done": false
+  }
 }

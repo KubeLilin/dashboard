@@ -115,7 +115,17 @@ export default defineConfig({
         {
           name: "clusters",
           path: "/resources/clusters",
-          component:"./resources/clusters/clusters"
+          component:"./resources/clusters/clusters",
+        },
+        {
+          name: "clusterinfo",
+          path: "/resources/clusterinfo",
+          component:"./resources/clusterinfo",
+        },
+        {
+          name: "workloads",
+          path: "/resources/workloads",
+          component:"./resources/workloads",
         },
         {
           name: "namespaces",
@@ -141,7 +151,12 @@ export default defineConfig({
           name: "buildimagelist",
           path: "/resources/buildimagelist",
           component:"./resources/buildimagelist"
-        }
+        },
+        {
+          name: "components",
+          path: "/resources/dapr-components",
+          component:"./resources/dapr-components"
+        },
       ]
     },
     {
@@ -167,6 +182,22 @@ export default defineConfig({
           name: "serviceConfig",
           path: "/applications/serviceconfig",
           component:"./applications/serviceconfig/serviceConfig"
+        },
+      ]
+    },
+    {
+      name:'runtime',
+      path:'/runtime',
+      routes:[
+        {
+          name: "namespace",
+          path: "/runtime/namespace",
+          component:"./runtime/namespace"
+        },
+        {
+          name: "components",
+          path: "/runtime/dapr-components",
+          component:"./runtime/dapr-components"
         },
       ]
     },
@@ -279,7 +310,7 @@ export default defineConfig({
   nodeModulesTransform: {
     type: 'none',
   },
-  mfsu: {},
+  // mfsu: {},
   webpack5: {},
   exportStatic: {},
   define: {

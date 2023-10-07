@@ -4,11 +4,11 @@ import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import ProForm, { ModalForm, ProFormInstance } from '@ant-design/pro-form';
 import { history, Link,useModel } from 'umi';
 import { PodItem, ContainerItem, podLogsRequest } from './data';
-import { Table,Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, notification, Radio } from 'antd'
+import { Table,Tabs, Button, Space, Tooltip,Layout, Tag, Modal, InputNumber, message, Popconfirm, Select, Switch, notification, Radio,Progress } from 'antd'
 
 import { getPodList, getNamespaceList, setReplicasByDeployId, 
     GetDeploymentFormInfo, destroyPod, getPodLogs, getYaml , 
-    DeleteDeploymentWithOutDB,getServiceInfo , getGatewayRouterList } from './service'
+    deleteDeployment,getServiceInfo , getGatewayRouterList } from './service'
 
 import React, { useState, useRef, useEffect } from 'react';
 import ProDescriptions from '@ant-design/pro-descriptions';
@@ -18,10 +18,14 @@ import 'codemirror/lib/codemirror.js'
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/yaml/yaml';
 import './monokai-bright.css'
+import 'codemirror/theme/ayu-dark.css';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import EventListComponent from './events';
 import WebTerminal from './terminal';
 import ExecDeployment from '@/pages/applications/execDeployment';
+
+//moment-duration-format
+import 'moment-duration-format';
 
 
 const { TabPane } = Tabs;
@@ -38,6 +42,8 @@ const Pods: React.FC = (props) => {
     const formScaleModalRef = useRef<ProFormInstance>();
     const [visibleTerminal, setVisibleTerminal] = useState(false);
     const [visibleWebConsole, setVisibleWebConsole] = useState(false);
+    const [terminalShellType,terminalShellTypeHandler] = useState<string>('/bin/bash');
+
 
     const [podListState, handePodListState] = useState<PodItem[]>([]);
     const [containerListState, handeContainerListState] = useState<ContainerItem[]>([]);
@@ -48,6 +54,7 @@ const Pods: React.FC = (props) => {
     const [autoLogs, setAutoLogs] = useState<boolean>(false)
     const [logContent, setLogContent] = useState<string[]>([]);
     const [yamlContent, setyamlContent] = useState<string>("");
+
     const [execFormVisible, setExecFormVisible] = useState(false);
     const [dpId, stepDpId] = useState<number>(0);
     var text1: any = undefined;
@@ -60,6 +67,7 @@ const Pods: React.FC = (props) => {
     var appName = history.location.query?.app
     var clusterId = history.location.query?.cid
     var node = history.location.query?.node
+    var workload = history.location.query?.workload
     var did = 0
     if (deployId) {
         did = Number(deployId)
@@ -71,7 +79,7 @@ const Pods: React.FC = (props) => {
    
 
     function bindYaml() {
-        let res = getYaml(deployId)
+        let res = getYaml(deployId,Number(clusterId),String(namespace),String(appName),String(workload))
         res.then((x) => {
             if (x?.success) {
                 setyamlContent(x.data)
@@ -94,14 +102,22 @@ const Pods: React.FC = (props) => {
             }
         },
         {
+            title: '命名空间',
+            dataIndex: 'namespace',
+            valueType: 'select',
+            request: async () => {
+                var namespaces = [{ label: '全部', value: '' }]
+                var ns = await getNamespaceList(String(clusterId))
+                namespaces.push(...ns)
+                return namespaces
+            }
+        },
+        {
             title: '状态',
             dataIndex: 'status',
             search: false,
             render: (dom, row) => {
-                if (row.status == 'Running') {
-                    return <span style={{ color: 'green' }}>{dom}</span>
-                }
-                return <span style={{ color: 'red' }}>{dom}</span>
+                    return <Space direction='horizontal'><Tag color={row.status=='Running'?'green':'red'}>{dom}</Tag>  <Tag color={  row.podCount == row.podReadyCount?'green':'red' }>Ready</Tag>  </Space>
             }
         },
         {
@@ -116,18 +132,9 @@ const Pods: React.FC = (props) => {
             title: '实例所在节点IP',
             dataIndex: 'hostIP',
             search: false,
+            hideInTable:true,
         },
-        {
-            title: '命名空间',
-            dataIndex: 'namespace',
-            valueType: 'select',
-            request: async () => {
-                var namespaces = [{ label: '全部', value: '' }]
-                var ns = await getNamespaceList(String(clusterId))
-                namespaces.push(...ns)
-                return namespaces
-            }
-        },
+      
         {
             title: '重启次数',
             dataIndex: 'restarts',
@@ -140,26 +147,72 @@ const Pods: React.FC = (props) => {
             title: '容器数',
             search: false,
             render: (_, row) => {
-                return <span>{row.containers.length}个</span>
+                return <span>{row.containers?.length}个</span>
             }
         },
         {
-            title: '性能(使用率)',
+            title: 'CPU资源',
+            width: 150,
             search: false,
             render: (_, row) => {
-                return <span style={{color:'green'}}>CPU:{(row.usage.cpu * 1000).toFixed(1)}m / 内存:{(row.usage.memory / 1024/1024).toFixed(1)} Mi</span>
+                const cpuUsage = row.usage.cpu  
+
+                // sum resources
+                var cpuLimits = 0
+                var cpuRequests = 0
+                row.containers?.forEach((item) => {
+                    cpuLimits += item.limitCpu  
+                    cpuRequests += item.requestCpu 
+                })
+
+              let cpuUsagePercentage =(cpuUsage / cpuLimits) * 100
+              cpuUsagePercentage = Math.round(cpuUsagePercentage * 100) / 100
+                //  return <span style={{color:'green'}}>CPU:{(row.usage.cpu * 1000).toFixed(1)}m / 内存:{(row.usage.memory / 1024/1024).toFixed(1)} Mi</span>
+               return  <Tooltip title={`CPU Usage: ${cpuUsage} Core  / Request: ${cpuRequests} Core  / Limit: ${cpuLimits} Core `}>
+                    <Progress percent={cpuUsagePercentage} />
+                </Tooltip>
             }
+        },
+        {
+            title: '内存资源',
+            search: false,
+            width: 150,
+            render: (_, row) => {
+                const memoryUsage = row.usage.memory
+
+                // sum resources
+                var memoryLimits = 0
+                var memoryRequests = 0
+                row.containers?.forEach((item) => {
+                    memoryLimits += item.limitMemory 
+                    memoryRequests += item.requestMemory
+                })
+
+              let memoryUsagePercentage = Math.floor(  (memoryUsage / memoryLimits) * 100)
+
+                //  return <span style={{color:'green'}}>CPU:{(row.usage.cpu * 1000).toFixed(1)}m / 内存:{(row.usage.memory / 1024/1024).toFixed(1)} Mi</span>
+               return  <Tooltip title={`Memory (Mi) Usage: ${(memoryUsage /1024/1024).toFixed(2) } Mi / Request: ${ (memoryRequests /1024/1024).toFixed(2) } Mi / Limit: ${ (memoryLimits/1024/1024).toFixed(2) } Mi`}>
+                    <Progress percent={memoryUsagePercentage} />
+                </Tooltip>
+            }
+        },
+        {
+            title: '运行时间',
+            search: false,
+            render:(_,row)=>{
+                const creationTimestamp = new Date(row.startTime)
+                const now = new Date()
+                const diff = moment.duration(moment(now).diff(moment(creationTimestamp)));
+                const duration = moment.duration(diff).format("D[d] H[h] m[m]");
+                return <span>{duration}</span>
+            },
         },
         {
             title: '创建时间',
             search: false,
+            
             render:(_,row)=>{
-                const seconds = Math.round(Number(row.age) / 1000/1000/1000)
-                var hh =  Math.round(seconds/3600)
-                if (hh >1) { hh = hh-1 }
-                const mm = Math.round((seconds%3600)/60)
-                const ss = Math.round(seconds%60)
-                return <Tooltip title={  (hh>0?hh+'小时':'') +  (mm>0?mm+'分钟':'') + (ss>0?ss+'秒':'0s')}><a href='#'>{row.startTime}</a> </Tooltip> 
+                return <a href='#'>{row.startTime}</a>
             },
         },
         {
@@ -200,10 +253,12 @@ const Pods: React.FC = (props) => {
                     { title: '容器名称', dataIndex: 'name', key: 'name' },
                     { title: '容器ID', dataIndex: 'id', key: 'id' },
                     { title: '镜像版本号', dataIndex: 'image', key: 'image' },
-                    //   { title: 'CPU Request', dataIndex: 'cpuRequest', key: 'cpuRequest' },
-                    //   { title: 'CPU Limit', dataIndex: 'cpuLimit', key: 'cpuLimit' },
-                    //   { title: '内存 Request', dataIndex: 'memoryRequest', key: 'memoryRequest' },
-                    //   { title: '内存 Limit', dataIndex: 'memoryLimit', key: 'memoryLimit' },
+                      { title: 'CPU Request', dataIndex: 'requestCpu', key: 'requestCpu' },
+                      { title: 'CPU Limit', dataIndex: 'limitCpu', key: 'limitCpu' },
+                      { title: '内存 Request', dataIndex: 'requestMemory', key: 'requestMemory',
+                        render:(_,v) => { return <span>{(v.requestMemory/1024/1024).toFixed(0)} Mi</span>} },
+                        { title: '内存 Limit', dataIndex: 'limitMemory', key: 'limitMemory',
+                        render:(_,v) => { return <span>{(v.limitMemory/1024/1024).toFixed(0)} Mi</span>} },
                     { title: '重启次数', dataIndex: 'restartCount', key: 'restartCount' },
                     {
                         title: '状态', dataIndex: 'status', key: 'status',
@@ -211,8 +266,8 @@ const Pods: React.FC = (props) => {
                             return [
                                 <Tooltip title={row.state} color="geekblue" key="status">
                                     <Space direction="vertical">
-                                        <span>Readly:  {row.ready ? <Tag color="geekblue">{String(row.ready)}</Tag> : <Tag color="#f50">String(row.ready)</Tag>}</span>
-                                        <span>Started:  {row.started ? <Tag color="geekblue">{String(row.started)}</Tag> : <Tag color="#f50">String(row.started)</Tag>}</span>
+                                        <span>Readly:  {row.ready ? <Tag color="green">true</Tag> : <Tag color="red">false</Tag>}</span>
+                                        <span>Started:  {row.started ? <Tag color="green">true</Tag> : <Tag color="red">false</Tag>}</span>
                                     </Space>
                                 </Tooltip>
                             ]
@@ -231,6 +286,12 @@ const Pods: React.FC = (props) => {
 
     console.log(clusterId)
     console.log(node)
+    var subtitle = ""
+    if (workload) {
+        subtitle = "工作负载: " + workload
+    } else {
+        subtitle = '部署环境:  ' + appName
+    }
     var pageTitle = "实例管理     "
     var breadcrumb = [
         { path: '', breadcrumbName: '资源中心' },
@@ -238,7 +299,7 @@ const Pods: React.FC = (props) => {
     if (appName) {
         breadcrumb[0] = { path: '', breadcrumbName: '应用中心' }
         breadcrumb[1] = { path: '', breadcrumbName: '实例管理' }
-        pageTitle = pageTitle + ' - 部署环境:  ' + appName
+        pageTitle = pageTitle + subtitle
     } else if (node) {
         breadcrumb[0] = { path: '', breadcrumbName: '资源中心' }
         breadcrumb[1] = { path: '', breadcrumbName: '节点管理' }
@@ -304,11 +365,12 @@ const Pods: React.FC = (props) => {
                         rowKey={record => record.name}
                         columns={podColumns}
                         dateFormatter="string"
-                        pagination={{ pageSize: 1000 }}
+                        pagination={{ pageSize: 13 }}
                         headerTitle={`实例列表 - 上次更新时间：${moment(time).format('HH:mm:ss')}`}
                         expandable={{ expandedRowRender }}
                         request={async (params, sort) => {
                             params.cid = clusterId
+                            params.workload = workload
                             if(!params.namespace && namespace) {
                                 params.namespace = namespace
                             }
@@ -355,14 +417,20 @@ const Pods: React.FC = (props) => {
                                 }}> <Button key='button' danger style={{ display: did > 0 ? 'block' : 'none' }}>清空实例</Button></Popconfirm>,
                                 <Popconfirm title="确定要删除部署吗?删除部署后,集群中的Deployment将被删除,所有对应实例将全部清空,但平台元数据将保留！"
                                 onConfirm={async () => {
-                                    console.log(deploymentInfo)
-                                    const resp = await DeleteDeploymentWithOutDB(did)
+                                    console.log(did)
+                                    console.log(namespace)
+                                    console.log(clusterId)
+                                    console.log(appName)
+
+                                    setPolling(1000)
+                                    const resp = await deleteDeployment(did,Number(clusterId),String(namespace),String(appName),String(workload))
                                     if (resp.success) {
                                             message.success('删除部署成功');
                                     } else {
                                             message.error('删除部署失败！');
                                     }
-                                }}> <Button key='button' type="primary" danger style={{ display: did > 0 ? 'block' : 'none' }}>删除Deployment</Button></Popconfirm>,
+                                    
+                                }}> <Button key='button' type="primary" danger style={{ display: did != 0 ? 'block' : 'none' }}>删除集群资源</Button></Popconfirm>,
                             <Button key="3"
                                 onClick={() => { if (polling) { setPolling(undefined); return; } setPolling(2000); }} >
                                 {polling ? <LoadingOutlined /> : <ReloadOutlined />}
@@ -413,16 +481,16 @@ const Pods: React.FC = (props) => {
                     <EventListComponent clusterId={ Number(clusterId) } deployment={ appName?.toString() } namespace={ namespace?.toString() } ></EventListComponent>
                 </TabPane>
                 <TabPane tab="YAML" key="4"  disabled={ namespace==undefined || did==0?true:false } >
-                    <div style={{  height: 890 }}>
-                    <CodeMirror
-                        editorDidMount={editor => { editor.setSize('auto','780') }}
+                    <div >
+                    <CodeMirror className="code-mirror"
+                        editorDidMount={editor => {  editor.setSize('auto',document.body.clientHeight - 400) }}
                         value={yamlContent}
-                        options={{ mode:{name:'text/yaml'}, theme: 'monokai-bright',
-                            readOnly: true, lineNumbers:true, }} >
+                        options={{ mode:{name:'text/yaml'}, theme: 'ayu-dark',
+                            readOnly:true, lineNumbers:true, }} >
                     </CodeMirror>
                     </div>
                 </TabPane>
-                <TabPane tab="详情&路由" key="5"  disabled={ namespace==undefined || did==0?true:false } >
+                <TabPane tab="详情&路由" key="5"  disabled={ namespace==undefined || did<=0?true:false } >
                 <ProDescriptions title="部署详情"  style={{ padding:15, } } dataSource={deploymentInfo} bordered  column={3} 
                   columns={[
                     { title: '应用名称', dataIndex: 'appName' },
@@ -528,14 +596,21 @@ const Pods: React.FC = (props) => {
                               ]}
                      rowKey="id" headerTitle={false} search={false} options={false} pagination={false} />
                  <p>Shell环境（仅做默认环境，登录后可切换至其他环境）</p>
-                 <p><Radio checked>/bin/bash</Radio></p>
+                 <p> 
+                 <Radio.Group defaultValue={'/bin/bash'} onChange={(e) => {
+                    terminalShellTypeHandler(e.target.value)
+                 }}>
+                    <Radio checked value={'/bin/bash'}>/bin/bash</Radio>
+                    <Radio value={'/bin/sh'}>/bin/sh</Radio>
+                 </Radio.Group>
+                 </p>
             </Modal>
 
             <Modal title={`Web Console for KubeLilin --  Pod:${selectedPodName}, Container:${selectedContainerName}` } centered visible={visibleTerminal} width={1580}  destroyOnClose footer={[]} onCancel={()=>{ setVisibleTerminal(false) } } >
-                <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} 
+                <WebTerminal tenantId={ Number(currentUser?.group)} clusterId={Number(clusterId)} terminalShell={terminalShellType}
                         namespace={selectedNamespace} pod_Name={selectedPodName} container_Name={selectedContainerName}></WebTerminal>
             </Modal>
-            <ExecDeployment visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} deployImage={deploymentInfo?.lastImage} ></ExecDeployment>
+            <ExecDeployment tableRef={false} visibleFunc={[execFormVisible, setExecFormVisible]} deploymentId={dpId} deployImage={deploymentInfo?.lastImage} ></ExecDeployment>
         </PageContainer>)
 
 }

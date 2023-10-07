@@ -6,7 +6,7 @@ import ProForm, {
 } from '@ant-design/pro-form';
 import ProCard from '@ant-design/pro-card';
 import { Select, Input, Checkbox, Modal, InputNumber, Space, Alert, notification, Drawer,
-    Form,  Button } from 'antd';
+    Form,  Button, message } from 'antd';
 import ProFormItem from '@ant-design/pro-form/lib/components/FormItem';
 import { BindCluster, BindNameSpace, CreateDeploymnet, CreateDeploymnetLimit, GetDeploymentFormInfo, GetDeploymentLevels } from './service';
 import { DeploymentStep,DeploymentLevel } from './devlopment_data';
@@ -19,6 +19,7 @@ export interface Props {
     tableRef: any,
     isEdit: boolean,
     id?: number,
+    envLevel:string,
 }
 function BindNamespaceSelect(clusterId: any, handler: any) {
     let req = BindNameSpace(clusterId)
@@ -49,6 +50,8 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
     const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([]);
     const [deploymentLevels, deploymentLevelsHandler] = useState<any>()
     
+    console.log(props.envLevel)
+
     function BindClusterSelect() {
         let req = BindCluster()
         req.then(x => { clusterHandler(x) })
@@ -58,6 +61,9 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
 
     useEffect(() => {
         BindDeploymentLevels()
+        formMapRef.current.forEach((formInstanceRef) => {
+            formInstanceRef.current?.setFieldsValue({level:'release'})
+        })
         BindClusterSelect()
         if (props.isEdit) {
             let req = GetDeploymentFormInfo(props.id)
@@ -78,10 +84,13 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
             })
         } else {
             openScvHandler(true)
+            var levelSelected = 'dev'
+            if(props.envLevel != 'all'){
+                levelSelected = props.envLevel
+            }
             formMapRef.current.forEach((formInstanceRef) => {
-
                 formInstanceRef.current?.setFieldsValue({
-                    level: 'dev',
+                    level: levelSelected,
                     serviceEnable: 'true',
                     serviceAway: 'ClusterPort',
                     servicePort: '8080',
@@ -96,7 +105,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
     }, props.visibleFunc)
     return (
 
-        <ProCard>
+       
             <StepsForm<DeploymentStep>
                 formMapRef={formMapRef}
                 onFinish={async (value) => {
@@ -116,7 +125,7 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                 stepsFormRender={(dom, submitter) => {
                     return (
                         <Drawer
-                            title="部署环境配置"
+                            title="部署环境配置(快速)"
                             width={880}
                             onClose={() => { props.visibleFunc[1](false) }}
                             visible={props.visibleFunc[0]}
@@ -140,19 +149,20 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                         } else {
                             value.appId = parseInt(props.appId);
                             value.clusterId = clusterId;
-                            value.name = (`${value.level}-${props.appName}-${clusterName}`).trim();
+                            value.name = (`${props.appName}-${value.nickname}`).trim();
+                            //value.name = (`${value.level}-${props.appName}-${clusterName}`).trim();
                         }
                         let res = await CreateDeploymnet(value)
-                        if (res.success == false) {
-                            notification.open({
-                                message: res.message,
-                                icon: <CloseCircleTwoTone />,
-                            });
-                        } else {
+                        console.log(res)
+                        if (res && res.success ) {
                             notification.open({
                                 message: "保存成功",
                                 icon: <SmileOutlined style={{ color: '#108ee9' }} />,
                             });
+                          
+                        } else {
+                           message.error('保存部署信息失败！')
+                           props.visibleFunc[1](false)
                         }
                         dpStepHandler(res.data)
                         return res.success
@@ -160,8 +170,19 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                 >
                   <ProCard title="部署目标" bordered headerBordered
                         collapsible style={{ marginBlockEnd: 16, minWidth: 800, maxWidth: '100%', }} >
-                    <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }]}>
-                        <Input ></Input>
+                    <ProForm.Item label="部署名称" name='nickname' rules={[{ required: true, message: '请输入部署名称' }, { pattern: /^[a-z][a-z0-9-]*[a-z]$/,message: '字段只能包含小写字母，数字和中划线，且必须以小写字母开头并以字母结尾!',}]}>
+                        <Input placeholder="请输入应用名称(仅限小写字母、数字和'-')" 
+                            onInput={(e) => { 
+                                // e.currentTarget.value = e.currentTarget.value.replace(/[^a-z\-]/g, "") 
+                                let value = e.currentTarget.value;
+                                if (!/^[a-z]/.test(value)) {
+                                  e.currentTarget.value = ''
+                                  return
+                                }
+                              
+                                value = value.replace(/[^a-z0-9-]/g, '');
+                                e.currentTarget.value = value;
+                            }} ></Input>
                     </ProForm.Item>
                     <ProForm.Item label="环境级别" name='level'>
                         <Select options={deploymentLevels}  disabled={props.isEdit} 
@@ -279,7 +300,6 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
                    </ProCard>                         
                 </StepsForm.StepForm>
             </StepsForm>
-        </ProCard>
     )
 }
 

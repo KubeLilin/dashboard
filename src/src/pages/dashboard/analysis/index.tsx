@@ -72,7 +72,7 @@ const Analysis: FC = () => {
         </div>
         <div className={styles.content}>
           <div className={styles.contentTitle}>
-            KubeLilin Dashbroad
+            KubeLilin Dashboard
           </div>
           <div>
             KubeLilin is an PaaS Platform, An Cloud-Native Application Platform for Kubernetes.
@@ -132,136 +132,184 @@ const Analysis: FC = () => {
         </Card>)
   };
   
-  const radialBarConfig = {
+  const CpuRequestLimitsConfig = {
     data:[
-      { name:'Nodes', star: clusterMetrics?.nodes.count },
-      { name: 'ReplicaSets', star:  workloadsMetrics?.replicaSets },
-      { name: 'StatefulSets',star:  workloadsMetrics?.statefulSets },
-      { name: 'DaemonSets', star:  workloadsMetrics?.daemonSets },
-      { name: 'Deployment', star: workloadsMetrics?.deployment },
-      { name: 'Pods running', star: workloadsMetrics?.podsRunning },
-      { name: 'Pods', star: workloadsMetrics?.podsCount },
+      { name:'Limits', star: clusterMetrics?.limit?.cpu, color: '#1ad5de', },
+      { name:'Requests', star: clusterMetrics?.requests?.cpu , color: '#a0ff03',},
+      { name:'Usage', star: clusterMetrics?.usage?.cpu ,color: '#e90b3a' },
     ], 
-    xField: 'name', yField: 'star',
-    width:165,  height:165, autoFit:false,label: { style: { fill: 'black', opacity: 0.6, fontSize: 12 }, rotate: true },
-    maxAngle: 270, radius: 0.8, innerRadius: 0.2, colorField: 'star',barBackground: {}, barStyle: { lineCap: 'round', },
-    color: ({star}) => {
-      if (star > 20) { return '#6349ec' } else if (star > 10) { return '#ff9300' } return '#ff93a7';
+    theme: 'dark',
+    barBackground: {
+      style: {
+        fill: 'rgba(255,255,255,0.45)',
+      },
     },
+    tooltip: {
+      formatter: (datum) => {
+        return {
+          name:datum.name,
+          value: datum.star.toFixed(2) + ' Cores',
+        };
+      },
+    },
+    xField: 'name', yField: 'star',
+    width:180,  height:180, autoFit:false,label: { style: { fill: 'black', opacity: 0.1, fontSize: 8 }, rotate: true },
+    maxAngle: 270, radius: 0.8, innerRadius: 0.2, colorField: 'star',   barStyle: { lineCap: 'round', },
+
+  };
+
+  const MemoryRequestLimitsConfig = {
+    data:[
+      { name:'Limits', star: Number(clusterMetrics?.limit?.memory) / 1024 / 1024 /1024 },
+      { name:'Requests', star: Number(clusterMetrics?.requests?.memory) / 1024 / 1024 / 1024  },
+      { name:'Usage', star: (Number(clusterMetrics?.usage?.memory) / 1024 / 1024/ 1024) },
+    ], 
+    theme: 'dark',
+    barBackground: {
+      style: {
+        fill: 'rgba(255,255,255,0.45)',
+      },
+    },
+    tooltip: {
+      formatter: (datum) => {
+        return {
+          name:datum.name,
+          value: datum.star.toFixed(2) + ' GiB',
+        };
+      },
+    },
+    xField: 'name', yField: 'star',
+    width:180,  height:180, autoFit:false,label: { style: { fill: 'black', opacity: 0.1, fontSize: 8 }, rotate: true },
+    maxAngle: 270, radius: 0.8, innerRadius: 0.2, colorField: 'star',  barStyle: { lineCap: 'round', },
+
   };
   
   return (
     <PageContainer 
-      header={{ title:'Welcome ', subTitle:"kubernetes base",extra:
-        [<Button key="1" type="primary" onClick={()=>{
-          loadMetrics(clusterId)
-        }}>刷新</Button>,] }}
+      header={{ title:'Welcome ', subTitle:"kubernetes base",
+      // extra:
+      //   [<Button key="1" type="primary" onClick={()=>{
+      //     loadMetrics(clusterId)
+      //   }}>刷新</Button>,] 
+      }}
       content={ <PageHeaderContent currentUser={{userid: '00000001', }} /> }
       extraContent={<ExtraContent />} >
     <GridContent>
         <Row gutter={[16, 16]}>
-          <Col span={4}>
-            <Card hoverable title="Overview" 
-                bodyStyle={{ textAlign: 'center',height:270 }} bordered={true} >
-              <Space direction="vertical" style={{ marginTop:0 }}>  
-                <RadialBar {...radialBarConfig} />
-                <div>Cluster ID: {cluster}</div>
-              </Space>
-            </Card>
-          </Col>
-          <Col span={4} >
-            <Card title="Node Information"  hoverable
-                bodyStyle={{ textAlign: 'center', height:270 }} bordered={false} >
-                  <Space direction="vertical">
-                    <Progress  type="dashboard" percent={100}  success={{ percent: (Number(clusterMetrics?.nodes.available)/ Number(clusterMetrics?.nodes.count)) *100 }}  format={() => clusterMetrics?.nodes.available +'/'+  clusterMetrics?.nodes.count }   />
-                    <Space direction="vertical" >
-                      <Text>Ready: {clusterMetrics?.nodes.available}</Text>
-                      <Text>All Nodes: {clusterMetrics?.nodes.count}</Text>
-                      <Text>Usage: - / - </Text>
-                    </Space>
-                  </Space>
-               </Card>
-          </Col>
-          <Col span={4}  style={{ marginBottom: 12 }}>
-          <Card title="Pods Limit" hoverable
-              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
-              bordered={false} >
-               <Space direction="vertical">
-                  <Progress  type="dashboard" percent={100}  success={{ percent: (Number(clusterMetrics?.usage.pods)/Number(clusterMetrics?.capacity.pods))*100 }} 
-                     format={() =>  clusterMetrics?.capacity.pods}   />
-                    <Space direction="vertical">
-                      <div>Capacity: {clusterMetrics?.capacity.pods}</div>
-                      <div>Limit: {clusterMetrics?.capacity.pods}</div>
-                      <div>Usage: - / - </div>
-                    </Space>
-                </Space>
-            </Card>
-          </Col>
-          <Col span={4}  >
-          <Card title="Total CPU (Core)" hoverable
-              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }} bordered={false}  >
-                <Space  direction="vertical">
-                  <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.cpu)} value={Number(clusterMetrics?.usage.cpu)} forceFit padding={[0, 0, 0, 0]}
+
+        <Col span={4}  >
+          <Card title="CPU Usage (Cores)" hoverable
+              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }} bordered={true}  >
+                <Space  direction="vertical" style={{width:240}}>
+                  <Liquid height={180} width={180} min={0} max={Number(clusterMetrics?.capacity.cpu)} value={Number(clusterMetrics?.usage.cpu)} forceFit padding={[0, 0, 0, 0]}
                   statistic={{
                     formatter: (value) => `${((Number(clusterMetrics?.usage.cpu)/Number(clusterMetrics?.capacity.cpu))*100).toFixed(2)}%`,
                   }} />
                     <Space direction="vertical">
-                      <div>Usage: { clusterMetrics?.usage.cpu.toFixed(2)}</div>
-                      <div>Allocatable: {clusterMetrics?.allocatable.cpu.toFixed(2)}</div>
-                      <div>Capacity: {clusterMetrics?.capacity.cpu.toFixed(2)}</div>
+                      <div>CPU(%): { clusterMetrics?.usage.cpu.toFixed(2)} / {clusterMetrics?.capacity.cpu.toFixed(2)} Cores</div>
                     </Space>
                 </Space>
             </Card>
           </Col>
 
           <Col span={4}>
-          <Card title="Total Memory (GiB)" hoverable
+          <Card title="Memory Usage (GiB)" hoverable
               bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
-              bordered={false} >
-                <Space direction="vertical">
-                  <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.memory)}
+              bordered={true} >
+                <Space direction="vertical"  style={{width:240}}>
+                  <Liquid height={180} width={180} min={0} max={Number(clusterMetrics?.capacity.memory)}
                   value={Number(clusterMetrics?.usage.memory)} forceFit padding={[0, 0, 0, 0]}
                   statistic={{
                     formatter: (value) => `${((Number(clusterMetrics?.usage.memory)/Number(clusterMetrics?.capacity.memory))*100).toFixed(2)}%`,
                   }} />
                     <Space direction="vertical" >
-                      <div>Usage: { (Number(clusterMetrics?.usage.memory)/1024/1024/1024).toFixed(2)} GiB</div>
-                      <div>Allocatable: {(Number(clusterMetrics?.allocatable.memory)/1024/1024/1024).toFixed(2)} GiB</div>
-                      <div>Capacity: {(Number(clusterMetrics?.capacity.memory)/1024/1024/1024).toFixed(2)} GiB</div>
+                      <div>Memory(%): { (Number(clusterMetrics?.usage.memory)/1024/1024/1024).toFixed(2)} / {(Number(clusterMetrics?.capacity.memory)/1024/1024/1024).toFixed(2)} GiB</div>
                     </Space>
                 </Space>
             </Card>
           
           </Col>
 
+          <Col span={4}>
+            <Card hoverable title="CPU Core (Requests/Limits)" 
+                bodyStyle={{ textAlign: 'center',height:270 }} bordered={true} >
+                   <Space direction="vertical" style={{ marginTop:0 }}>  
+             <RadialBar {...CpuRequestLimitsConfig} />
+             <Text>Requests:{(Number(clusterMetrics?.requests?.cpu) ).toFixed(2)} Limits: { (Number(clusterMetrics?.limit?.cpu) ).toFixed(2) }</Text>
+             </Space>
+            </Card>
+          </Col>
+
+          <Col span={4}>
+            <Card hoverable title="Memory GiB (Requests/Limits)" 
+                bodyStyle={{ textAlign: 'center',height:270 }} bordered={true} >
+                   <Space direction="vertical" style={{ marginTop:0 }}>  
+             <RadialBar {...MemoryRequestLimitsConfig} />
+             <Text>Requests:{(Number(clusterMetrics?.requests?.memory) / 1024 / 1024 / 1024).toFixed(2)} Limits: { (Number(clusterMetrics?.limit?.memory) / 1024 / 1024 /1024).toFixed(2) }</Text>
+
+             </Space>
+            </Card>
+          </Col>
+
+        
+
+          <Col span={4} >
+            <Card title="Nodes"  hoverable
+                bodyStyle={{ textAlign: 'center', height:270 }} bordered={true} >
+                  <Space direction="vertical">
+                    <Progress width={180}  type="circle" percent={100}  success={{ percent: (Number(clusterMetrics?.nodes.available)/ Number(clusterMetrics?.nodes.count)) *100 }}  format={() => clusterMetrics?.nodes.available +'/'+  clusterMetrics?.nodes.count }   />
+                    <Space direction="vertical" >
+                      <Text>Node Ready:  {clusterMetrics?.nodes.available} /  {clusterMetrics?.nodes.count}</Text>
+
+                    </Space>
+                  </Space>
+               </Card>
+          </Col>
           <Col span={4}  style={{ marginBottom: 12 }}>
+          <Card title="Pods" hoverable
+              bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
+              bordered={true} >
+               <Space direction="vertical">
+                  <Progress  width={180} type="circle" percent={100}  success={{ percent: (Number(clusterMetrics?.usage.pods)/Number(clusterMetrics?.capacity.pods))*100 }} 
+                     format={() =>  clusterMetrics?.capacity.pods}   />
+                    <Space direction="vertical">
+                      <div>Pods Ready: {clusterMetrics?.usage.pods} / {clusterMetrics?.capacity.pods}  </div>
+                    </Space>
+                </Space>
+            </Card>
+          </Col>
+
+          {/* <Col span={4}  style={{ marginBottom: 12 }}>
           <Card title="Local Storage (GB)" hoverable
               bodyStyle={{ textAlign: 'center',height:270,marginTop:0  }}
               bordered={false} >
-               <Space direction="vertical">
-                  <Liquid height={130} width={130} min={0} max={Number(clusterMetrics?.capacity.storage)}
+               <Space direction="vertical" style={{width:240}}>
+                  <Liquid height={180} width={180} min={0} max={Number(clusterMetrics?.capacity.storage)}
                   value={Number(clusterMetrics?.usage.storage)} forceFit padding={[0, 0, 0, 0]}
                   statistic={{
                     formatter: (value) => Number(clusterMetrics?.usage.storage)>0?`${((Number(clusterMetrics?.usage.storage)/Number(clusterMetrics?.capacity.storage))*100).toFixed(2)}%`:'0.00%',
                   }} />
                     <Space direction="vertical">
-                    <div>Usage: { (Number(clusterMetrics?.usage.storage)/1024/1024/1024).toFixed(2)} GB</div>
-                      <div>Allocatable: {(Number(clusterMetrics?.allocatable.storage)/1024/1024/1024).toFixed(2)} GB</div>
-                      <div>Capacity: {(Number(clusterMetrics?.capacity.storage)/1024/1024/1024).toFixed(2)} GB</div>
+                    <div>Storage(%): { (Number(clusterMetrics?.usage.storage)/1024/1024/1024).toFixed(2)} /  {(Number(clusterMetrics?.capacity.storage)/1024/1024/1024).toFixed(2)} GBi</div>
                     </Space>
                 </Space>
             </Card>
-          </Col>
+          </Col> */}
  
         </Row>
         <Row gutter={[18, 18]}>
-          <Col span={24}  style={{ marginBottom: 12 }}>
+
+          <Col span={24}  style={{  alignItems:'center',justifyContent:'center' }} >
             <Card title="Workloads Information" bordered={true}  >
               <Row >
+              <Col span={1}  >
+ 
+              </Col>
+
                 <Col span={3} style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }}  >
                 <Space>
-                  <Progress  type="dashboard" percent={100}  success={{ percent: (Number(workloadsMetrics?.podsRunning)/Number(workloadsMetrics?.podsCount))*100 }} 
+                  <Progress  width={160}  type="dashboard" percent={100}  success={{ percent: (Number(workloadsMetrics?.podsRunning)/Number(workloadsMetrics?.podsCount))*100 }} 
                     format={(percent) => 
                       <Space direction="vertical" style={{fontSize:16}}>
                           <span>Pods</span> 
@@ -273,7 +321,7 @@ const Analysis: FC = () => {
                 </Col>
                 <Col span={3} style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
-                <Progress  type="circle" percent={100}   format={(percent) => 
+                <Progress  width={160} type="circle" percent={100}   format={(percent) => 
                     <Space direction="vertical" style={{fontSize:16}}>
                         <span>Deployment</span> 
                         <span>{workloadsMetrics?.deployment + '/' +workloadsMetrics?.deployment  }</span> 
@@ -283,7 +331,7 @@ const Analysis: FC = () => {
                 </Col>
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
-                <Progress  type="circle" percent={100}    format={(percent) => 
+                <Progress  width={160} type="circle" percent={100}    format={(percent) => 
                   <Space direction="vertical" style={{fontSize:16}}>
                   <span>StatefulSets</span> 
                   <span>{workloadsMetrics?.statefulSets + '/' +workloadsMetrics?.statefulSets  }</span> 
@@ -293,7 +341,7 @@ const Analysis: FC = () => {
                 </Col>
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
-                <Progress  type="circle" percent={100}   format={(percent) => 
+                <Progress  width={160} type="circle" percent={100}   format={(percent) => 
                   <Space direction="vertical" style={{fontSize:16 }}>
                     <span>DaemonSets</span> 
                     <span>{workloadsMetrics?.daemonSets + '/' +workloadsMetrics?.daemonSets  }</span> 
@@ -303,7 +351,7 @@ const Analysis: FC = () => {
                 </Col>
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
-                <Progress  type="circle" percent={100}  format={(percent) => 
+                <Progress  width={160}  type="circle" percent={100}  format={(percent) => 
                   <Space direction="vertical" style={{fontSize:16 }}>
                     <span>CronJob</span> 
                     <span>{workloadsMetrics?.cronJobs + '/' +workloadsMetrics?.cronJobs  }</span> 
@@ -313,7 +361,7 @@ const Analysis: FC = () => {
                 </Col>
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
-                <Progress  type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
+                <Progress  width={160} type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
                   <Space direction="vertical" style={{fontSize:16 }}>
                     <span>Job</span> 
                     <span>{workloadsMetrics?.jobs + '/' +workloadsMetrics?.jobs  }</span> 
@@ -323,7 +371,7 @@ const Analysis: FC = () => {
                 </Col>
                 <Col span={3}  style={{marginLeft:12}}>
                 <Card hoverable bodyStyle={{ textAlign: 'center' }} >
-                <Progress  type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
+                <Progress  width={160}  type="circle" percent={100}  success={{ percent: 100 }}  format={(percent) => 
                     <Space direction="vertical" style={{fontSize:16 }}>
                       <span>ReplicaSet</span> 
                       <span>{workloadsMetrics?.replicaSets + '/' +workloadsMetrics?.replicaSets  }</span> 
@@ -331,12 +379,13 @@ const Analysis: FC = () => {
                 } />    
                 </Card>       
                 </Col>
-              
+                <Col span={1}> </Col>
               </Row>
             </Card>
           </Col>
         </Row>
-        <Row>
+
+        <Row style={{marginTop:15}} >
           <TableListContent/>
         </Row>
     </GridContent>

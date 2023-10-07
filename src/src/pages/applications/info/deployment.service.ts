@@ -120,7 +120,7 @@ export async function GetPipelineById(id:number) {
 
 
 export async function RunPipeline(pipelineId:number, appId:number) {
-    let resData = await request<ApiResponse<number>>("/v1/application/runpipeline",{
+    let resData = await request<ApiResponse<number>>("/v1/application/runPipeline",{
         method:'POST',
         headers:{
             'Content-Type': 'application/json',
@@ -132,6 +132,22 @@ export async function RunPipeline(pipelineId:number, appId:number) {
     })
     return resData
 }
+
+export async function RunPipelineWithBranch(pipelineId:number, appId:number,branch:string) {
+    let resData = await request<ApiResponse<number>>("/v1/application/runPipelineWithBranch",{
+        method:'POST',
+        headers:{
+            'Content-Type': 'application/json',
+          },
+        data: {
+            id: pipelineId,
+            appid: appId,
+            branch:branch
+        }
+    })
+    return resData
+}
+
 
 export async function AbortPipeline(pipelineId:number, appId:number,taskId:number) {
     let resData = await request<ApiResponse<number>>("/v1/application/abortpipeline",{
@@ -215,4 +231,11 @@ export async function getRouterList(params: any) {
         params: params
     })
    return req
+}
+
+export async function GetDeploymentFormInfo(id?:number) {
+    let req=await request<ApiResponse<any>>(`/v1/deployment/deploymentById?dpId=${id}`,{
+        method:'GET',
+    })
+    return req
 }

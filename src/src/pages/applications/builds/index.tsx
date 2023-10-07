@@ -1,8 +1,8 @@
 import React, { SetStateAction, useState, Dispatch, useEffect, useRef, } from 'react';
-import {List,Card ,Tooltip,Button,Space,Empty,Tag,Modal,Dropdown,Menu, message } from 'antd'
+import {notification,List,Card ,Tooltip,Button,Space,Empty,Tag,Modal,Dropdown,Menu, message,Form } from 'antd'
 import { SettingOutlined,EditOutlined ,CloseCircleTwoTone,SyncOutlined,CheckCircleOutlined,CloseCircleOutlined,
-    EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone,ReloadOutlined,ExclamationCircleOutlined} from '@ant-design/icons'
-
+    SmileOutlined, EllipsisOutlined,PlayCircleFilled,PlusOutlined ,CheckCircleTwoTone,ReloadOutlined,ExclamationCircleOutlined} from '@ant-design/icons'
+import { ProFormSelect, ModalForm ,ProFormItem}  from '@ant-design/pro-form';
 import { Drawer } from 'antd'
 import ProForm, {
   ProFormText,
@@ -14,7 +14,7 @@ import ProDescriptions from '@ant-design/pro-descriptions';
 
 
 import { NewPipeline,GetPipelineList,RunPipeline,AbortPipeline,DeletePipeline,
-        GetPipelineDetails,GetPipelineLogs } from '../info/deployment.service'
+        GetPipelineDetails,GetPipelineLogs,GetDeploymentFormInfo ,GetAppGitBranches, RunPipelineWithBranch } from '../info/deployment.service'
 
 
 interface Props{
@@ -35,6 +35,11 @@ type BuildItem = {
         time: string
         task: string
         start: string
+    },
+    dsl:string,
+    lastCommit: {
+        Message:string,
+        Sha:string
     }
 }
 
@@ -49,6 +54,10 @@ const AppBuildList : React.FC<Props> = (props) => {
 
     const [buildList, setBuildList] = useState<BuildItem[]>([]);
 
+    const [runPipelineFormVis, setRunPipelineFormVis] = useState(false);
+    const [runPipelineForm] = Form.useForm();
+
+
     const [currentBuildItem,setCurrentBuildItem] = useState<BuildItem|undefined>(undefined)
     const [autoLogs, setAutoLogs] = useState(false);
 
@@ -59,7 +68,12 @@ const AppBuildList : React.FC<Props> = (props) => {
             if(res) {
                 appBuildList = res.data.map((v,i)=>{
                     var buildItem:BuildItem
-                    buildItem = { id:v.id, title: v.name ,taskId:Number(v.taskid) , lastBuildRecords:undefined }
+                    var commit = { Message:'--',Sha:'' }
+                    if (v.lastCommit != '') {
+                        commit = JSON.parse(v.lastCommit)
+                    }
+
+                    buildItem = { id:v.id, title: v.name ,taskId:Number(v.taskid) , lastBuildRecords:undefined ,lastCommit:commit,dsl:v.dsl }
                     return buildItem
                 })
                 console.log(appBuildList)
@@ -101,8 +115,6 @@ const AppBuildList : React.FC<Props> = (props) => {
                 console.log(tasks)
                 setBuildList(appBuildList)
             })
-        }).catch(()=>{
-            setBuildList(appBuildList)
         })
     }
 
@@ -111,7 +123,6 @@ const AppBuildList : React.FC<Props> = (props) => {
         console.log(props.AppId)
         LoadData(props.AppId)
 
-
         var id: NodeJS.Timeout
         if (props.AutoLoad) {
             id =  setInterval(()=>{
@@ -119,6 +130,8 @@ const AppBuildList : React.FC<Props> = (props) => {
             },5500)
         }
         return () => { clearInterval(id) }
+
+
 
         // var buildList1:BuildItem[] =[]
         // buildList1.push({title:'dev-nginx-cls-hbktlqm5', lastBuildRecords:undefined    })
@@ -187,17 +200,9 @@ const AppBuildList : React.FC<Props> = (props) => {
                                 actions={[ 
                                 <Tooltip title="开始构建">
                                     <PlayCircleFilled  key="building" style={{ fontSize:23}} twoToneColor="#52c41a" 
-                                     onClick={(e)=>{  
-                                                    e.stopPropagation()
-                                                    confirm({
-                                                    title: '要构建此任务吗?',
-                                                    icon: <ExclamationCircleOutlined />,
-                                                    content: '构建时间较长，请耐心等待',
-                                                    onOk : async ()=> {
-                                                        const res = await RunPipeline(item.id,props.AppId)
-                                                        LoadData(props.AppId)
-                                                        console.log(res.data)
-                                                    } })
+                                     onClick={(e)=>{ e.stopPropagation()
+                                        setRunPipelineFormVis(true)
+                                        runPipelineForm.setFieldsValue({ id:item.id, })
                                       }} /></Tooltip>,
                                 <Tooltip title="设置"><SettingOutlined onClick={()=>{ 
                                     history.push(`/devops/pipeline?id=${item.id}&name=${item.title}&appid=${props.AppId}&appname=${props.AppName}`)
@@ -235,26 +240,69 @@ const AppBuildList : React.FC<Props> = (props) => {
                                 } ></Dropdown.Button> </Tooltip>,
                             ]}> 
                             
-                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}  style={{ height:30, display: !item.lastBuildRecords?'block':'none' }}>
+                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}  style={{ height:46, display: !item.lastBuildRecords?'block':'none' }}>
                             {/* <a href=''>立即构建  </a> */}
                             </Empty>
 
-                            <Space direction='vertical' size={8} style={{ height:95, display: item.lastBuildRecords?'block':'none' }}>
+                            <Space direction='vertical' size={8} style={{ height:110, display: item.lastBuildRecords?'block':'none' }}>
                                 <div style={{ display: (item.lastBuildRecords?.status=='completed' && item.lastBuildRecords?.success)?'block':'none' }}>
-                                    <CheckCircleTwoTone style={{ fontSize:20}} twoToneColor="#52c41a" />
-                                    <span style={{marginLeft: 8,fontSize:16 , color:"green"}}>构建成功</span>
+                                    <CheckCircleTwoTone style={{ fontSize:18}} twoToneColor="#52c41a" />
+                                    <span style={{marginLeft: 8,fontSize:18 , color:"green"}}>构建成功</span>
                                 </div>
                                 <div style={{ display: (item.lastBuildRecords?.status=='completed' && !(item.lastBuildRecords?.success))?'block':'none' }}>
-                                    <CloseCircleTwoTone style={{ fontSize:20}} twoToneColor="red" /> 
-                                    <span style={{marginLeft: 8,fontSize:16 , color:"red"}}>构建失败</span>
+                                    <CloseCircleTwoTone style={{ fontSize:18}} twoToneColor="red" /> 
+                                    <span style={{marginLeft: 8,fontSize:18 , color:"red"}}>构建失败</span>
                                 </div>
                                 <div style={{ display: item.lastBuildRecords?.status=='running'?'block':'none' }}>
-                                    <SyncOutlined style={{ fontSize:20 }}  twoToneColor="#06f"  spin /> 
-                                    <span style={{marginLeft: 8,fontSize:16 ,fontWeight:"bold", color:"#06f"}}>正在构建</span>
+                                    <SyncOutlined style={{ fontSize:18 }}  twoToneColor="#06f"  spin /> 
+                                    <span style={{marginLeft: 8,fontSize:18 ,fontWeight:"bold", color:"#06f"}}>正在构建</span>
                                 </div>
-                                <span>管理员: 手动触发 </span>
-                                <span>耗时: {item.lastBuildRecords?.time} </span>
-                                <span>任务: <a href=''> #{item.lastBuildRecords?.task} </a> </span>
+                                <span>当前任务:  <a > #{item.lastBuildRecords?.task} </a> </span>
+                                <span>执行耗时:  {item.lastBuildRecords?.time} </span>
+                                <span onClick={(e)=>{
+                                    const jobj = JSON.parse(item.dsl)
+                                    var gitAddr:string = jobj[0]?.steps[0]?.content.git
+                                    if (gitAddr.length > 0){
+                                        gitAddr = gitAddr.replace('.git','')
+                                        console.log(gitAddr)
+                                        gitAddr = gitAddr + '/-/commit/' + item.lastCommit.Sha
+                                        window.open(gitAddr,'_blank')
+
+                                    }
+                                    e.stopPropagation()
+                                }}>代码提交: <Tooltip title={item.lastCommit?.Message}>
+                                <img style={{width:14,height:14}}  src='../git_v2.png'  />
+                                <Tag color='blue'>{item.dsl?JSON.parse(item.dsl)[0]?.steps[0]?.content.branch:'unkown'}</Tag>
+                                </Tooltip>
+                                </span>
+                                <span>当前部署:
+                                <a style={{  textDecorationLine: 'underline' }} onClick={async(e)=>{
+                                    e.stopPropagation()
+                                    var deploymentId = 0
+                                    const itemDsl = JSON.parse(item.dsl)
+                                    const deployStage =  itemDsl.filter((x:any)=>x.name=="部署")
+                                    if (deployStage.length > 0) {
+                                        const deployStep = deployStage[0].steps.filter((x:any)=>x.key=="app_deploy")
+                                        if (deployStep.length > 0) {
+                                            console.log(deployStep[0].content)
+                                            if (deployStep[0].content.depolyment) {
+                                                deploymentId = deployStep[0].content.depolyment
+                                            }
+                                        }
+                                    }
+                                    console.log(deploymentId)
+                                    if (deploymentId > 0) {
+                                        const res = await GetDeploymentFormInfo(deploymentId)
+                                        if (res.success) {
+                                            console.log(res.data)
+                                             // history.push(`/resources/pods?did=${deploymentId}`)
+                                            history.push(`/resources/pods?did=${deploymentId}&app=${res.data.name}&cid=${res.data.clusterId}&ns=${res.data.namespace}`)
+                                        }
+                                    } else {
+                                        message.error("无部署实例")
+                                    }
+                                }}>  查看部署实例</a>
+                                </span>
                             </Space>
                         
                         </Card>
@@ -299,6 +347,49 @@ const AppBuildList : React.FC<Props> = (props) => {
                         }}>
             </textarea>
             </Drawer>
+
+
+            <ModalForm title="构建流水线" form={runPipelineForm} width={400} visible={runPipelineFormVis} onVisibleChange={setRunPipelineFormVis}
+                modalProps={{destroyOnClose:true}}
+                onFinish={async (fromData) => {
+                    console.log(fromData)
+                    var res
+                    if (fromData.branche == '') {
+                        res = await RunPipeline(fromData.id,props.AppId)
+                        if (res.success == false) {
+                            res = await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                        }
+                    } else {
+                       res = await RunPipelineWithBranch(fromData.id,props.AppId,fromData.branche)
+                    }
+
+                    if (res && res.success) {
+                        notification.open({
+                            message: '构建已开始',
+                            description: `构建已开始，任务ID：${res.data}`,
+                            icon: <SmileOutlined style={{ color: '#108ee9' }} />,
+                        })
+                    } else {
+                       message.error("构建失败")
+                    }
+                    
+                    LoadData(props.AppId)
+                    return true
+                }} >
+                <ProFormItem name="id" hidden >
+                    <ProFormText ></ProFormText>
+                </ProFormItem>
+                <ProFormItem name="branche" label="构建分支" initialValue={''}>
+                    <ProFormSelect request={async()=>{
+                            var namesRes = await GetAppGitBranches( props.AppId) 
+                            var list = [ {label:'初始化',value:''} ] 
+                            if (namesRes.data.branches){
+                                list.push(... namesRes.data.branches.map((item)=> ({label: item ,value:item}) ))
+                            } 
+                            return list
+                    }} ></ProFormSelect>
+                </ProFormItem>
+            </ModalForm>
         </div>
         
         )

@@ -97,16 +97,22 @@ const Pipeline : React.FC = () => {
                     onStepItemClick(stagesDSL[0].steps[0],0,0)
                 },50)
             } else {
+                // new pipeline or no saved
                 setCurrentStageName(initStages[0].name)
                 setAllStages([...initStages])
             }
             setLoaded(true)
+            return resp.data.language
+        }).then((language)=>{
+            getAppLanguages().then((languages)=>{
+                setAppLanuages(languages)
+                console.log(language)
+                buildForm.current?.setFieldsValue({buildEnv:language})
+                selectedLanguageComilpeImages(languages,language)
+            })
         })
 
-        getAppLanguages().then((x)=>{
-            setAppLanuages(x)
-            console.log(x)
-        })
+       
         
     },[onLoaded])
 
@@ -117,6 +123,11 @@ const Pipeline : React.FC = () => {
 
     const removeStage = () => {
         if(allStages.length > 0){
+            if (allStages[currentStageIndex].name == '代码'){
+                message.error("不能删除代码阶段")
+                return 
+            }
+
             allStages.splice(currentStageIndex,1)
             bindAllStages()
         }
@@ -124,6 +135,10 @@ const Pipeline : React.FC = () => {
 
     const removeStep = (stepIndex:number) => {
         if(allStages[currentStageIndex].steps.length > 0) {
+            if (allStages[currentStageIndex].steps[stepIndex].key == 'git_pull') {
+                message.error("不能删除拉取代码步骤")
+                return
+            }
             allStages[currentStageIndex].steps.splice(stepIndex,1)
             setAllStages([...allStages])
             setCurrentStageSetpIndex(0)
@@ -167,6 +182,20 @@ const Pipeline : React.FC = () => {
     const onSavePipeline = async () => {        
         const key = "savePipeline"
         message.loading({ content: '保存中...', key });
+        //验证流水线信息必须所有子任务都保存才能保存流水线
+        var noStepSave = false
+        allStages.forEach(stage => {
+            stage.steps.forEach(step=>{
+                if(!step.save) {
+                    noStepSave = true
+                }
+            })
+        })
+        if (noStepSave) {
+            message.error({content:'保存流水线失败,请确认所有阶段的步骤都进行了保存！',key ,  style: { marginTop: '20vh' }})
+            return
+        }
+
         const res = await SavePipeline({
             appid: Number(appId),
             id: PipelineId,
@@ -190,10 +219,25 @@ const Pipeline : React.FC = () => {
             const languageId = query[0].id
             console.log(languageId)
             const dataList = await getBuildImageByLanguageId(languageId)
+            if(dataList.length > 0){
+                buildForm?.current?.setFieldsValue({buildImage:dataList[0].value})
+            }
             setLanguageCompileOptions(dataList)
         }
     }
 
+    const selectedLanguageComilpeImages = async (lanuages:[],languageName:string)=>{
+        const query:any = lanuages?.filter((v:any)=>v.name == languageName)
+        if (query && query.length > 0) {
+            const script = query[0].compileScripts
+            buildForm?.current?.setFieldsValue({buildScript: script})
+            const languageId = query[0].id
+            console.log(languageId)
+            const dataList = await getBuildImageByLanguageId(languageId)
+            setLanguageCompileOptions(dataList)
+            buildForm.current?.setFieldsValue({buildImage:dataList[0].value})
+        }
+    }
 
     const onStepItemClick = (item:StepItem,stageIndex:number,stepindex:number) => {
         if (allStages.length > 0 && allStages[stageIndex].steps.length > stepindex) {
@@ -348,7 +392,7 @@ const Pipeline : React.FC = () => {
                                 <div id="code_build" style={{ display: allStages.length>0&&allStages[currentStageIndex].steps.length>0?allStages[currentStageIndex].steps[currentStageSetpIndex].key=="code_build"?"block":"none" :"none"}}>
                                     <ProForm onValuesChange={onFormValuesChanged} formRef={buildForm} submitter={{ render:()=> [<Button type="primary" htmlType="submit">保存当前步骤</Button> ] }} 
                                         onFinish={onFormSave} >
-                                    <ProForm.Item name="buildEnv" label="构建环境" initialValue={"java"} rules={[{ required: true, message: '请选择构建环境' }]}>
+                                    <ProForm.Item name="buildEnv" label="构建环境" initialValue={""} rules={[{ required: true, message: '请选择构建环境' }]}>
                                         <CheckCard.Group style={{ width: '100%'  }} defaultValue={""}
                                             onChange={async (val)=>{
                                                 console.log(val)
@@ -361,7 +405,7 @@ const Pipeline : React.FC = () => {
                                                 </CheckCard.Group>
                                     </ProForm.Item>
                                     <ProForm.Item name="buildImage" rules={[{ required: true, message: '请选择构建环境' }]}>
-                                        <ProFormSelect label="构建镜像" width="md" options={languageCompileOptions} ></ProFormSelect>
+                                        <ProFormSelect label="构建镜像" width="md" options={languageCompileOptions}></ProFormSelect>
                                     </ProForm.Item>
                                     <ProForm.Item name="buildScript" initialValue={"# 编译命令，注：当前已在代码根路径下 \rmvn clean package "} rules={[{ required: true, message: '请选择填写构建脚本' }]} >
                                         <ProFormTextArea label="构建脚本"  
@@ -420,6 +464,10 @@ const Pipeline : React.FC = () => {
                             <div>
                                 <span>{item.name} </span>
                                 <Button type="primary" onClick={()=>{
+                                    if (item.key== 'git_pull') {
+                                        message.error("不能重复添加代码拉取步骤！")
+                                        return
+                                    }
                                     allStages[currentStageIndex].steps.push(item)
                                     setVisableStepsSelected(false)
                                 }}>创建</Button>

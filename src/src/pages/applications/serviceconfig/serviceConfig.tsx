@@ -251,10 +251,11 @@ const ServiceConfig: React.FC = () => {
             hideInTable:true,
             dataIndex:'clusterId',
             renderFormItem: () => {
-                return <ProFormSelect key="clssl" request={getClusterList} 
+                return <ProFormSelect key="clssl" request={getClusterList}  allowClear={true}
                     fieldProps={{onChange:async(value)=>{
                         const onlyPaaS = seacthForm.current?.getFieldValue('onlyPAAS')
                         BindingNamespaceByClusterAndPaaS(value,onlyPaaS)
+                        seacthForm.current?.submit()
                     }}} ></ProFormSelect>
             }
         },
@@ -263,7 +264,10 @@ const ServiceConfig: React.FC = () => {
             dataIndex: 'namespace',
             hideInForm: true,
             renderFormItem: () => {
-                return <ProFormSelect key="nssl" allowClear={true} options={bindNamespaceList} ></ProFormSelect>
+                return <ProFormSelect key="nssl" allowClear={true} options={bindNamespaceList}
+                    fieldProps={{onChange:async(value)=>{
+                        seacthForm.current?.submit()
+                    }}} ></ProFormSelect>
             },
             fieldProps:{
                 autoClearSearchValue:true,
@@ -381,11 +385,9 @@ const ServiceConfig: React.FC = () => {
 
     return (
         <PageContainer>
-            <DrawerForm<ServiceInfo>
-                title={"服务详情"}
-                width={800}
-                visible={formVisible}
-                form={appForm}
+            <DrawerForm<ServiceInfo> 
+                drawerProps={{ destroyOnClose: true }}
+                title={"服务详情"} width={800} visible={formVisible} form={appForm}
                 onVisibleChange={(v)=>{ 
                     setTimeout(() => {
                         fromDisplayLabelsHandler( getObjectKVString( appForm.getFieldValue("labels")).map(s=>(<Tag color="purple">{s}</Tag>)))
@@ -504,12 +506,9 @@ const ServiceConfig: React.FC = () => {
                 </ProForm.Group>
             </DrawerForm>
 
-            <DrawerForm  
-                title="引用Workload资源"
-                width={500}
-                visible={workloadFormVisible}
+            <DrawerForm   drawerProps={{ destroyOnClose: true }}
+                title="引用Workload资源" width={500} visible={workloadFormVisible} form={workloadForm}
                 onVisibleChange={workloadFormVisibleHandler}
-                form={workloadForm}
                 onFinish={async(formdata)=>{
                     console.log(formdata)
                     appForm.setFieldsValue({selector:formdata.labels})
@@ -522,6 +521,9 @@ const ServiceConfig: React.FC = () => {
                 <ProFormSelect allowClear={true} name='deployment' label="资源列表"   placeholder="请选择部署" showSearch 
                     request={(params)=>{
                         const data = workloadForm.getFieldsValue()
+                        if(!data.clusterId || !data.namespace){
+                            return Promise.resolve([])
+                        }
                         const clusterId = Number(data.clusterId)
                         const namespace = String(data.namespace)
                         return getDeploymentKVList(clusterId,namespace)
@@ -546,7 +548,7 @@ const ServiceConfig: React.FC = () => {
 
             <ProTable<ServiceData>
                 columns={tableColumns}
-                pagination={{ pageSize:50 }}
+                pagination={{ pageSize:10 }}
                 actionRef={serviceListActionRef}
                 formRef={seacthForm}
                 rowKey={(i)=>i.name+i.createTime}

@@ -58,3 +58,14 @@ export async function GetDeploymentLevels() {
     })
     return res.data.map(item=> ({ label: item.name , value: item.code  }) )
 }
+
+
+
+//IsInstalledRuntime
+export async function IsInstalledRuntime(namespaceId:number) {
+    const res = await request<ApiResponse<string>>('/v1/runtime/isInstalledRuntime',{
+        method:'GET',
+        params:{namespaceId:namespaceId}
+    })
+    return res
+}
