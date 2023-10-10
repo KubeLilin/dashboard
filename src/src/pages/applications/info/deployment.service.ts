@@ -239,3 +239,11 @@ export async function GetDeploymentFormInfo(id?:number) {
     })
     return req
 }
+
+
+export async function GetTestFormInfo(id?:number) {
+    let req=await request<ApiResponse<any>>(`/v1/deployment/test?dpId=${id}`,{
+        method:'GET',
+    })
+    return req
+}
