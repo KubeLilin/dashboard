@@ -275,6 +275,11 @@ export default defineConfig({
       icon: 'CiOutlined',
       path: '/deliverables',
       routes: [
+        {
+          "component": "./deliverables/project/project",
+          "name": "DeliverablesProject",
+          "path": "/deliverables/project"
+        }
       ],
     },
     {
