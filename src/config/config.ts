@@ -8,8 +8,8 @@ const { REACT_APP_ENV } = process.env;
 export default defineConfig({
   hash: true,
   antd: {
-       // themes
-       dark: true,
+    // themes
+    dark: true,
   },
   dva: {
     hmr: true,
@@ -115,131 +115,131 @@ export default defineConfig({
         {
           name: "clusters",
           path: "/resources/clusters",
-          component:"./resources/clusters/clusters",
+          component: "./resources/clusters/clusters",
         },
         {
           name: "clusterinfo",
           path: "/resources/clusterinfo",
-          component:"./resources/clusterinfo",
+          component: "./resources/clusterinfo",
         },
         {
           name: "workloads",
           path: "/resources/workloads",
-          component:"./resources/workloads",
+          component: "./resources/workloads",
         },
         {
           name: "namespaces",
-          path:"/resources/namespaces",
-          component:"./resources/namespaces"
+          path: "/resources/namespaces",
+          component: "./resources/namespaces"
         },
         {
           name: "nodes",
           path: "/resources/nodes",
-          component:"./resources/nodes"
+          component: "./resources/nodes"
         },
         {
           name: "pods",
           path: "/resources/pods",
-          component:"./resources/pods"
+          component: "./resources/pods"
         },
         {
           name: "serviceConnection",
           path: "/resources/serviceConnection",
-          component:"./resources/serviceConnection"
+          component: "./resources/serviceConnection"
         },
         {
           name: "buildimagelist",
           path: "/resources/buildimagelist",
-          component:"./resources/buildimagelist"
+          component: "./resources/buildimagelist"
         },
         {
           name: "components",
           path: "/resources/dapr-components",
-          component:"./resources/dapr-components"
+          component: "./resources/dapr-components"
         },
       ]
     },
     {
-      name:'applications',
-      path:'/applications',
-      routes:[
+      name: 'applications',
+      path: '/applications',
+      routes: [
         {
           name: "apps",
           path: "/applications/apps",
-          component:"./applications/apps/apps"
+          component: "./applications/apps/apps"
         },
         {
           name: "info",
           path: "/applications/info",
-          component:"./applications/info"
+          component: "./applications/info"
         },
         {
           name: "deployments",
           path: "/applications/info/deployments",
-          component:"./applications/info/deployments"
+          component: "./applications/info/deployments"
         },
         {
           name: "serviceConfig",
           path: "/applications/serviceconfig",
-          component:"./applications/serviceconfig/serviceConfig"
+          component: "./applications/serviceconfig/serviceConfig"
         },
       ]
     },
     {
-      name:'runtime',
-      path:'/runtime',
-      routes:[
+      name: 'runtime',
+      path: '/runtime',
+      routes: [
         {
           name: "namespace",
           path: "/runtime/namespace",
-          component:"./runtime/namespace"
+          component: "./runtime/namespace"
         },
         {
           name: "components",
           path: "/runtime/dapr-components",
-          component:"./runtime/dapr-components"
+          component: "./runtime/dapr-components"
         },
       ]
     },
     {
-      name:'devops',
-      path:'/devops',
-      routes:[
+      name: 'devops',
+      path: '/devops',
+      routes: [
         {
           name: "pipeline",
           path: "/devops/pipeline",
-          component:"./devops/pipeline"
+          component: "./devops/pipeline"
         },
         {
           name: "projects",
           path: "/devops/projects",
-          component:"./devops/projects"
+          component: "./devops/projects"
         },
         {
           name: "projects",
           path: "/devops/projects/info",
-          component:"./devops/projects/info"
+          component: "./devops/projects/info"
         },
       ]
     },
     {
-      name:'networks',
-      path:'/networks',
-      routes:[
+      name: 'networks',
+      path: '/networks',
+      routes: [
         {
           name: "gateway",
           path: "/networks/gateway",
-          component:"./networks/gateway"
+          component: "./networks/gateway"
         },
         {
           name: "gateway_teams",
           path: "/networks/gateway/teams",
-          component:"./networks/gateway/teams"
+          component: "./networks/gateway/teams"
         },
         {
           name: "gateway_routers",
           path: "/networks/gateway/routers",
-          component:"./networks/gateway/routers"
+          component: "./networks/gateway/routers"
         },
       ]
     },
@@ -268,6 +268,13 @@ export default defineConfig({
           "name": "tenant",
           "path": "/account/tenant"
         }
+      ],
+    },
+    {
+      name: 'deliverables',
+      icon: 'CiOutlined',
+      path: '/deliverables',
+      routes: [
       ],
     },
     {
@@ -314,6 +321,6 @@ export default defineConfig({
   webpack5: {},
   exportStatic: {},
   define: {
-    'process.env.UMI_ENV':process.env.UMI_ENV || 'dev',
+    'process.env.UMI_ENV': process.env.UMI_ENV || 'dev',
   },
 });
