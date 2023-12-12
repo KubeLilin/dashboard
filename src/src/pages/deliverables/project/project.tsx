@@ -5,7 +5,8 @@ import { queryProject } from './project_service';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Button, Input } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import ProForm, { DrawerForm, ProFormText } from '@ant-design/pro-form';
+import ProForm, { DrawerForm, ProFormItem, ProFormText } from '@ant-design/pro-form';
+import ServiceConnectionSelector from '@/components/selector/serviceConnnectionSelector/ServiceConnectionSelector';
 
 
 
@@ -59,7 +60,7 @@ const DeliverablesProject: React.FC = () => {
                 visible={drawerVisit}
                 onVisibleChange={setDrawerVisit}
             >
-                <ProForm.Item name="name" label="项目名称" rules={[{ required: true, message: '请输入项目名称' }]} >
+                <ProForm.Item name="projectName" label="项目名称" rules={[{ required: true, message: '请输入项目名称' }]} >
                     <Input placeholder="仅限小写字母、数字、- 标识为项目的唯一身份标签，后期不可修改" 
                         onInput={(e) => {
                             let value = e.currentTarget.value;
@@ -73,6 +74,9 @@ const DeliverablesProject: React.FC = () => {
                             appNamehandler(e.currentTarget.value)
                         }} />
                 </ProForm.Item>
+                <ProFormItem name='serviceConnectionId' label='连接器'>
+                    <ServiceConnectionSelector sserviceType={5}></ServiceConnectionSelector>
+                </ProFormItem>
             </DrawerForm>
         </PageContainer>)
 

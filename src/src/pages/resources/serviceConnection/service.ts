@@ -87,3 +87,14 @@ export async function queryRepoConnections(repoType: string) {
     }
     return noneOption
 }
+
+export async function queryServiceConnectionSelector(params:{serviceType:number}):Promise<any>{
+    let req = await request<ApiResponse<ServiceConnectionItem[]>>('/v1/serviceconnection/queryserviceconnectionlist', {
+        method: 'GET',
+        params: {
+            serviceType:params.serviceType,
+        }
+    })
+    let retData = req.data.map(x=>{ return {label:x.name,value:x.id}})
+    return new Promise((x)=>x(retData)) 
+}
