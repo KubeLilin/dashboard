@@ -49,8 +49,6 @@ const DevlopmentForm: React.FC<Props> = (props: Props) => {
     const [deployment, deploymentHandler] = useState<DeploymentStep>()
     const formMapRef = useRef<React.MutableRefObject<ProFormInstance<any> | undefined>[]>([]);
     const [deploymentLevels, deploymentLevelsHandler] = useState<any>()
-    
-    console.log(props.envLevel)
 
     function BindClusterSelect() {
         let req = BindCluster()

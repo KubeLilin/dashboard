@@ -11,3 +11,14 @@ export async function queryProject(pageParams: any): Promise<any> {
         x(res.data);
     })
 }
+
+
+export async function createProject(params: any): Promise<ApiResponse<TenatDeliverablesItem>> {
+    return request<ApiResponse<TenatDeliverablesItem>>('/v1/deliverables/tenantdeliverablesproject', {
+        method: 'POST',
+        data:params       ,
+         headers:{
+            'Content-Type': 'application/json',
+          },
+    })
+}

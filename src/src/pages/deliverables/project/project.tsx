@@ -1,12 +1,13 @@
 import React, { useState, useRef } from 'react';
 import ProTable, { ActionType, ProColumns } from "@ant-design/pro-table";
 import { TenatDeliverablesItem } from "./project_data";
-import { queryProject } from './project_service';
+import { createProject, queryProject } from './project_service';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Button, Input } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import ProForm, { DrawerForm, ProFormItem, ProFormText } from '@ant-design/pro-form';
+import ProForm, { DrawerForm, ProFormInstance, ProFormItem, ProFormText } from '@ant-design/pro-form';
 import ServiceConnectionSelector from '@/components/selector/serviceConnnectionSelector/ServiceConnectionSelector';
+import e from 'express';
 
 
 
@@ -14,6 +15,7 @@ const DeliverablesProject: React.FC = () => {
     const actionRef = useRef<ActionType>();
     const [drawerVisit, setDrawerVisit] = useState(false);
     const [appName, appNamehandler] = useState<string>("");
+    const formRef = useRef<ProFormInstance>();
 
     const columns: ProColumns<TenatDeliverablesItem>[] = [
         {
@@ -59,9 +61,24 @@ const DeliverablesProject: React.FC = () => {
                 title="新建表单"
                 visible={drawerVisit}
                 onVisibleChange={setDrawerVisit}
+                onFinish={async (x) => {
+                    let res= await createProject(x)
+                    if(res.success){
+                        setDrawerVisit(false)
+                        formRef.current?.setFieldsValue({})
+                        return res.success
+                    }else{
+                        setDrawerVisit(false)
+                        formRef.current?.setFieldsValue({})
+                        return res.success
+                    }
+                }
+                }
+
+                formRef={formRef}
             >
                 <ProForm.Item name="projectName" label="项目名称" rules={[{ required: true, message: '请输入项目名称' }]} >
-                    <Input placeholder="仅限小写字母、数字、- 标识为项目的唯一身份标签，后期不可修改" 
+                    <Input placeholder="仅限小写字母、数字、- 标识为项目的唯一身份标签，后期不可修改"
                         onInput={(e) => {
                             let value = e.currentTarget.value;
                             if (!/^[a-z]/.test(value)) {
@@ -74,9 +91,7 @@ const DeliverablesProject: React.FC = () => {
                             appNamehandler(e.currentTarget.value)
                         }} />
                 </ProForm.Item>
-                <ProFormItem name='serviceConnectionId' label='连接器'>
-                    <ServiceConnectionSelector sserviceType={5}></ServiceConnectionSelector>
-                </ProFormItem>
+                <ServiceConnectionSelector serviceType={2}></ServiceConnectionSelector>
             </DrawerForm>
         </PageContainer>)
 
