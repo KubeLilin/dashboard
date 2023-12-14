@@ -3,7 +3,7 @@ import { request } from "umi";
 import { TenatDeliverablesItem } from "./project_data";
 
 export async function queryProject(pageParams: any): Promise<any> {
-    let res = await request<PageResponse<TenatDeliverablesItem>>('/v1/deliverables/querytenantdeliverablesproject', {
+    let res = await request<PageResponse<TenatDeliverablesItem>>('/v1/deliverables/tenantdeliverablesproject', {
         method: 'GET',
         params: pageParams
     })
